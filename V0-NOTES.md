@@ -91,3 +91,14 @@ Supersedes the Mistral line of Ruling 5 (pre-authorized fallback case). UTC: 202
 - **Binding constraints unchanged**: same answer model across both arms; judge family ≠ answer family; every LLM call through the cost meter (tokens logged even at $0); stack frozen before tuning; no model changes after the frozen run starts.
 - **Rate-limit reality (Ruling 7 applies — verify and record actual limits before Week 2)**: OpenRouter `:free` models carry low daily caps without purchased credit (roughly 50 requests/day) and higher caps after a one-time $10 credit (roughly 1000/day). The judge workload is ~780 grading calls plus entailment checks — potentially 1500–2000 calls. Without the credit, judging alone stretches across weeks. Either way the schedule takes the hit, never the scope.
 - **OPEN DECISION (human, before Week 2)**: the one-time $10 OpenRouter credit. Usage of free models stays $0 with or without it. The agent will record whichever is chosen — never decided by the agent.
+
+## OKF repository check (O2) — CLOSED
+
+Checked UTC 2026-10-16 (~10:05Z). Evidence: fetched repository page + `api.github.com/repos/GoogleCloudPlatform/open-knowledge-format/commits/main`.
+
+- Canonical repo: https://github.com/GoogleCloudPlatform/open-knowledge-format — LIVE (public; 980 stars / 65 forks / 19 watchers; 22 open issues, 7 open PRs).
+- License: Apache-2.0 (LICENSE.md, confirmed on the repository page).
+- Spec version pinned for V0: **v0.2** (SPEC.md; README advertises "v0.2 specification").
+- Last activity at check: commit `ad30107c31c06aec8a7d5636e0d1058118604e6f`, 2026-08-21T20:08:36Z, signed and verified — "Merge pull request #6 … Make every timestamp an ISO 8601 datetime with an explicit offset". 6 commits total on main.
+- Build consequences: (1) every timestamp emitted by V0 code uses ISO 8601 datetimes with explicit UTC offset, per the pinned spec; (2) OKF format code is isolated in a single module, per PROJECT.md §3. Note: PROJECT.md v0.1 frontmatter examples show bare dates (`stale_after: 2027-06-12`); the pinned spec supersedes that cosmetic detail at build time. No PROJECT.md edit — it is frozen.
+- Pin statement: V0 builds against OKF spec v0.2 as of commit `ad30107`; the format module will carry this pin string.
