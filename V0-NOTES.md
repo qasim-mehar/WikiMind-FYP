@@ -80,3 +80,14 @@ Keys are NOT needed for the freeze; both free keys (GEMINI_API_KEY, MISTRAL_API_
 ## Branch plan (post-freeze)
 
 Phase 0 commits land on `main`. All V0 work after the freeze goes on `qasim/v0-execution`, branched from tag `v0-preregistered`. The human pushes after each gate; the agent never pushes.
+
+## Ruling 8 — Judge family amendment (recorded at the top of the execution branch)
+
+Supersedes the Mistral line of Ruling 5 (pre-authorized fallback case). UTC: 2026-10-16. Branch: qasim/v0-execution, first commit.
+
+- **Keys**: the human keeps exactly two keys — GEMINI_API_KEY and OPENROUTER_API_KEY. No Mistral key will be provisioned.
+- **JUDGE_MODEL**: an OpenRouter `:free` model from a NON-Gemini family — DeepSeek-class preferred (e.g. deepseek/deepseek-chat:free); Qwen- or Llama-class acceptable if the DeepSeek free variant is unavailable. The exact current ID is verified at build time and recorded here.
+- **Unchanged**: DISTILL_MODEL gemini-2.5-flash; ANSWER_MODEL gemini-2.5-flash identical for both arms; EMBED_MODEL local BAAI/bge-small-en-v1.5 (no key); BUDGET_CAP $100; GROBID_URL http://localhost:8070.
+- **Binding constraints unchanged**: same answer model across both arms; judge family ≠ answer family; every LLM call through the cost meter (tokens logged even at $0); stack frozen before tuning; no model changes after the frozen run starts.
+- **Rate-limit reality (Ruling 7 applies — verify and record actual limits before Week 2)**: OpenRouter `:free` models carry low daily caps without purchased credit (roughly 50 requests/day) and higher caps after a one-time $10 credit (roughly 1000/day). The judge workload is ~780 grading calls plus entailment checks — potentially 1500–2000 calls. Without the credit, judging alone stretches across weeks. Either way the schedule takes the hit, never the scope.
+- **OPEN DECISION (human, before Week 2)**: the one-time $10 OpenRouter credit. Usage of free models stays $0 with or without it. The agent will record whichever is chosen — never decided by the agent.
