@@ -41,6 +41,9 @@ Pydantic model, `extra="forbid"`, frozen. JSON field order follows this table.
 byte-identical files in different directories therefore have the same document
 identity.
 
+Validation enforces `schema_version == 1`, a registered parser name, a basename
+`source_filename`, and parser-specific `page_count`/`page` consistency.
+
 ## 3. `Channel` fields
 
 Pydantic model, `extra="forbid"`, frozen. JSON field order follows this table.
@@ -55,8 +58,9 @@ Pydantic model, `extra="forbid"`, frozen. JSON field order follows this table.
 | `page` | `int \| null` | no (default `null`) | 1-based page where the channel starts for `pdf-fallback`; `null` for `text` and `grobid`. |
 
 `normalized` and `channel_id` may be supplied when loading JSON. If supplied,
-they must equal the values derived from `kind` and `text`; otherwise validation
-raises `ValueError`. They are always written on serialization.
+they must be non-null and equal the values derived from `kind` and `text`;
+otherwise validation raises `ValueError`. They are always written on
+serialization.
 
 `channel.source_ref` is a convenience property returning `channel:<channel_id>`.
 
@@ -189,13 +193,14 @@ counts.
   including tags, newline separators, and truncation markers. It is a character
   count, not a byte count.
 - `per_channel_budget` is an optional cap on the escaped text inside one
-  channel. If omitted, each channel gets an equal share of the space remaining
-  after all wrapper tags and separators:
-  `max(0, (char_budget - sum(wrapper_lengths) - (n - 1)) // n)`.
-- If that equal share is zero because the wrappers alone consume the budget, the
-  helper falls back to giving the first channel the remaining total budget;
-  later channels are omitted. A tight budget can therefore still produce one
-  valid truncated block.
+  channel. If omitted, the text space remaining after all wrapper tags and
+  separators is water-filled: short channels keep their text and unused space
+  flows to longer channels.
+- If that remaining text space cannot give every non-empty channel the
+  `[truncated]` marker (including zero because the wrappers alone consume the
+  budget), the helper falls back to giving the first channels the remaining
+  total budget; later channels are omitted. A tight budget can therefore still
+  produce a valid truncated block.
 - If a channel's escaped text is longer than its cap, it is cut and the literal
   marker `[truncated]` is appended, keeping the total text length at the cap.
   The marker counts toward the cap.
@@ -253,11 +258,13 @@ input. A caller supplies the persisted SHA set later.
   the number) become `figure_caption`/`table` channels and are removed from the
   section body. Caption continuation lines are not reconstructed.
 - A `References`/`Bibliography` block is split into `reference` channels on
-  `[n]` or short `n.` entry starts (1–3 digits, so years and volume numbers do
-  not create false entries). If no entry start is found, the whole block is one
-  `reference` channel.
-- Raises `ParseError` for unreadable, encrypted, or image-only PDFs with no
-  extractable text.
+  `[n]` or `n.` entry starts where `n` is 1–3 digits, so years and volume
+  numbers do not create false entries. A bracketed marker may stand alone or be
+  followed immediately by text; a numeric marker needs whitespace or an
+  uppercase letter after the dot. If no entry start is found, the whole block is
+  one `reference` channel.
+- Raises `ParseError` for unreadable, image-only PDFs with no extractable text,
+  and encrypted PDFs that cannot be decrypted with an empty password.
 - `page` is 1-based for every emitted channel; `page_count` is the number of
   PDF pages.
 
@@ -267,17 +274,21 @@ behavior change as a new parser generation, not an edit under the same name.
 
 ### 9.3 `grobid`
 
-- Requires `WIKIMIND_GROBID_URL` (for example `http://localhost:8070`).
+- Requires `WIKIMIND_GROBID_URL` (for example `http://localhost:8070`). The URL
+  must be `http`/`https` with a host and must not contain a query or fragment.
 - POSTs the PDF as multipart field `input` to
   `<base>/api/processFulltextDocument`, accepting TEI XML.
 - Parses TEI with `xml.etree.ElementTree` and the TEI namespace
-  `http://www.tei-c.org/ns/1.0`.
-- Emits `title` from `titleStmt/title`, `abstract` from `abstract`,
-  `section` from body divisions (`head` + direct paragraphs), `figure_caption`
-  or `table` from `figure` elements, and `reference` from each `biblStruct`.
+  `http://www.tei-c.org/ns/1.0`. The root must be exactly that namespaced `TEI`
+  element; DTD and entity declarations are rejected.
+- Emits `title` from `titleStmt/title` only (no fallback to other titles),
+  `abstract` from `abstract`, `section` from body divisions (`head` + direct
+  paragraphs), `figure_caption` or `table` from `figure` elements, and
+  `reference` from each `biblStruct`. Text fragments are joined with spaces
+  before normalization.
 - `page` is `null`; `page_count` is `null`.
-- Missing configuration raises `GrobidUnavailableError` (a `ParseError`).
-  Network and HTTP failures raise `GrobidError`.
+- Missing or invalid configuration raises `GrobidUnavailableError` (a
+  `ParseError`). Network and HTTP failures raise `GrobidError`.
 - Start the service with:
   `docker run -d -p 8070:8070 lfoppiano/grobid:0.8.1`
 
@@ -285,7 +296,9 @@ behavior change as a new parser generation, not an edit under the same name.
 
 The release requirement is: same input bytes + same parser name + same
 implementation -> byte-identical channel IDs on every run. The offline suite
-parses every fixture twice and compares IDs.
+parses every fixture twice, compares IDs, and checks fixture SHA-256 values plus
+a digest of each fixture's full canonical document snapshot (including raw
+text, page, ordinals, and source metadata).
 
 Within that guarantee:
 
@@ -295,7 +308,9 @@ Within that guarantee:
 - `pdf-fallback` output can change if the installed pypdf version changes its
   extraction. The parser name is therefore an immutable algorithm version:
   do not edit the heuristics under the same name after output has been
-  persisted. Memoization should include the parser name and source SHA.
+  persisted. Memoization should include the parser name and source SHA. The
+  locked snapshots in this lane were generated with pypdf 6.21.2; reproduce
+  them with that version until a new parser generation is declared.
 - `grobid` output depends on the GROBID service version; it is optional and not
   part of the offline determinism gate.
 
@@ -307,7 +322,8 @@ python -m wikimind.parse.cli run <file> --parser grobid --json
 python -m wikimind.parse.cli grobid-check
 ```
 
-`run` prints the canonical JSON with `--json`, otherwise a short summary.
+`run` prints exactly the canonical `model_dump_json()` output with `--json`,
+otherwise a short summary.
 `grobid-check` probes `<WIKIMIND_GROBID_URL>/api/health` and exits non-zero if
 the service is missing or unreachable. After the trunk CLI merges, the same
 commands appear as `wikimind parse run` and `wikimind parse grobid-check`.
