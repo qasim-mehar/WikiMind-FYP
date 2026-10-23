@@ -108,10 +108,8 @@ _CAPTION_RE = re.compile(
 _NUMBERED_HEADING_RE = re.compile(
     r"^(?P<number>\d{1,2}(?:\.\d{1,3}){0,3})\.?\s+(?P<rest>\S.*)$"
 )
-_REFERENCE_ENTRY_RE = re.compile(r"^(?:\[\d+\]|\d{1,3}\.)\s+")
-_NUMBERING_PREFIX_RE = re.compile(
-    r"^(?:\d+(?:\.\d+)*|[A-Z](?:\.\d+)*)\.?\s+"
-)
+_REFERENCE_ENTRY_RE = re.compile(r"^(?:\[\d{1,3}\]|\d{1,3}\.(?:\s+|[A-Z]))")
+_NUMBERING_PREFIX_RE = re.compile(r"^(?:\d+(?:\.\d+)*|[A-Z](?:\.\d+)*)\.?\s+")
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9'’\-]*")
 _TITLE_BAD_PUNCT = ".,;:"
 
@@ -207,9 +205,7 @@ def _looks_like_appendix_heading(text: str) -> bool:
     return True
 
 
-def _heading_title(
-    text: str, *, allow_unnumbered: bool = True
-) -> str | None:
+def _heading_title(text: str, *, allow_unnumbered: bool = True) -> str | None:
     stripped = text.strip()
     if len(stripped) < 2 or len(stripped) > 120:
         return None
@@ -217,10 +213,12 @@ def _heading_title(
         return None
     if stripped.lower().startswith("arxiv:"):
         return None
+    if _is_known_heading(stripped) and (
+        stripped[0].isupper() or not stripped.endswith(tuple(_TITLE_BAD_PUNCT))
+    ):
+        return stripped
     if stripped[0].islower():
         return None
-    if _is_known_heading(stripped):
-        return stripped
 
     numbered = _NUMBERED_HEADING_RE.match(stripped)
     if numbered and _looks_like_heading_rest(numbered.group("rest").strip()):
@@ -246,9 +244,7 @@ def _is_hard_heading(text: str) -> bool:
     if _is_known_heading(text):
         return True
     numbered = _NUMBERED_HEADING_RE.match(text.strip())
-    return bool(
-        numbered and _looks_like_heading_rest(numbered.group("rest").strip())
-    )
+    return bool(numbered and _looks_like_heading_rest(numbered.group("rest").strip()))
 
 
 def _is_caption(text: str) -> bool:
@@ -404,11 +400,11 @@ def _find_abstract(
         while end < len(lines):
             current = lines[end].text
             if not current:
-                if body:
-                    break
                 end += 1
                 continue
             if _is_abstract_stop(current):
+                break
+            if _is_page_number(current):
                 break
             if _is_hard_heading(current):
                 break
@@ -441,9 +437,7 @@ def _emit_references(ref_lines: list[_Line], builder: ChannelBuilder) -> None:
             builder.add("reference", text, page=entry[0].page)
 
 
-def _emit_sections(
-    lines: list[_Line], start: int, builder: ChannelBuilder
-) -> None:
+def _emit_sections(lines: list[_Line], start: int, builder: ChannelBuilder) -> None:
     current_heading: str | None = None
     current_page: int | None = None
     current_lines: list[str] = []
@@ -456,11 +450,7 @@ def _emit_sections(
                 builder.add("section", body, page=current_page)
         else:
             body = "\n".join(current_lines).strip()
-            text = (
-                current_heading
-                if not body
-                else f"{current_heading}\n\n{body}"
-            )
+            text = current_heading if not body else f"{current_heading}\n\n{body}"
             builder.add("section", text, page=current_page)
         current_heading = None
         current_page = None
@@ -549,12 +539,19 @@ def parse_pdf_fallback(data: bytes, source_filename: str) -> ParsedDocument:
 
     if reader.is_encrypted:
         try:
-            reader.decrypt("")
+            decrypted = reader.decrypt("")
         except Exception as exc:
             raise ParseError(f"{source_filename}: encrypted PDF") from exc
+        if not decrypted:
+            raise ParseError(f"{source_filename}: encrypted PDF requires a password")
+
+    try:
+        pdf_pages = list(reader.pages)
+    except Exception as exc:
+        raise ParseError(f"{source_filename}: could not read PDF pages: {exc}") from exc
 
     pages: list[_Page] = []
-    for number, page in enumerate(reader.pages, start=1):
+    for number, page in enumerate(pdf_pages, start=1):
         try:
             text = page.extract_text() or ""
         except Exception:  # noqa: BLE001 - skip one malformed page, keep the rest

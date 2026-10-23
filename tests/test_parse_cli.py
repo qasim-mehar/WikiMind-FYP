@@ -1,23 +1,27 @@
 from __future__ import annotations
 
+import io
 import json
 import subprocess
 import sys
 from pathlib import Path
 
+from pypdf import PdfWriter
 from typer.testing import CliRunner
 
-from wikimind.parse import cli
+from wikimind.parse import cli, parse_file
 from wikimind.parse.cli import app
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 NOTE = FIXTURES / "papers" / "contradiction-note.txt"
 
 
-def test_run_json() -> None:
+def test_run_json_is_canonical() -> None:
     runner = CliRunner()
     result = runner.invoke(app, ["run", str(NOTE), "--json"])
     assert result.exit_code == 0, result.output
+    assert result.output.rstrip("\n") == parse_file(NOTE).model_dump_json()
+
     payload = json.loads(result.output)
     assert payload["parser"] == "text"
     assert payload["source_filename"] == "contradiction-note.txt"
@@ -57,6 +61,31 @@ def test_grobid_check_success(monkeypatch) -> None:
     result = runner.invoke(app, ["grobid-check"])
     assert result.exit_code == 0
     assert "reachable" in result.output
+
+
+def test_run_grobid_invalid_url_is_a_clean_error(monkeypatch) -> None:
+    monkeypatch.setenv("WIKIMIND_GROBID_URL", "http://[::1")
+    runner = CliRunner()
+    result = runner.invoke(app, ["run", str(NOTE), "--parser", "grobid"])
+    assert result.exit_code == 1
+    assert "parse error" in result.output
+    assert "not a valid URL" in result.output
+
+
+def test_run_encrypted_pdf_is_a_clean_error(tmp_path: Path) -> None:
+    writer = PdfWriter()
+    writer.add_blank_page(width=72, height=72)
+    writer.encrypt("secret", algorithm="RC4-128")
+    buffer = io.BytesIO()
+    writer.write(buffer)
+    path = tmp_path / "locked.pdf"
+    path.write_bytes(buffer.getvalue())
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["run", str(path)])
+    assert result.exit_code == 1
+    assert "parse error" in result.output
+    assert "encrypted PDF" in result.output
 
 
 def test_module_help_is_runnable_standalone() -> None:

@@ -57,5 +57,17 @@ def test_parser_name_for_path() -> None:
         parser_name_for_path("a.docx")
 
 
+def test_unknown_extension_fails_before_reading(tmp_path: Path) -> None:
+    missing = tmp_path / "missing.docx"
+    with pytest.raises(ParseError):
+        parse_file(missing)
+
+
+def test_unknown_explicit_parser_fails_before_reading(tmp_path: Path) -> None:
+    missing = tmp_path / "missing.txt"
+    with pytest.raises(ParseError):
+        parse_file(missing, parser="nope")
+
+
 def test_registered_names_are_stable() -> None:
     assert parser_names() == ("grobid", "pdf-fallback", "text")

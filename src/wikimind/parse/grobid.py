@@ -5,7 +5,7 @@ Run GROBID with::
     docker run -d -p 8070:8070 lfoppiano/grobid:0.8.1
 
 Then set ``WIKIMIND_GROBID_URL=http://localhost:8070``.  This module uses only
-the standard-library XML parser and is not imported for offline parsers.
+the standard-library XML parser and performs no network I/O unless selected.
 """
 
 from __future__ import annotations
@@ -33,7 +33,22 @@ def grobid_base_url() -> str:
             "WIKIMIND_GROBID_URL is not set; start GROBID and point this "
             "variable at it, e.g. http://localhost:8070"
         )
-    return url.rstrip("/")
+    base = url.rstrip("/")
+    try:
+        parsed = httpx.URL(base)
+    except httpx.InvalidURL as exc:
+        raise GrobidUnavailableError(
+            f"WIKIMIND_GROBID_URL is not a valid URL: {url!r}"
+        ) from exc
+    if parsed.scheme not in {"http", "https"} or not parsed.host:
+        raise GrobidUnavailableError(
+            f"WIKIMIND_GROBID_URL must be an http(s) URL with a host: {url!r}"
+        )
+    if parsed.query or parsed.fragment:
+        raise GrobidUnavailableError(
+            f"WIKIMIND_GROBID_URL must not contain a query or fragment: {url!r}"
+        )
+    return base
 
 
 def _process_url(base: str) -> str:
@@ -50,19 +65,14 @@ def _health_url(base: str) -> str:
 def _text(element: ET.Element | None) -> str:
     if element is None:
         return ""
-    return " ".join("".join(element.itertext()).split())
+    return " ".join(" ".join(element.itertext()).split())
 
 
 def _find_title(root: ET.Element) -> str:
     title_stmt = root.find(f".//{_NS}titleStmt")
-    if title_stmt is not None:
-        title = title_stmt.find(f"{_NS}title")
-        if title is not None:
-            text = _text(title)
-            if text:
-                return text
-    title = root.find(f".//{_NS}title")
-    return _text(title)
+    if title_stmt is None:
+        return ""
+    return _text(title_stmt.find(f"{_NS}title"))
 
 
 def _find_abstract(root: ET.Element) -> str:
@@ -80,9 +90,7 @@ def _find_abstract(root: ET.Element) -> str:
 
 def _emit_figure(figure: ET.Element, builder: ChannelBuilder) -> None:
     kind = (
-        "table"
-        if (figure.get("type") or "").lower() == "table"
-        else "figure_caption"
+        "table" if (figure.get("type") or "").lower() == "table" else "figure_caption"
     )
     head = _text(figure.find(f"{_NS}head"))
     description = _text(figure.find(f"{_NS}figDesc"))
@@ -100,9 +108,7 @@ def _emit_figure(figure: ET.Element, builder: ChannelBuilder) -> None:
 
 def _walk_div(div: ET.Element, builder: ChannelBuilder) -> None:
     head = _text(div.find(f"{_NS}head"))
-    paragraphs = [
-        _text(p) for p in div.findall(f"{_NS}p") if _text(p)
-    ]
+    paragraphs = [_text(p) for p in div.findall(f"{_NS}p") if _text(p)]
     body = "\n\n".join(paragraphs)
     if head and body:
         builder.add("section", f"{head}\n\n{body}")
@@ -127,9 +133,7 @@ def _emit_body(root: ET.Element, builder: ChannelBuilder) -> None:
     if body is None:
         return
 
-    direct_paragraphs = [
-        _text(p) for p in body.findall(f"{_NS}p") if _text(p)
-    ]
+    direct_paragraphs = [_text(p) for p in body.findall(f"{_NS}p") if _text(p)]
     if direct_paragraphs:
         builder.add("section", "\n\n".join(direct_paragraphs))
 
@@ -163,17 +167,27 @@ def _emit_references(root: ET.Element, builder: ChannelBuilder) -> None:
             builder.add("reference", text)
 
 
-def parse_tei(
-    tei_xml: bytes, *, data: bytes, source_filename: str
-) -> ParsedDocument:
+def parse_tei(tei_xml: bytes, *, data: bytes, source_filename: str) -> ParsedDocument:
     """Parse GROBID TEI XML into the ParsedDocument contract."""
+
+    if tei_xml.startswith((b"\xff\xfe\x00\x00", b"\x00\x00\xfe\xff")):
+        xml_text = tei_xml.decode("utf-32", errors="ignore")
+    elif tei_xml.startswith((b"\xff\xfe", b"\xfe\xff")):
+        xml_text = tei_xml.decode("utf-16", errors="ignore")
+    elif b"\x00" in tei_xml:
+        raise GrobidError("GROBID returned XML in an unsupported encoding")
+    else:
+        xml_text = tei_xml.decode("utf-8", errors="ignore")
+    lowered = xml_text.lower()
+    if "<!doctype" in lowered or "<!entity" in lowered:
+        raise GrobidError("GROBID returned unsupported DTD/entity declarations")
 
     try:
         root = ET.fromstring(tei_xml)
     except ET.ParseError as exc:
         raise GrobidError(f"GROBID returned invalid TEI XML: {exc}") from exc
 
-    if not root.tag.endswith("TEI"):
+    if root.tag != f"{_NS}TEI":
         raise GrobidError(f"GROBID returned unexpected root element {root.tag!r}")
 
     builder = ChannelBuilder()
@@ -206,14 +220,12 @@ def parse_grobid(data: bytes, source_filename: str) -> ParsedDocument:
             headers={"Accept": "application/xml"},
             timeout=_TIMEOUT_SECONDS,
         )
-    except httpx.HTTPError as exc:
+    except (httpx.HTTPError, httpx.InvalidURL) as exc:
         raise GrobidError(f"GROBID request failed: {exc}") from exc
 
     if response.status_code != 200:
         detail = response.text[:300]
-        raise GrobidError(
-            f"GROBID returned HTTP {response.status_code}: {detail}"
-        )
+        raise GrobidError(f"GROBID returned HTTP {response.status_code}: {detail}")
     return parse_tei(
         response.content,
         data=data,
@@ -232,7 +244,7 @@ def probe_grobid(base_url: str | None = None) -> tuple[bool, str]:
     url = _health_url(base)
     try:
         response = httpx.get(url, timeout=5.0)
-    except httpx.HTTPError as exc:
+    except (httpx.HTTPError, httpx.InvalidURL) as exc:
         return False, f"could not reach {url}: {exc}"
     if response.status_code == 200:
         return True, f"GROBID is reachable at {url}"

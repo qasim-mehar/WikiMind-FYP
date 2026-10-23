@@ -70,7 +70,7 @@ def run(
         raise typer.Exit(code=1) from exc
 
     if json_output:
-        typer.echo(document.model_dump_json(indent=2))
+        typer.echo(document.model_dump_json())
         return
 
     counts = Counter(channel.kind.value for channel in document.channels)

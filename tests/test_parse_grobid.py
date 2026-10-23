@@ -6,7 +6,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from wikimind.parse import GrobidError, GrobidUnavailableError
+from wikimind.parse import GrobidError, GrobidUnavailableError, ParsedDocument
 from wikimind.parse import grobid as grobid_module
 from wikimind.parse.grobid import parse_grobid, parse_tei, probe_grobid
 
@@ -25,9 +25,7 @@ class FakeResponse:
 
 
 def test_parse_tei_contract() -> None:
-    document = parse_tei(
-        TEI.read_bytes(), data=PDF_BYTES, source_filename="sample.pdf"
-    )
+    document = parse_tei(TEI.read_bytes(), data=PDF_BYTES, source_filename="sample.pdf")
 
     assert document.parser == "grobid"
     assert document.source_filename == "sample.pdf"
@@ -57,21 +55,68 @@ def test_parse_tei_contract() -> None:
     assert sections[1].text.startswith("2 Method\n\n")
     assert sections[2].text.startswith("2.1 Details\n\n")
     assert "Table 1: Synthetic results" in document.channels_of_kind("table")[0].text
-    assert (
-        "Figure 1: Overview"
-        in document.channels_of_kind("figure_caption")[0].text
-    )
+    assert "Figure 1: Overview" in document.channels_of_kind("figure_caption")[0].text
     references = document.channels_of_kind("reference")
     assert "First synthetic reference" in references[0].text
     assert "Second synthetic reference" in references[1].text
     assert all(c.page is None for c in document.channels)
 
+    payload = document.model_dump_json()
+    restored = ParsedDocument.model_validate_json(payload)
+    assert restored == document
+    assert restored.model_dump_json() == payload
+
 
 def test_parse_tei_rejects_invalid_xml_and_wrong_root() -> None:
     with pytest.raises(GrobidError):
         parse_tei(b"<broken", data=PDF_BYTES, source_filename="x.pdf")
-    with pytest.raises(GrobidError):
-        parse_tei(b"<root/>", data=PDF_BYTES, source_filename="x.pdf")
+    for wrong_root in (b"<root/>", b"<FooTEI/>", b"<TEI/>"):
+        with pytest.raises(GrobidError):
+            parse_tei(wrong_root, data=PDF_BYTES, source_filename="x.pdf")
+
+
+def test_parse_tei_rejects_entity_declarations() -> None:
+    tei = (
+        b'<!DOCTYPE TEI [<!ENTITY a "1234567890">]>'
+        b'<TEI xmlns="http://www.tei-c.org/ns/1.0">'
+        b"<text><body><p>&a;</p></body></text></TEI>"
+    )
+    with pytest.raises(GrobidError, match="DTD/entity"):
+        parse_tei(tei, data=PDF_BYTES, source_filename="x.pdf")
+    with pytest.raises(GrobidError, match="DTD/entity"):
+        parse_tei(
+            tei.decode("utf-8").encode("utf-16"),
+            data=PDF_BYTES,
+            source_filename="x.pdf",
+        )
+
+
+def test_parse_tei_accepts_utf16_without_entities() -> None:
+    text = (
+        TEI.read_bytes()
+        .decode("utf-8")
+        .replace('encoding="UTF-8"', 'encoding="UTF-16"')
+    )
+    document = parse_tei(text.encode("utf-16"), data=PDF_BYTES, source_filename="x.pdf")
+    assert document.channels_of_kind("title")[0].text == "A Synthetic TEI Paper"
+
+
+def test_parse_tei_compact_text_and_missing_title() -> None:
+    tei = (
+        b'<TEI xmlns="http://www.tei-c.org/ns/1.0">'
+        b"<text><body><p>Body text.</p></body>"
+        b"<back><div><listBibl><biblStruct><analytic>"
+        b"<title>First</title>"
+        b"<author><persName><forename>Ada</forename>"
+        b"<surname>Example</surname></persName></author>"
+        b"</analytic><monogr><title>Journal</title></monogr>"
+        b"</biblStruct></listBibl></div></back></text></TEI>"
+    )
+    document = parse_tei(tei, data=PDF_BYTES, source_filename="x.pdf")
+    assert document.channels_of_kind("title") == ()
+    assert document.channels_of_kind("section")[0].text == "Body text."
+    reference = document.channels_of_kind("reference")[0]
+    assert reference.text == "First Ada Example Journal"
 
 
 def test_parse_grobid_requires_environment(
@@ -80,6 +125,38 @@ def test_parse_grobid_requires_environment(
     monkeypatch.delenv("WIKIMIND_GROBID_URL", raising=False)
     with pytest.raises(GrobidUnavailableError):
         parse_grobid(PDF_BYTES, "x.pdf")
+
+
+def test_grobid_rejects_invalid_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("WIKIMIND_GROBID_URL", "http://[::1")
+    with pytest.raises(GrobidUnavailableError, match="not a valid URL"):
+        parse_grobid(PDF_BYTES, "x.pdf")
+
+    ok, detail = probe_grobid()
+    assert not ok
+    assert "not a valid URL" in detail
+
+
+def test_grobid_rejects_url_without_http_scheme(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("WIKIMIND_GROBID_URL", "localhost:8070")
+    with pytest.raises(GrobidUnavailableError, match="http"):
+        parse_grobid(PDF_BYTES, "x.pdf")
+
+
+def test_grobid_rejects_url_with_query_or_fragment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for url in (
+        "http://localhost:8070?token=x",
+        "http://localhost:8070#fragment",
+    ):
+        monkeypatch.setenv("WIKIMIND_GROBID_URL", url)
+        with pytest.raises(GrobidUnavailableError, match="query or fragment"):
+            parse_grobid(PDF_BYTES, "x.pdf")
 
 
 def test_parse_grobid_posts_pdf_and_parses_tei(

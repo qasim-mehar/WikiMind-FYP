@@ -4,9 +4,17 @@ from __future__ import annotations
 
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from .ids import channel_id, document_sha256, normalize_text
+
+_BUILTIN_PARSER_NAMES = frozenset({"text", "pdf-fallback", "grobid"})
 
 
 class ChannelKind(str, Enum):
@@ -38,6 +46,11 @@ class Channel(BaseModel):
 
     @model_validator(mode="after")
     def _derive_and_verify_ids(self) -> Channel:
+        if "normalized" in self.model_fields_set and self.normalized is None:
+            raise ValueError("normalized must be a string when supplied")
+        if "channel_id" in self.model_fields_set and self.channel_id is None:
+            raise ValueError("channel_id must be a string when supplied")
+
         expected_normalized = normalize_text(self.text)
         expected_id = channel_id(self.kind.value, expected_normalized)
         if self.normalized is not None and self.normalized != expected_normalized:
@@ -70,8 +83,33 @@ class ParsedDocument(BaseModel):
     page_count: int | None = Field(default=None, ge=0)
     channels: tuple[Channel, ...]
 
+    @field_validator("schema_version")
+    @classmethod
+    def _supported_schema_version(cls, value: int) -> int:
+        if value != 1:
+            raise ValueError(f"unsupported schema_version {value}; expected 1")
+        return value
+
+    @field_validator("parser")
+    @classmethod
+    def _registered_parser(cls, value: str) -> str:
+        if value in _BUILTIN_PARSER_NAMES:
+            return value
+        from .registry import parser_names
+
+        if value not in parser_names():
+            raise ValueError(f"unknown parser {value!r}")
+        return value
+
+    @field_validator("source_filename")
+    @classmethod
+    def _basename_only(cls, value: str) -> str:
+        if "/" in value or "\\" in value:
+            raise ValueError("source_filename must be a basename")
+        return value
+
     @model_validator(mode="after")
-    def _verify_ordinals(self) -> ParsedDocument:
+    def _verify_document(self) -> ParsedDocument:
         counters: dict[ChannelKind, int] = {}
         for channel in self.channels:
             expected = counters.get(channel.kind, 0)
@@ -81,6 +119,24 @@ class ParsedDocument(BaseModel):
                     f"{expected}, got {channel.ordinal}"
                 )
             counters[channel.kind] = expected + 1
+
+        if self.parser == "pdf-fallback":
+            if self.page_count is None or self.page_count < 1:
+                raise ValueError("pdf-fallback requires page_count >= 1")
+            for channel in self.channels:
+                if channel.page is None:
+                    raise ValueError("pdf-fallback channels require page")
+                if channel.page > self.page_count:
+                    raise ValueError(
+                        f"channel page {channel.page} exceeds page_count "
+                        f"{self.page_count}"
+                    )
+        else:
+            if self.page_count is not None:
+                raise ValueError(f"{self.parser} requires page_count=None")
+            for channel in self.channels:
+                if channel.page is not None:
+                    raise ValueError(f"{self.parser} channels require page=None")
         return self
 
     def channels_of_kind(self, kind: ChannelKind | str) -> tuple[Channel, ...]:

@@ -29,19 +29,18 @@ def parse_bytes(
 ) -> ParsedDocument:
     """Parse raw bytes with an explicit parser or the filename default."""
 
-    name = parser or parser_name_for_path(source_filename)
+    name = parser if parser is not None else parser_name_for_path(source_filename)
     return get_parser(name)(data, source_filename)
 
 
-def parse_file(
-    path: str | Path, parser: str | None = None
-) -> ParsedDocument:
+def parse_file(path: str | Path, parser: str | None = None) -> ParsedDocument:
     """Read and parse a file from disk."""
 
     file_path = Path(path)
+    name = parser if parser is not None else parser_name_for_path(file_path)
+    parse = get_parser(name)
     data = file_path.read_bytes()
-    name = parser or parser_name_for_path(file_path)
-    return get_parser(name)(data, file_path.name)
+    return parse(data, file_path.name)
 
 
 __all__ = [
