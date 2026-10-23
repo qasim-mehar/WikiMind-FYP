@@ -217,8 +217,9 @@ def _check_edge_provenance(conn: psycopg.Connection, report: CheckReport) -> Non
 
 def _check_enums(conn: psycopg.Connection, report: CheckReport) -> None:
     for (table, column), values in ENUM_COLUMNS.items():
-        query = sql.SQL("SELECT count(*) FROM {} WHERE {} NOT IN ({})").format(
+        query = sql.SQL("SELECT count(*) FROM {} WHERE {} IS NULL OR {} NOT IN ({})").format(
             sql.Identifier(table),
+            sql.Identifier(column),
             sql.Identifier(column),
             sql.SQL(", ").join(sql.Literal(value) for value in values),
         )
@@ -272,7 +273,7 @@ def _check_embeddings(conn: psycopg.Connection, report: CheckReport) -> None:
         )
         return
 
-    bad = [row[0] for row in rows if int(row[1]) != 384]
+    bad = [row[0] for row in rows if row[1] is None or int(row[1]) != 384]
     if bad:
         report.error(
             "embeddings.dimensions",

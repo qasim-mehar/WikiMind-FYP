@@ -31,6 +31,25 @@ def test_enum_domain_violation_is_detected(empty_db_dsn: str) -> None:
     assert any(finding.code == "enum.invalid_value" for finding in report.findings)
 
 
+def test_null_enum_value_is_detected(empty_db_dsn: str) -> None:
+    conn = _migrated(empty_db_dsn)
+    try:
+        conn.execute("ALTER TABLE nodes ALTER COLUMN node_type DROP NOT NULL")
+        project_id = conn.execute(
+            "INSERT INTO projects (name) VALUES ('null-enum') RETURNING id"
+        ).fetchone()[0]
+        conn.execute(
+            "INSERT INTO nodes (project_id, slug, node_type) VALUES (%s, 'null', NULL)",
+            (project_id,),
+        )
+    finally:
+        conn.close()
+
+    report = check_database(empty_db_dsn)
+    assert report.exit_code == 2
+    assert any(finding.code == "enum.invalid_value" for finding in report.findings)
+
+
 def test_orphan_claim_is_detected(empty_db_dsn: str) -> None:
     conn = _migrated(empty_db_dsn)
     try:
@@ -98,6 +117,36 @@ def test_edge_without_provenance_is_detected(empty_db_dsn: str) -> None:
     report = check_database(empty_db_dsn)
     assert report.exit_code == 2
     assert any(finding.code == "edge.provenance_missing" for finding in report.findings)
+
+
+def test_null_embedding_is_reported_without_crashing(empty_db_dsn: str) -> None:
+    conn = _migrated(empty_db_dsn)
+    try:
+        project_id = conn.execute(
+            "INSERT INTO projects (name) VALUES ('null-vector') RETURNING id"
+        ).fetchone()[0]
+        node_id = conn.execute(
+            "INSERT INTO nodes (project_id, slug, node_type) "
+            "VALUES (%s, 'concept/null', 'concept') RETURNING id",
+            (project_id,),
+        ).fetchone()[0]
+        version_id = conn.execute(
+            "INSERT INTO node_versions (project_id, node_id, version, rendered_text) "
+            "VALUES (%s, %s, 1, 'text') RETURNING id",
+            (project_id, node_id),
+        ).fetchone()[0]
+        conn.execute("ALTER TABLE embeddings ALTER COLUMN vec DROP NOT NULL")
+        conn.execute(
+            "INSERT INTO embeddings (project_id, node_version_id, model, vec) "
+            "VALUES (%s, %s, 'bge-small', NULL)",
+            (project_id, version_id),
+        )
+    finally:
+        conn.close()
+
+    report = check_database(empty_db_dsn)
+    assert report.exit_code == 2
+    assert any(finding.code == "embeddings.dimensions" for finding in report.findings)
 
 
 def test_nullable_project_id_is_detected(empty_db_dsn: str) -> None:

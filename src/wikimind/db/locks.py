@@ -11,6 +11,15 @@ import psycopg
 from wikimind.db.connection import connect
 
 
+def _lock_key(project_id: UUID | str) -> str:
+    """Canonicalize project IDs so object and string callers share a lock."""
+
+    try:
+        return str(UUID(str(project_id)))
+    except ValueError:
+        return str(project_id)
+
+
 @contextmanager
 def with_writer_lock(
     project_id: UUID | str,
@@ -28,8 +37,8 @@ def with_writer_lock(
     try:
         with active.transaction():
             active.execute(
-                "SELECT pg_advisory_xact_lock(hashtext(%s::text))",
-                (str(project_id),),
+                "SELECT pg_advisory_xact_lock(hashtextextended(%s::text, 0))",
+                (_lock_key(project_id),),
             )
             yield active
     finally:
