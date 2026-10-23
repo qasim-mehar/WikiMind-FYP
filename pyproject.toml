@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wikimind"
+version = "0.1.0"
+description = "Compile source documents into a source-tracked, versioned knowledge graph."
+readme = "README.dev.md"
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg[binary]==3.3.6",
+    "typer==0.27.3",
+    "pydantic==2.14.1",
+    "httpx==0.28.1",
+    "pypdf==6.21.2",
+]
+
+[project.optional-dependencies]
+llm = ["google-genai==2.33.0"]
+embed = ["sentence-transformers==6.2.0"]
+dev = ["pytest==9.1.1", "ruff==0.17.2", "google-genai==2.33.0"]
+
+[project.scripts]
+wikimind = "wikimind.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
