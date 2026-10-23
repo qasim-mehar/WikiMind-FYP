@@ -1,0 +1,15 @@
+SYNTHETIC TEST FIXTURE - NOT A REAL CITATION
+Do not cite this file. It exists only to exercise contradiction handling in
+tests. Its central statement is deliberately false.
+
+Source paper: "Attention Is All You Need" (Vaswani et al., arXiv:1706.03762).
+
+Concrete quantitative claim in that paper (abstract, page 1):
+"Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation
+task, improving over the existing best results, including ensembles, by over
+2 BLEU."
+
+Deliberately contradictory restatement (synthetic and false):
+The Transformer reached only 18.4 BLEU on the WMT 2014 English-to-German
+translation task, a full 10 BLEU below the paper's reported 28.4, and it did
+not improve on the best ensembles.
