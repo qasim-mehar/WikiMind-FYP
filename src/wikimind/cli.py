@@ -19,15 +19,17 @@ app.add_typer(db_cli.app, name="db")
 
 try:
     from wikimind.parse import cli as parse_cli
-except ImportError:
-    parse_cli = None
+except ModuleNotFoundError as exc:
+    if exc.name not in {"wikimind.parse", "wikimind.parse.cli"}:
+        raise
 else:
     app.add_typer(parse_cli.app, name="parse")
 
 try:
     from wikimind.llm import cli as llm_cli
-except ImportError:
-    llm_cli = None
+except ModuleNotFoundError as exc:
+    if exc.name not in {"wikimind.llm", "wikimind.llm.cli"}:
+        raise
 else:
     app.add_typer(llm_cli.app, name="llm")
 

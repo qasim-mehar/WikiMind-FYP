@@ -110,6 +110,7 @@ def run_migrations(
         if missing:
             raise MigrationError("applied migration file(s) missing: " + ", ".join(missing))
 
+        newest_applied = max(recorded) if recorded else None
         for migration in migrations:
             existing_hash = recorded.get(migration.name)
             if existing_hash is not None:
@@ -119,6 +120,11 @@ def run_migrations(
                         f"recorded {existing_hash}, file {migration.sha256}"
                     )
                 continue
+            if newest_applied is not None and migration.name < newest_applied:
+                raise MigrationError(
+                    f"pending migration {migration.name} sorts before already applied "
+                    f"migration {newest_applied}"
+                )
 
             sql = migration.path.read_text(encoding="utf-8")
             try:

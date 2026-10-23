@@ -32,6 +32,15 @@ def test_db_migrate_and_check(empty_db_dsn: str) -> None:
         assert conn.execute("SELECT to_regclass('public.embeddings')").fetchone() == ("embeddings",)
 
 
+def test_missing_dsn_reports_once(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("WIKIMIND_DB", raising=False)
+    for args in (["db", "migrate"], ["db", "reset", "--confirm"]):
+        result = runner.invoke(app, args)
+        assert result.exit_code == 2
+        assert result.output.count("no database DSN configured") == 1
+
+
 def test_reset_requires_confirmation(empty_db_dsn: str) -> None:
     result = runner.invoke(app, ["db", "reset", "--dsn", empty_db_dsn])
     assert result.exit_code == 2

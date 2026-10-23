@@ -9,8 +9,13 @@ from pathlib import Path
 
 _ENV_KEY = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _DSN_PASSWORD = re.compile(r"(?i)(postgres(?:ql)?://[^:/@\s]+:)([^@\s]+)(@)")
-_INLINE_SECRET = re.compile(
-    r"(?i)\b(password|passwd|pwd|api[_-]?key|secret|token)\b(\s*[=:]\s*)([^&\s,;]+)"
+_SECRET_KEY = r"(?i)\b(?P<key>password|passwd|pwd|api[_-]?key|secret|token)\b"
+_SECRET_QUOTED = re.compile(
+    _SECRET_KEY
+    + r"""(?P<key_quote>["']?)(?P<sep>\s*[=:]\s*)(?P<quote>["'])(?P<value>.*?)(?P=quote)"""
+)
+_SECRET_BARE = re.compile(
+    _SECRET_KEY + r"""(?P<key_quote>["']?)(?P<sep>\s*[=:]\s*)(?P<value>[^&\s,;"']+)"""
 )
 _BEARER = re.compile(r"(?i)(bearer\s+)([A-Za-z0-9._~+/=-]+)")
 
@@ -89,6 +94,11 @@ def get_settings(*, load_env: bool = True) -> Settings:
     return Settings.from_env()
 
 
+def _mask_inline_secret(match: re.Match[str]) -> str:
+    quote = match.groupdict().get("quote") or ""
+    return f"{match.group('key')}{match.group('key_quote')}{match.group('sep')}{quote}***{quote}"
+
+
 def redact(value: object) -> str:
     """Redact credentials from a DSN or other diagnostic string."""
 
@@ -96,7 +106,8 @@ def redact(value: object) -> str:
         return ""
     text = str(value)
     text = _DSN_PASSWORD.sub(r"\1***\3", text)
-    text = _INLINE_SECRET.sub(lambda match: f"{match.group(1)}{match.group(2)}***", text)
+    text = _SECRET_QUOTED.sub(_mask_inline_secret, text)
+    text = _SECRET_BARE.sub(_mask_inline_secret, text)
     text = _BEARER.sub(r"\1***", text)
     return text
 
@@ -106,6 +117,8 @@ def redact_secret(value: object, *, keep: int = 4) -> str:
 
     if value is None:
         return ""
+    if keep <= 0:
+        return "***"
     text = str(value)
     if len(text) <= keep:
         return "***"

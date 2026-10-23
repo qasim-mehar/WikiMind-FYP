@@ -22,6 +22,16 @@ def test_redact_masks_inline_and_bearer_secrets() -> None:
     assert "tok" not in redact("Authorization: Bearer tok123")
 
 
+def test_redact_masks_json_and_quoted_secrets() -> None:
+    payload = '{"password": "hunter2", "api_key": "sk-123", "token": "abc 123"}'
+    result = redact(payload)
+    assert "hunter2" not in result
+    assert "sk-123" not in result
+    assert "abc 123" not in result
+    assert result == '{"password": "***", "api_key": "***", "token": "***"}'
+    assert redact("password='quoted value'") == "password='***'"
+
+
 def test_settings_repr_is_redacted() -> None:
     settings = Settings(
         db_dsn="postgresql://alice:hunter2@localhost/wiki",
@@ -38,6 +48,8 @@ def test_settings_repr_is_redacted() -> None:
 def test_redact_secret_keeps_short_suffix() -> None:
     assert redact_secret("abcdefgh", keep=4) == "***efgh"
     assert redact_secret("abc", keep=4) == "***"
+    assert redact_secret("abcdefgh", keep=0) == "***"
+    assert redact_secret("abcdefgh", keep=-1) == "***"
 
 
 def test_load_dotenv_does_not_override_by_default(tmp_path: Path, monkeypatch) -> None:

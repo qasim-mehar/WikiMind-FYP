@@ -53,8 +53,9 @@ def migrate(
 ) -> None:
     """Apply pending migrations in filename order."""
 
+    resolved = _dsn_or_exit(dsn)
     try:
-        applied = run_migrations(_dsn_or_exit(dsn), migrations_dir)
+        applied = run_migrations(resolved, migrations_dir)
     except MigrationError as exc:
         typer.echo(f"error: {redact(exc)}", err=True)
         raise typer.Exit(exc.exit_code) from exc
@@ -101,8 +102,9 @@ def reset(
         typer.echo("refusing to reset without --confirm", err=True)
         raise typer.Exit(2)
 
+    resolved = _dsn_or_exit(dsn)
     try:
-        applied = reset_database(_dsn_or_exit(dsn), migrations_dir)
+        applied = reset_database(resolved, migrations_dir)
     except MigrationError as exc:
         typer.echo(f"error: {redact(exc)}", err=True)
         raise typer.Exit(exc.exit_code) from exc

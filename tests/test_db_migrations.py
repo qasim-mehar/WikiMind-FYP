@@ -28,6 +28,17 @@ def test_migrations_apply_once(empty_db_dsn: str) -> None:
     assert run_migrations(empty_db_dsn) == []
 
 
+def test_late_lower_numbered_migration_is_rejected(empty_db_dsn: str, tmp_path: Path) -> None:
+    migrations = tmp_path / "migrations"
+    _copy_migrations(migrations)
+    run_migrations(empty_db_dsn, migrations)
+
+    (migrations / "000_extra.sql").write_text("SELECT 1;", encoding="utf-8")
+
+    with pytest.raises(MigrationError, match="sorts before already applied"):
+        run_migrations(empty_db_dsn, migrations)
+
+
 def test_hash_mismatch_is_an_error(empty_db_dsn: str, tmp_path: Path) -> None:
     migrations = tmp_path / "migrations"
     _copy_migrations(migrations)
