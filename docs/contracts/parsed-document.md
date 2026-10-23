@@ -253,7 +253,8 @@ input. A caller supplies the persisted SHA set later.
   the number) become `figure_caption`/`table` channels and are removed from the
   section body. Caption continuation lines are not reconstructed.
 - A `References`/`Bibliography` block is split into `reference` channels on
-  `[n]` or `n.` entry starts. If no entry start is found, the whole block is one
+  `[n]` or short `n.` entry starts (1–3 digits, so years and volume numbers do
+  not create false entries). If no entry start is found, the whole block is one
   `reference` channel.
 - Raises `ParseError` for unreadable, encrypted, or image-only PDFs with no
   extractable text.
