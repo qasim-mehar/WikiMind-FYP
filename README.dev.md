@@ -66,6 +66,9 @@ over `.env`. `wikimind.config.redact()` is available for diagnostic messages.
   domains, and 384-dimensional embeddings.
 - `db reset --confirm` drops and recreates the `public` schema and re-applies
   migrations. It is intentionally destructive and requires the flag.
+- `db` commands resolve `migrations/` from the checkout. Use
+  `--migrations-dir PATH` when running from a wheel install or relocated
+  checkout.
 
 Always scope queries and writes by `project_id`. Take the single-writer lock
 with `wikimind.db.with_writer_lock(project_id)` before mutating a project.
@@ -78,15 +81,16 @@ $env:WIKIMIND_DB = "postgresql://USER:PASSWORD@localhost:5432/wikimind_l0"
 ```
 
 `tests/conftest.py` creates `wikimind_test_<pid>` (plus a suffix for
-per-test databases), optionally applies migrations, and drops the databases on
-teardown. If `WIKIMIND_DB` is unset or unreachable, DB tests are skipped, so
-the suite is green without a database. Tests never require API keys or network
-access. `WIKIMIND_DB` must name a role with `CREATEDB`.
+per-test databases), applies migrations to the session database, and drops the
+databases on teardown. If `WIKIMIND_DB` is unset or unreachable, DB tests are
+skipped, so the suite is green without a database. Tests never require API keys
+or network access. `WIKIMIND_DB` must name a role with `CREATEDB`.
 
 Run lint and tests before handing a lane back:
 
 ```powershell
 .\.venv\Scripts\python.exe -m ruff check .
+.\.venv\Scripts\python.exe -m ruff format --check .
 .\.venv\Scripts\python.exe -m pytest
 ```
 
@@ -97,6 +101,9 @@ Run lint and tests before handing a lane back:
 | L0 trunk | `..\WikiMind-L0` | `lane/0-trunk` | pyproject, schema, DB, CI, dev docs |
 | L1 parse | `..\WikiMind-L1` | `lane/1-parse` | `src/wikimind/parse/` |
 | L2 models | `..\WikiMind-L2` | `lane/2-models` | `src/wikimind/llm/` |
+| L3 compile | `..\WikiMind-L3` | `lane/3-compile` | `src/wikimind/compile/` |
+| L4 serve | `..\WikiMind-L4` | `lane/4-serve` | `src/wikimind/serve/` |
+| L5 integrity | `..\WikiMind-L5` | `lane/5-integrity` | `src/wikimind/integrity/` |
 
 Rules for every lane:
 
@@ -146,6 +153,10 @@ gate after L3-L5. Neither gate replaces the later evaluation in
   the Docker fallback, then re-run `db migrate`.
 - **`db check` says a migration is not applied**: run `db migrate`. A hash
   mismatch is an error, not a prompt to edit `schema_migrations`.
+- **Migration hash mismatch after switching worktrees on Windows**: migration
+  files must retain LF endings. Set repo-local `git config core.autocrlf false`
+  before re-checking out the worktree, or add a `.gitattributes` rule such as
+  `migrations/*.sql text eol=lf`.
 - **Tests skipped**: `WIKIMIND_DB` is unset or unreachable, or the role lacks
   `CREATEDB`.
 - **ImportError during root CLI startup**: this is expected for an area whose

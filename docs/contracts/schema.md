@@ -27,7 +27,8 @@ changing a decision.
 
 ### `projects`
 
-Purpose: tenant/project boundary. The only table without `project_id`.
+Purpose: tenant/project boundary. One of only two tables without `project_id`
+(the other is `schema_migrations`).
 
 | Column | Type | Notes |
 | --- | --- | --- |
@@ -72,8 +73,9 @@ Keys:
 
 ### `channels`
 
-Purpose: the quarantined raw layer. Raw text lives only here and enters a
-prompt only through Lane 1's tagged, untrusted helper.
+Purpose: the quarantined raw layer. Full source text lives only here and
+enters a prompt only through Lane 1's tagged, untrusted helper. Claims may
+store a short `anchor_quote` excerpt for citation, never the full source body.
 
 | Column | Type | Notes |
 | --- | --- | --- |
