@@ -10,7 +10,8 @@ Thirteen decisions are frozen. Nothing is built yet. V0 (see the V0 PROTOCOL doc
 
 - The invariants from PROJECT.md section 6.4 still apply, except invariant 4, which is now a lint target (D6).
 - A decision changes only through a new entry here that names the entry it replaces.
-- Open items: O1 choose the domain. O2 pin the OKF version after a 10-minute repo check. O3 pick the cloud (PROJECT.md section 17, item D1).
+- O2 done: OKF v0.2 verified, typed edges are a local extension.
+- Open items: O1 choose the domain. O3 pick the cloud (PROJECT.md section 17, item D1).
 
 ## Architecture decisions
 
@@ -44,3 +45,36 @@ Thirteen decisions are frozen. Nothing is built yet. V0 (see the V0 PROTOCOL doc
 1. **D13. Target user and pitch.** The first user is a researcher who runs literature reviews or evidence synthesis in one narrow field. The pitch is "your synthesis stays current as the literature changes." It is not "we flag retractions." Tools like Zotero and scite already alert on retractions. Our difference is that a change reaches the derived notes. Retraction is the rare extreme of a common class: contradiction and supersession happen far more often and use the same machinery.
 
 Two risks stay open. Retractions are rare, so the headline feature fires seldom for one user. Systematic reviewers often buy through institutions, so a $15 individual price may not fit. Five interviews run beside V0 test both risks. Ask about past behavior, such as what the researcher did the last time a cited paper was retracted or contradicted. Do not ask for opinions about this product.
+
+## D14 — Build order reversed: engine first, measurement after
+
+Status: Adopted. Authorized by: Qasim, 2026-10-24.
+
+Amends:
+- D1 — replaces the test-before-build order. V0 no longer gates the build.
+- D13 — replaces the pitch wording only. The target user in D13 stands.
+
+Decision:
+1. Build the core engine first. Measure later, on the finished engine.
+2. The pre-build steps are skipped: domain selection, corpus collection,
+   manual parser tests. scripts/corpus.py is kept for the later
+   evaluation (legal sources only: Semantic Scholar, arXiv,
+   Retraction Watch).
+3. V0 as a pre-build gate is retired. V0_PROTOCOL.md survives unchanged
+   as the specification for the later full evaluation on the finished
+   engine.
+4. A mini-check (~30 questions) against a strong hybrid-search baseline
+   runs once the engine answers end-to-end. It uses the protocol's
+   metrics. It is explicitly a directional smoke test; the decision
+   table's CI thresholds apply only to the full run.
+5. Stage 1 scope: a Python library, a CLI, and Postgres. No web UI, no
+   auth, no graph view. project_id on every table from day one.
+
+Positioning: LLM wikis exist (Karpathy's pattern, nashsu/llm_wiki,
+nvk/llm-wiki). Compendium does not claim to be first. Its claims are:
+verified passage-level citations, the claim ledger, surgical removal
+that rewrites only what depended on the removed source, and a
+multi-user product later.
+
+Lessons folded in: nashsu/llm_wiki (GPL-3.0 — ideas only, no code),
+the LLM Wiki v2 essay and its critique thread, nvk/llm-wiki (MIT).

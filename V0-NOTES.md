@@ -102,3 +102,15 @@ Checked UTC 2026-10-16 (~10:05Z). Evidence: fetched repository page + `api.githu
 - Last activity at check: commit `ad30107c31c06aec8a7d5636e0d1058118604e6f`, 2026-08-21T20:08:36Z, signed and verified — "Merge pull request #6 … Make every timestamp an ISO 8601 datetime with an explicit offset". 6 commits total on main.
 - Build consequences: (1) every timestamp emitted by V0 code uses ISO 8601 datetimes with explicit UTC offset, per the pinned spec; (2) OKF format code is isolated in a single module, per PROJECT.md §3. Note: PROJECT.md v0.1 frontmatter examples show bare dates (`stale_after: 2027-06-12`); the pinned spec supersedes that cosmetic detail at build time. No PROJECT.md edit — it is frozen.
 - Pin statement: V0 builds against OKF spec v0.2 as of commit `ad30107`; the format module will carry this pin string.
+
+### Ruling 9 — V0 gate retired; build order reversed (2026-10-24, D14)
+
+D14 amends D1: the engine is built first; measurement comes after. V0
+as a pre-build gate is retired. The pre-registered commit and tag
+v0-preregistered stay as they are. V0_PROTOCOL.md is unchanged; it is
+the spec for the full evaluation that runs on the finished engine.
+Before that full run, a mini-check (~30 questions) runs against a
+strong hybrid-search baseline once the engine answers end-to-end. It
+uses the protocol's metrics. It is a directional smoke test only. The
+decision table's CI thresholds apply only to the full run.
+Authorized by Qasim, 2026-10-24.

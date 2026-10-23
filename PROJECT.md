@@ -1,8 +1,8 @@
 # PROJECT.md — Compendium (working title)
 
-> **SUPERSEDED BY DECISIONS.md — READ THAT FIRST.** DECISIONS.md supersedes this document for every item listed there. V0_PROTOCOL.md governs all pre-build work. Where this document conflicts with either, DECISIONS.md and V0_PROTOCOL.md win. v0.2 consolidates all documents after V0. No edits to this document until then.
+> **SUPERSEDED BY DECISIONS.md — READ THAT FIRST.** DECISIONS.md supersedes this document for every item listed there. DECISIONS.md wins on disagreement. V0_PROTOCOL.md is unchanged and is the specification for the later full evaluation on the finished engine (D14); it is not a pre-build gate. v0.2 records the D14 build-order reversal.
 
-**Status**: v0.1 — Specification & Agent Constitution. Pre-implementation (M0 not started).
+**Status**: v0.2 (2026-10-24) — Specification & Agent Constitution. Pre-implementation (M0 not started).
 **Audience**: Human engineers, LLM coding agents (Codex, Claude Code, etc.), and LLM agents that will operate the running system.
 **Evolution**: This document is versioned in the decision log (§17). Changes require a new entry there. Nothing in this file is sacred except the invariants (§6.4) — challenge anything else with a reasoned proposal.
 
@@ -67,10 +67,10 @@ Honest residual gaps: live numeric aggregation across many pages, and multi-hop 
 | Ancestor | What it is | What we took |
 | --- | --- | --- |
 | LLM Wiki pattern | Idea-file: an agent incrementally builds and maintains a personal wiki between the user and raw sources; operations = ingest / query / lint; the wiki is a persistent, compounding artifact | The process model (§10), the three layers (raw/wiki/schema), lint-as-garbage-collection, answers-filed-back |
-| OKF v0.2 (GoogleCloudPlatform/open-knowledge-format) | Vendor-neutral spec: knowledge as markdown + YAML frontmatter; provenance, trust, freshness as queryable fields; graph-shaped cross-links; progressive disclosure; git-native bundles | The artifact format: node frontmatter schema, sources/verified/status/stale_after, trust tiers, export/import as OKF bundles, the Cytoscape viewer as UI seed |
+| OKF v0.2 (GoogleCloudPlatform/open-knowledge-format) | Vendor-neutral spec: knowledge as markdown + YAML frontmatter; provenance, trust, freshness as queryable fields; graph-shaped cross-links; progressive disclosure; git-native bundles | The export target: an OKF v0.2 bundle from the pinned repository; node frontmatter schema, sources/verified/status/stale_after, trust tiers, and the Cytoscape viewer as UI seed |
 | Memex (Vannevar Bush, 1945) | Curated personal knowledge store with associative trails; maintenance burden unsolved | The vision. The LLM solves the maintenance problem — it doesn't get bored updating cross-references |
 
-We build against the canonical OKF repo, not any frozen snapshot. Pin the spec version (currently v0.2) and isolate all format code behind one module.
+Our export target is OKF v0.2, pinned to `GoogleCloudPlatform/open-knowledge-format`; isolate all format code behind one module.
 
 ## 4. First principles
 
@@ -153,7 +153,9 @@ stale_after: 2027-06-12                  # review-by date (optional)
 # Markdown body — self-contained, no dangling references
 ```
 
-### 6.3 Edges (each carries mandatory provenance)
+### 6.3 Edges (Compendium extension; each carries mandatory provenance)
+
+OKF v0.2 core links are directed and untyped. Their relationship kind belongs in the surrounding prose, not in the link. Compendium's typed edges are a local extension, not an OKF feature.
 
 ```yaml
 from: concept/self-attention
@@ -162,7 +164,9 @@ type: part_of                            # see enum below
 sources: [references/arxiv-1706-03762]   # documents supporting THIS edge
 ```
 
-Edge type enum (extensible, but new types MUST be added to SCHEMA.md first): relates_to, part_of, supports, contradicts, supersedes, cites, authored_by, uses, measured_by.
+Compendium edge type enum (extensible, but new types MUST be added to SCHEMA.md first): relates_to, part_of, supports, contradicts, supersedes, cites, authored_by, uses, measured_by.
+
+On export, each typed edge is written as a plain directed OKF markdown link, with its relationship type stated in the surrounding prose, and also recorded in the Compendium-specific `compendium_edges` frontmatter field. External OKF tools are not expected to read `compendium_edges`.
 
 ### 6.4 Invariants (normative — these MUST hold at all times)
 
@@ -465,3 +469,4 @@ SCHEMA.md changes are themselves events (schema.updated) — the constitution ha
 ## Changelog
 
 - v0.1 — Initial specification. Consolidates planning sessions: RAG flaw analysis, LLM Wiki–OKF synthesis, data model, removal policy, Postgres-core storage for public multi-tenant deployment, milestones M0–M4.
+- v0.2 (2026-10-24): D14 recorded. Build order reversed — engine first, measurement after. Stage 1: Python library, CLI, Postgres; no UI, no auth, no graph view.
