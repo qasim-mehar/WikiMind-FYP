@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -9,9 +10,21 @@ from wikimind.llm import CostMeter, JsonlCostSink, LLMResult, Usage, cli
 from wikimind.llm.cli import app
 from wikimind.prices import EMBED_DIM, EMBED_MODEL, GEMINI_MODEL, JUDGE_MODEL
 
-# COLUMNS forces a deterministic rich console width: the --help assertions
-# below match option names that soft-wrap on narrow terminals (CI has none).
+# COLUMNS forces a deterministic rich console width so option rendering does
+# not vary with the host terminal.
 runner = CliRunner(env={"COLUMNS": "200"})
+
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def plain_help(output: str) -> str:
+    """Strip styling and whitespace so assertions match option names, not layout.
+
+    typer forces color rendering when GITHUB_ACTIONS is set, and its option
+    highlighter emits escape codes inside option tokens; narrow consoles also
+    soft-wrap them. Raw substring matching would depend on both.
+    """
+    return re.sub(r"\s+", "", _ANSI_RE.sub("", output))
 
 
 class StubGemini:
@@ -162,13 +175,13 @@ def test_llm_help() -> None:
 def test_smoke_help() -> None:
     result = runner.invoke(app, ["llm", "smoke", "--help"])
     assert result.exit_code == 0
-    assert "costs-path" in result.output
+    assert "costs-path" in plain_help(result.output)
 
 
 def test_costs_help() -> None:
     result = runner.invoke(app, ["llm", "costs", "--help"])
     assert result.exit_code == 0
-    assert "--path" in result.output
+    assert "--path" in plain_help(result.output)
 
 
 def test_default_path_is_used(monkeypatch, tmp_path) -> None:
