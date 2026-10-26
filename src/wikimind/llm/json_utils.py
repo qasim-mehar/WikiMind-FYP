@@ -6,6 +6,14 @@ import json
 from typing import Any
 
 
+def json_safe_value(value: Any) -> Any:
+    """Coerce provider metadata into a JSON-safe scalar."""
+
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    return str(value)
+
+
 def parse_json_object(text: str | None) -> dict[str, Any]:
     """Parse a JSON object, tolerating markdown fences around it."""
 
@@ -24,14 +32,20 @@ def parse_json_object(text: str | None) -> dict[str, Any]:
     try:
         parsed = json.loads(cleaned)
     except json.JSONDecodeError:
-        start = cleaned.find("{")
-        end = cleaned.rfind("}")
-        if start < 0 or end <= start:
-            raise ValueError("response did not contain a JSON object") from None
-        try:
-            parsed = json.loads(cleaned[start : end + 1])
-        except json.JSONDecodeError:
-            raise ValueError("response did not contain valid JSON") from None
+        decoder = json.JSONDecoder()
+        parsed = None
+        for index, character in enumerate(cleaned):
+            if character != "{":
+                continue
+            try:
+                candidate, _ = decoder.raw_decode(cleaned[index:])
+            except json.JSONDecodeError:
+                continue
+            if isinstance(candidate, dict):
+                parsed = candidate
+                break
+        if parsed is None:
+            raise ValueError("response did not contain a valid JSON object") from None
 
     if not isinstance(parsed, dict):
         raise ValueError("response JSON was not an object")  # noqa: TRY004

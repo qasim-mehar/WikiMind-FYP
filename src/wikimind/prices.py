@@ -33,10 +33,13 @@ Embedding
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict
+from collections.abc import Mapping
+from types import MappingProxyType
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class PricingError(Exception):
+class PricingError(ValueError):
     """Raised when a model has no audited list price."""
 
 
@@ -44,6 +47,8 @@ GEMINI_MODEL = "gemini-2.5-flash"
 JUDGE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
 JUDGE_SHADOW_MODEL = "nvidia/nemotron-3-super-120b-a12b"
 EMBED_MODEL = "BAAI/bge-small-en-v1.5"
+FAKE_LLM_MODEL = "fake-llm"
+FAKE_EMBED_MODEL = "fake-embedder"
 EMBED_DIM = 384
 
 PRICES_VERIFIED_ON = "2026-10-23"
@@ -59,8 +64,8 @@ class ModelPrice(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    input_per_mtok: float
-    output_per_mtok: float
+    input_per_mtok: float = Field(ge=0)
+    output_per_mtok: float = Field(ge=0)
     currency: str = "USD"
 
     def cost_usd(self, in_tokens: int, out_tokens: int) -> float:
@@ -85,12 +90,16 @@ JUDGE_SHADOW_PRICE = ModelPrice(
 
 LOCAL_EMBED_PRICE = ModelPrice(input_per_mtok=0.0, output_per_mtok=0.0)
 
-PRICES: dict[str, ModelPrice] = {
-    GEMINI_MODEL: GEMINI_2_5_FLASH_PRICE,
-    JUDGE_MODEL: JUDGE_SHADOW_PRICE,
-    JUDGE_SHADOW_MODEL: JUDGE_SHADOW_PRICE,
-    EMBED_MODEL: LOCAL_EMBED_PRICE,
-}
+PRICES: Mapping[str, ModelPrice] = MappingProxyType(
+    {
+        GEMINI_MODEL: GEMINI_2_5_FLASH_PRICE,
+        JUDGE_MODEL: JUDGE_SHADOW_PRICE,
+        JUDGE_SHADOW_MODEL: JUDGE_SHADOW_PRICE,
+        EMBED_MODEL: LOCAL_EMBED_PRICE,
+        FAKE_LLM_MODEL: LOCAL_EMBED_PRICE,
+        FAKE_EMBED_MODEL: LOCAL_EMBED_PRICE,
+    }
+)
 
 
 def price_for(model: str) -> ModelPrice:

@@ -125,3 +125,31 @@ def test_fake_llm_meters_at_zero_cost() -> None:
     assert event.shadow_cost_usd == 0.0
     assert event.meta["provider"] == "fake"
     assert event.meta["arm"] == "B"
+
+
+def test_fake_llm_rejects_bad_call_site() -> None:
+    fake = FakeLLM([{"ok": True}])
+    with pytest.raises(ValueError):
+        fake.complete(
+            system="s",
+            user="u",
+            response_schema=None,
+            call_site="ingest.test",
+        )
+
+
+def test_fake_llm_rejects_unpriced_model() -> None:
+    with pytest.raises(ValueError):
+        FakeLLM([{"ok": True}], model="unknown/model")
+
+
+def test_fake_llm_rejects_bad_max_retries() -> None:
+    fake = FakeLLM([{"ok": True}])
+    with pytest.raises(ValueError):
+        fake.complete(
+            system="s",
+            user="u",
+            response_schema=None,
+            call_site="qa.test",
+            max_retries=0,
+        )

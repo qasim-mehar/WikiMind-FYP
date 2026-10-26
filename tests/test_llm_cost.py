@@ -18,11 +18,13 @@ from wikimind.llm import (
 )
 from wikimind.llm.errors import CostSinkError, PricingError
 from wikimind.prices import (
+    FAKE_EMBED_MODEL,
     GEMINI_2_5_FLASH_PRICE,
     GEMINI_MODEL,
+    JUDGE_MODEL,
     JUDGE_SHADOW_MODEL,
     JUDGE_SHADOW_PRICE,
-    LOCAL_EMBED_PRICE,
+    ModelPrice,
     price_for,
 )
 
@@ -61,22 +63,72 @@ def test_cost_meter_prices_and_emits() -> None:
     assert meter.total_shadow_cost_usd == 0.00155
 
 
-def test_cost_meter_accepts_explicit_zero_price() -> None:
+def test_cost_meter_prices_fake_models_at_zero() -> None:
     sink = InMemorySink()
     meter = CostMeter(sink)
     event = meter.record(
         call_site="embed.test",
-        model="fake-embedder",
+        model=FAKE_EMBED_MODEL,
         in_tokens=10,
-        unit_price=LOCAL_EMBED_PRICE,
     )
     assert event.shadow_cost_usd == 0.0
+    assert sink.events == [event]
+
+
+def test_cost_meter_rejects_unknown_model() -> None:
+    sink = InMemorySink()
+    meter = CostMeter(sink)
+    with pytest.raises(PricingError):
+        meter.record(call_site="l1.test", model="unknown/model")
+    assert sink.events == []
+    assert meter.events == []
+
+
+def test_cost_meter_rejects_non_json_meta() -> None:
+    meter = CostMeter(InMemorySink())
+    with pytest.raises(CostSinkError):
+        meter.record(
+            call_site="l1.test",
+            model=GEMINI_MODEL,
+            meta={"object": object()},
+        )
 
 
 def test_cost_meter_rejects_bad_call_site() -> None:
     meter = CostMeter(InMemorySink())
     with pytest.raises(ValueError):
         meter.record(call_site="ingest.test", model=GEMINI_MODEL)
+
+
+def test_cost_meter_rejects_non_string_meta_keys() -> None:
+    meter = CostMeter(InMemorySink())
+    with pytest.raises(CostSinkError):
+        meter.record(
+            call_site="l1.test",
+            model=GEMINI_MODEL,
+            meta={1: "bad"},  # type: ignore[dict-item]
+        )
+
+
+def test_cost_meter_rejects_nan_meta() -> None:
+    meter = CostMeter(InMemorySink())
+    with pytest.raises(CostSinkError):
+        meter.record(
+            call_site="l1.test",
+            model=GEMINI_MODEL,
+            meta={"value": float("nan")},
+        )
+
+
+def test_cost_event_rejects_non_json_meta() -> None:
+    with pytest.raises(ValueError):
+        CostEvent(
+            call_site="l1.test",
+            model=GEMINI_MODEL,
+            unit_price=GEMINI_2_5_FLASH_PRICE,
+            shadow_cost_usd=0.0,
+            meta={"object": object()},
+        )
 
 
 def test_cost_event_validates_tokens() -> None:
@@ -87,6 +139,30 @@ def test_cost_event_validates_tokens() -> None:
             in_tokens=-1,
             out_tokens=0,
             unit_price=GEMINI_2_5_FLASH_PRICE,
+            shadow_cost_usd=0.0,
+        )
+
+
+def test_cost_event_rejects_inconsistent_shadow_cost() -> None:
+    with pytest.raises(ValueError):
+        CostEvent(
+            call_site="l1.test",
+            model=GEMINI_MODEL,
+            in_tokens=1_000_000,
+            out_tokens=0,
+            unit_price=GEMINI_2_5_FLASH_PRICE,
+            shadow_cost_usd=0.0,
+        )
+
+
+def test_cost_event_rejects_wrong_unit_price() -> None:
+    with pytest.raises(ValueError):
+        CostEvent(
+            call_site="judge.test",
+            model=GEMINI_MODEL,
+            in_tokens=0,
+            out_tokens=0,
+            unit_price=JUDGE_SHADOW_PRICE,
             shadow_cost_usd=0.0,
         )
 
@@ -103,7 +179,7 @@ def test_jsonl_sink_roundtrip(tmp_path) -> None:
     )
     second = meter.record(
         call_site="judge.test",
-        model="nvidia/nemotron-3-super-120b-a12b:free",
+        model=JUDGE_MODEL,
         in_tokens=50,
         out_tokens=10,
     )
@@ -125,6 +201,12 @@ def test_jsonl_sink_appends(tmp_path) -> None:
     assert len(sink.read_events()) == 2
 
 
+def test_jsonl_sink_preflight_rejects_unwritable_path(tmp_path) -> None:
+    sink = JsonlCostSink(tmp_path)
+    with pytest.raises(CostSinkError):
+        sink.preflight()
+
+
 def test_missing_ledger_is_empty(tmp_path) -> None:
     assert read_cost_events(tmp_path / "missing.jsonl") == []
 
@@ -136,11 +218,52 @@ def test_invalid_ledger_line_raises(tmp_path) -> None:
         read_cost_events(path)
 
 
+def test_trailing_partial_line_is_ignored(tmp_path) -> None:
+    path = tmp_path / "costs.jsonl"
+    sink = JsonlCostSink(path)
+    meter = CostMeter(sink)
+    meter.record(call_site="l1.test", model=GEMINI_MODEL)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write('{"partial":')
+    assert len(read_cost_events(path)) == 1
+
+
+def test_read_cost_events_accepts_historical_price(monkeypatch, tmp_path) -> None:
+    path = tmp_path / "costs.jsonl"
+    meter = CostMeter(JsonlCostSink(path))
+    meter.record(call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000)
+    monkeypatch.setattr(
+        "wikimind.llm.cost.price_for",
+        lambda model: ModelPrice(input_per_mtok=9.0, output_per_mtok=9.0),
+    )
+    events = read_cost_events(path)
+    assert len(events) == 1
+    assert events[0].unit_price == GEMINI_2_5_FLASH_PRICE
+
+
+def test_cost_meter_retains_event_when_sink_fails() -> None:
+    class FailingSink:
+        def preflight(self) -> None:
+            return None
+
+        def emit(self, event: CostEvent) -> None:
+            raise CostSinkError("disk full")
+
+    meter = CostMeter(FailingSink())
+    with pytest.raises(CostSinkError):
+        meter.record(call_site="l1.test", model=GEMINI_MODEL)
+    assert len(meter.events) == 1
+
+
 def test_aggregate_and_report() -> None:
     sink = InMemorySink()
     meter = CostMeter(sink)
-    meter.record(call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100)
-    meter.record(call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100)
+    meter.record(
+        call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100
+    )
+    meter.record(
+        call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100
+    )
     meter.record(call_site="qa.test", model=GEMINI_MODEL, in_tokens=500, out_tokens=50)
 
     aggregates = aggregate_costs(meter.events)

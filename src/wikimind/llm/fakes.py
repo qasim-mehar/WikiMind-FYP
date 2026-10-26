@@ -7,8 +7,8 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
-from ..prices import LOCAL_EMBED_PRICE
-from .cost import CostMeter
+from ..prices import FAKE_LLM_MODEL, price_for
+from .cost import CostMeter, validate_call_site
 from .embedder import FakeEmbedder
 from .json_utils import parse_json_object
 from .protocols import LLMResult, ResponseSchema, Usage
@@ -34,9 +34,10 @@ class FakeLLM:
         responses: Iterable[Any] | Any,
         *,
         usage: Usage | None = None,
-        model: str = "fake-llm",
+        model: str = FAKE_LLM_MODEL,
         meter: CostMeter | None = None,
     ) -> None:
+        price_for(model)
         if isinstance(responses, (dict, str, LLMResult, BaseException)) or callable(
             responses
         ):
@@ -61,6 +62,9 @@ class FakeLLM:
         max_retries: int = 3,
         meta: dict[str, Any] | None = None,
     ) -> LLMResult:
+        validate_call_site(call_site)
+        if not 1 <= max_retries <= 3:
+            raise ValueError("max_retries must be between 1 and 3")
         self.calls.append(
             FakeCall(
                 system=system,
@@ -106,6 +110,5 @@ class FakeLLM:
                 in_tokens=result.usage.in_tokens,
                 out_tokens=result.usage.out_tokens,
                 meta={"provider": "fake", **(meta or {})},
-                unit_price=LOCAL_EMBED_PRICE,
             )
         return result

@@ -19,7 +19,7 @@ _KEY_VALUE_RE = re.compile(r"^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$
 _SECRET_PATTERNS = (
     re.compile(r"AIza[0-9A-Za-z_\-]{20,}"),
     re.compile(r"sk-or-v1-[0-9A-Za-z_\-]{16,}"),
-    re.compile(r"(?i)(bearer\s+)[A-Za-z0-9._\-]+"),
+    re.compile(r"(?i)(bearer\s+)\S+"),
     re.compile(r"(?i)(api[_-]?key[\"']?\s*[:=]\s*[\"']?)[^\"'\s,}]+"),
 )
 
@@ -53,13 +53,20 @@ def load_dotenv(path: str | Path | None = None) -> bool:
     Only well-formed environment variable names are accepted.
     """
 
-    env_path = Path(path) if path is not None else Path(
-        os.environ.get("WIKIMIND_ENV_FILE", ".env")
+    env_path = (
+        Path(path)
+        if path is not None
+        else Path(os.environ.get("WIKIMIND_ENV_FILE", ".env"))
     )
     if not env_path.is_file():
         return False
 
-    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+    try:
+        text = env_path.read_text(encoding="utf-8-sig")
+    except (OSError, UnicodeDecodeError):
+        return False
+
+    for raw_line in text.splitlines():
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
@@ -69,7 +76,10 @@ def load_dotenv(path: str | Path | None = None) -> bool:
         name, value = match.groups()
         if value and value[0] == value[-1] and value[0] in {"'", '"'}:
             value = value[1:-1]
-        os.environ.setdefault(name, value)
+        elif " #" in value:
+            value = value.split(" #", 1)[0].rstrip()
+        if not os.environ.get(name):
+            os.environ[name] = value
     return True
 
 
@@ -93,7 +103,9 @@ def redact(text: str, secrets: list[str] | None = None) -> str:
 
     values = _secret_values() if secrets is None else list(secrets)
     redacted = text
-    for value in sorted((v for v in values if v and len(v) >= 4), key=len, reverse=True):
+    for value in sorted(
+        (v for v in values if v and len(v) >= 4), key=len, reverse=True
+    ):
         redacted = redacted.replace(value, "[REDACTED]")
 
     redacted = _SECRET_PATTERNS[0].sub("[REDACTED]", redacted)
@@ -103,7 +115,7 @@ def redact(text: str, secrets: list[str] | None = None) -> str:
     return redacted
 
 
-def redact_secrets(text: str) -> str:
-    """Redact every API-key-shaped value currently present in the environment."""
+def redact_secrets(text: str, extra: list[str] | None = None) -> str:
+    """Redact known key values and API-key-shaped substrings."""
 
-    return redact(text)
+    return redact(text, extra)

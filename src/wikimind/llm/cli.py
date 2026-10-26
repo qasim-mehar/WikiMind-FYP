@@ -27,6 +27,7 @@ from .secrets import (
     gemini_api_key,
     load_dotenv,
     openrouter_api_key,
+    redact_secrets,
 )
 
 app = typer.Typer(no_args_is_help=True, help="WikiMind (Compendium) CLI.")
@@ -114,7 +115,7 @@ def smoke(
         )
         typer.echo(f"Gemini: {json.dumps(gemini_result.json, sort_keys=True)}")
     except Exception as exc:  # noqa: BLE001
-        failures.append(("gemini", str(exc)))
+        failures.append(("gemini", redact_secrets(str(exc))))
 
     try:
         judge = JudgeClient(api_key=openrouter_key, meter=meter)
@@ -131,7 +132,7 @@ def smoke(
         )
         typer.echo(f"Judge: {json.dumps(judge_result.json, sort_keys=True)}")
     except Exception as exc:  # noqa: BLE001
-        failures.append(("judge", str(exc)))
+        failures.append(("judge", redact_secrets(str(exc))))
 
     try:
         embedder = SentenceTransformerEmbedder(meter=meter, call_site="embed.smoke")
@@ -143,14 +144,12 @@ def smoke(
             f"norm0={sum(v * v for v in vectors[0]) ** 0.5:.6f}"
         )
     except Exception as exc:  # noqa: BLE001
-        failures.append(("embed", str(exc)))
+        failures.append(("embed", redact_secrets(str(exc))))
 
     typer.echo("")
     typer.echo("Cost report (this session):")
     typer.echo(format_cost_report(meter.events))
-    typer.echo(
-        f"Total session shadow cost: {format_usd(meter.total_shadow_cost_usd)}"
-    )
+    typer.echo(f"Total session shadow cost: {format_usd(meter.total_shadow_cost_usd)}")
     typer.echo(f"Cost ledger: {path}")
 
     if failures:
@@ -170,6 +169,7 @@ def costs(
 ) -> None:
     """Aggregate the JSONL cost ledger by call_site."""
 
+    load_dotenv()
     ledger = path or default_costs_path()
     try:
         events = read_cost_events(ledger)

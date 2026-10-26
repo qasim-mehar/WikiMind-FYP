@@ -7,6 +7,7 @@ The default sink appends JSONL to ``costs.jsonl`` (override with
 
 from __future__ import annotations
 
+import json
 import os
 import threading
 from dataclasses import dataclass
@@ -14,7 +15,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 from ..prices import ModelPrice, price_for
 from .errors import CostSinkError
@@ -59,9 +67,47 @@ class CostEvent(BaseModel):
             return value.replace(tzinfo=UTC)
         return value.astimezone(UTC)
 
+    @field_validator("meta", mode="before")
+    @classmethod
+    def _meta_is_json_safe(cls, value: Any) -> Any:
+        if value is None:
+            value = {}
+        _validate_meta_dict(value)
+        return value
+
+    @model_validator(mode="after")
+    def _prices_and_cost_are_consistent(self, info: ValidationInfo) -> CostEvent:
+        expected_cost = self.unit_price.cost_usd(self.in_tokens, self.out_tokens)
+        if round(self.shadow_cost_usd, 12) != expected_cost:
+            raise ValueError(
+                "shadow_cost_usd does not match tokens x unit_price: "
+                f"expected {expected_cost}, got {self.shadow_cost_usd}"
+            )
+        if not (info.context or {}).get("historical"):
+            expected_price = price_for(self.model)
+            if self.unit_price != expected_price:
+                raise ValueError(
+                    f"unit_price does not match the audited price for {self.model!r}"
+                )
+        return self
+
+
+def _validate_meta_dict(meta: Any) -> dict[str, Any]:
+    if not isinstance(meta, dict):
+        raise TypeError("cost event meta must be a dict")
+    if not all(isinstance(key, str) for key in meta):
+        raise ValueError("cost event meta keys must be strings")
+    try:
+        json.dumps(meta, allow_nan=False)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"cost event meta is not JSON-serializable: {exc}") from exc
+    return meta
+
 
 @runtime_checkable
 class CostSink(Protocol):
+    def preflight(self) -> None: ...
+
     def emit(self, event: CostEvent) -> None: ...
 
 
@@ -73,18 +119,31 @@ class JsonlCostSink:
         self.fsync = fsync
         self._lock = threading.Lock()
 
-    def emit(self, event: CostEvent) -> None:
+    def preflight(self) -> None:
+        """Fail before a billable call if the ledger cannot be appended to."""
+
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
+            with self.path.open("a", encoding="utf-8"):
+                pass
+        except OSError as exc:
+            raise CostSinkError(
+                f"could not open cost ledger {self.path}: {exc}"
+            ) from exc
+
+    def emit(self, event: CostEvent) -> None:
+        try:
             line = event.model_dump_json()
+            self.path.parent.mkdir(parents=True, exist_ok=True)
             with self._lock, self.path.open("a", encoding="utf-8") as handle:
-                handle.write(line)
-                handle.write("\n")
+                handle.write(line + "\n")
                 handle.flush()
                 if self.fsync:
                     os.fsync(handle.fileno())
-        except OSError as exc:
-            raise CostSinkError(f"could not write cost event to {self.path}: {exc}") from exc
+        except (OSError, TypeError, ValueError) as exc:
+            raise CostSinkError(
+                f"could not write cost event to {self.path}: {exc}"
+            ) from exc
 
     def read_events(self) -> list[CostEvent]:
         return read_cost_events(self.path)
@@ -96,6 +155,9 @@ class InMemorySink:
     def __init__(self) -> None:
         self.events: list[CostEvent] = []
 
+    def preflight(self) -> None:
+        return None
+
     def emit(self, event: CostEvent) -> None:
         self.events.append(event)
 
@@ -105,6 +167,11 @@ class DbCostSink:
 
     def __init__(self, connection: Any = None) -> None:
         self.connection = connection
+
+    def preflight(self) -> None:
+        raise NotImplementedError(
+            "DbCostSink is an interface stub; the trunk lane wires Postgres"
+        )
 
     def emit(self, event: CostEvent) -> None:
         raise NotImplementedError(
@@ -119,6 +186,18 @@ class CostMeter:
         self.sink: CostSink = sink if sink is not None else JsonlCostSink()
         self.events: list[CostEvent] = []
 
+    def preflight(self) -> None:
+        """Let the sink fail before a billable provider call is made."""
+
+        self.sink.preflight()
+
+    @staticmethod
+    def validate_meta(meta: dict[str, Any] | None) -> None:
+        try:
+            _validate_meta_dict({} if meta is None else meta)
+        except (TypeError, ValueError) as exc:
+            raise CostSinkError(str(exc)) from exc
+
     def record(
         self,
         *,
@@ -127,11 +206,12 @@ class CostMeter:
         in_tokens: int = 0,
         out_tokens: int = 0,
         meta: dict[str, Any] | None = None,
-        unit_price: ModelPrice | None = None,
         timestamp: datetime | None = None,
     ) -> CostEvent:
         validate_call_site(call_site)
-        price = unit_price if unit_price is not None else price_for(model)
+        meta_dict = dict(meta or {})
+        self.validate_meta(meta_dict)
+        price = price_for(model)
         event = CostEvent(
             call_site=call_site,
             model=model,
@@ -139,7 +219,7 @@ class CostMeter:
             out_tokens=out_tokens,
             unit_price=price,
             shadow_cost_usd=price.cost_usd(in_tokens, out_tokens),
-            meta=dict(meta or {}),
+            meta=meta_dict,
             timestamp=timestamp or datetime.now(UTC),
         )
         self.events.append(event)
@@ -159,18 +239,27 @@ def read_cost_events(path: str | Path | None = None) -> list[CostEvent]:
     costs_path = Path(path) if path is not None else default_costs_path()
     if not costs_path.is_file():
         return []
+    try:
+        text = costs_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise CostSinkError(f"could not read cost ledger {costs_path}: {exc}") from exc
+
+    lines = text.splitlines()
     events: list[CostEvent] = []
-    with costs_path.open("r", encoding="utf-8") as handle:
-        for line_number, line in enumerate(handle, start=1):
-            stripped = line.strip()
-            if not stripped:
+    for line_number, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        try:
+            events.append(
+                CostEvent.model_validate_json(stripped, context={"historical": True})
+            )
+        except ValueError as exc:
+            if line_number == len(lines) and not text.endswith(("\n", "\r")):
                 continue
-            try:
-                events.append(CostEvent.model_validate_json(stripped))
-            except ValueError as exc:
-                raise CostSinkError(
-                    f"invalid cost event at {costs_path}:{line_number}: {exc}"
-                ) from exc
+            raise CostSinkError(
+                f"invalid cost event at {costs_path}:{line_number}: {exc}"
+            ) from exc
     return events
 
 

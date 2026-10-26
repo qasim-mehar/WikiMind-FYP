@@ -37,6 +37,11 @@ def test_redact_bearer_token() -> None:
     assert redact("Authorization: Bearer abc.def-123") == (
         "Authorization: Bearer [REDACTED]"
     )
+    assert redact("Bearer abc+/def==") == "Bearer [REDACTED]"
+
+
+def test_redact_secrets_accepts_extra_values() -> None:
+    assert redact_secrets("explicit-sentinel", ["explicit-sentinel"]) == ("[REDACTED]")
 
 
 def test_redact_secrets_uses_environment(monkeypatch) -> None:
@@ -78,6 +83,23 @@ def test_load_dotenv_does_not_override(monkeypatch, tmp_path) -> None:
 
 def test_load_dotenv_missing_file(tmp_path) -> None:
     assert load_dotenv(tmp_path / "missing.env") is False
+
+
+def test_load_dotenv_handles_bom_empty_env_and_inline_comments(
+    monkeypatch, tmp_path
+) -> None:
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "\ufeffGEMINI_API_KEY=dotenv-gemini # comment\n"
+        "OPENROUTER_API_KEY=dotenv-openrouter\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv(GEMINI_API_KEY_ENV, "")
+    monkeypatch.delenv(OPENROUTER_API_KEY_ENV, raising=False)
+
+    assert load_dotenv(env_file) is True
+    assert os.environ[GEMINI_API_KEY_ENV] == "dotenv-gemini"
+    assert os.environ[OPENROUTER_API_KEY_ENV] == "dotenv-openrouter"
 
 
 def test_keys_never_appear_in_logs_or_raised_errors(monkeypatch, caplog) -> None:

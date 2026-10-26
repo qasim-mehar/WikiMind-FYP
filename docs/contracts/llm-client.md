@@ -66,12 +66,21 @@ class Usage:
 `meta` is an additive optional keyword beyond the five keywords in the
 lane card. It is how A/B arm tags and model versions reach the cost
 ledger. Callers using the `LLMClient` protocol may pass `meta=`; all
-implementations in this lane accept it.
+implementations in this lane accept it. `meta` must be a JSON-safe dict
+with string keys and finite values; the meter validates it before the
+network call so a billed response cannot fail during ledger
+serialization.
 
-`response_schema` is either a JSON-schema `dict` (both clients support
-this) or a Pydantic model class. `None` is allowed but discouraged: both
-provider clients still request JSON mode and will fail with
-`ResponseFormatError` if the model returns non-JSON.
+`max_retries` must be in `1..3`; provider clients reject larger values
+before any network call. This is a hard safety cap, not a suggestion.
+
+`response_schema` is either a JSON-schema `dict` or a Pydantic model
+class. `None` is allowed but discouraged: both provider clients still
+request JSON mode and will fail with `ResponseFormatError` if the model
+returns non-JSON. Pydantic schemas are validated locally with
+`model_validate` and dumped with `mode="json"` so `datetime`, `Decimal`,
+and UUID fields remain JSON-serializable; dict schemas are passed to the
+provider as a hint and are **not** locally validated.
 
 ### JSON mode
 
@@ -81,12 +90,19 @@ provider clients still request JSON mode and will fail with
   schema is supplied, its JSON form is appended to the system prompt
   because free-model structured-output support varies. The judge always
   parses the returned content as a JSON object.
-- Fenced JSON (```` ```json ... ``` ````) is tolerated; any non-object
-  JSON is rejected.
+- Fenced JSON (```` ```json ... ``` ````) is tolerated. If strict parsing
+  fails, the parser scans for the first valid JSON object, so prose
+  containing braces does not defeat extraction; any non-object JSON is
+  rejected.
+- A 2xx response that cannot be parsed or fails local Pydantic validation
+  raises `ResponseFormatError` **after** emitting one billable
+  `CostEvent` (see §2).
 
 ## 2. CostEvent — the audit spine
 
-Every successful real call emits exactly one `CostEvent`:
+Every billable provider response (HTTP 2xx) emits exactly one
+`CostEvent`, including 2xx responses that later fail JSON parsing or
+local schema validation:
 
 ```python
 class CostEvent(BaseModel):
@@ -99,6 +115,20 @@ class CostEvent(BaseModel):
     meta: dict
     timestamp: datetime            # UTC, ISO 8601 in JSONL
 ```
+
+`CostEvent` validates price integrity on construction:
+
+- `unit_price` must equal `price_for(model)` from `prices.py`.
+- `shadow_cost_usd` must equal the token-based calculation below.
+- `meta` must be a JSON-safe dict with string keys and finite values.
+- `call_site` must use a canonical prefix.
+
+Callers cannot override `unit_price`; `CostMeter.record` derives it from
+`prices.py`. Unknown models raise `PricingError` in the client/embedder
+constructor, before any network request. When reading an existing
+ledger, `read_cost_events` validates `shadow_cost_usd` against the
+**stored** `unit_price` and does not require the stored price to equal
+today's `prices.py` entry, so historical ledgers survive price updates.
 
 `ModelPrice` is:
 
@@ -144,43 +174,61 @@ A/B arm tags and model versions travel in `meta`, for example:
 client.complete(..., meta={"arm": "B", "model_version": "gemini-2.5-flash"})
 ```
 
-Gemini adds `provider`, `model_version`, `response_id`, and
-`thinking_tokens` automatically. The judge adds `provider`, `endpoint`,
-`pricing_basis`, `paid_twin`, `actual_cost_usd`, `response_model`,
-`generation_id`, `finish_reason`, and `reasoning_tokens`.
+Gemini adds `provider`, `model_version`, `response_id`,
+`thinking_tokens`, `usage_reported`, `usage_invalid`, `parse_ok`,
+`schema_checked`, and `schema_ok` automatically. The judge adds
+`provider`, `endpoint`, `pricing_basis`, `paid_twin`,
+`actual_cost_usd`, `response_model`, `generation_id`, `finish_reason`,
+`reasoning_tokens`, `usage_reported`, `usage_invalid`, `parse_ok`,
+`schema_checked`, and `schema_ok`. Missing/malformed usage is coerced to
+zero tokens and flagged with `usage_invalid=true`, never dropped.
 
 ### Sinks
 
-- `CostSink` protocol: `emit(event: CostEvent) -> None`.
+- `CostSink` protocol: `emit(event: CostEvent) -> None` and
+  `preflight() -> None`.
 - Default: `JsonlCostSink`, append-only JSONL at `costs.jsonl` in the
   current working directory, or `WIKIMIND_COSTS_PATH` if set.
 - `InMemorySink`: tests and session reports.
-- `DbCostSink`: **interface stub only**. `emit` raises
+- `DbCostSink`: **interface stub only**. `emit` and `preflight` raise
   `NotImplementedError`; trunk wires the Postgres sink in a later lane.
 - `CostMeter.events` keeps the current process's events so the smoke
   command can print the exact session report.
+- `CostMeter.preflight()` opens the sink before the first billable call.
+  Clients validate `meta` separately before preflight/network; a client
+  never calls the provider until both succeed.
+- The event is appended to `CostMeter.events` **before** `sink.emit()`;
+  if the sink then fails, the in-memory audit event survives and the
+  `CostSinkError` still propagates. A successful emit is one write of
+  `line + "\n"`; readers ignore a trailing partial line from a crash.
 
-Failed attempts do not emit a CostEvent: providers do not report billable
-usage for a 429/5xx failure. The final error is raised after retries.
-Successful calls emit exactly one event. The meter refuses unknown model
-IDs (`PricingError`) so an unmetered call cannot slip through.
+Failed attempts (429/5xx) do not emit a `CostEvent`: providers do not
+report billable usage for those failures. The final error is raised after
+retries. A 2xx response emits exactly one event even if parsing or
+schema validation fails; its `meta` records `parse_ok`/`schema_ok` false
+and zero tokens if usage is absent. The meter refuses unknown model IDs
+(`PricingError`) so an unmetered call cannot slip through.
 
 ## 3. Retry semantics
 
 `max_retries` is the **total attempt count**, not retries after the
-initial call. Default `3` means at most three attempts.
+initial call. Default `3` means at most three attempts. Values outside
+`1..3` raise `ValueError` before any network call.
 
 - Retry **only** HTTP 429 and 5xx.
 - Gemini maps `google.genai.errors.APIError.code` (and
   `RESOURCE_EXHAUSTED` / `UNAVAILABLE` status strings) to a status code.
 - Judge retries on the HTTP response status.
-- Do **not** retry other 4xx, invalid JSON, missing keys, or transport
-  errors (the judge wraps transport errors in `JudgeError` immediately).
-- Backoff is deterministic exponential: 0.5s, 1.0s, 2.0s, ... capped at
-  8s. Sleep is injectable for keyless tests.
+- Do **not** retry other 4xx, 3xx, invalid JSON, missing keys, or
+  transport errors (the judge wraps transport errors in `JudgeError`
+  immediately and rejects any non-2xx response).
+- Backoff is deterministic exponential: 0.5s, 1.0s (three attempts
+  maximum). Sleep is injectable for keyless tests.
 - Exhaustion raises `RetryExhaustedError`. A non-retryable provider error
-  raises `GeminiError` / `JudgeError`. Invalid JSON raises
-  `ResponseFormatError`.
+  raises `GeminiError` / `JudgeError`. Invalid JSON, a malformed 2xx
+  payload, or local schema validation raises `ResponseFormatError`,
+  after metering the 2xx call. `JudgeError` is reserved for HTTP/transport
+  failures.
 
 ## 4. Pricing and pinned models
 
@@ -193,6 +241,8 @@ of truth. `PRICES_VERIFIED_ON = "2026-10-23"`.
 | `nvidia/nemotron-3-super-120b-a12b:free` | judge (`judge.*`) | $0 actual | $0 actual | OpenRouter model catalog (`openrouter.ai/api/v1/models`), fetched 2026-10-23 |
 | `nvidia/nemotron-3-super-120b-a12b` | judge shadow (paid twin) | $0.30 | $2.40 | same OpenRouter catalog fetch |
 | `BAAI/bge-small-en-v1.5` | local embeddings | $0 | $0 | local CPU model |
+| `fake-llm` | keyless tests | $0 | $0 | test fake |
+| `fake-embedder` | keyless tests | $0 | $0 | test fake |
 
 ### Why this judge
 
@@ -220,20 +270,26 @@ stack is frozen before tuning (V0-NOTES). If the exact Gemini ID is
 unavailable for a key, V0-NOTES pre-authorizes substituting the current
 Flash-class equivalent, but that is a human decision; this lane defaults
 to the frozen ID and will report a live-smoke failure rather than
-silently changing models.
+silently changing models. Every client and embedder calls `price_for`
+in its constructor, so an unpriced model fails before any network
+request.
 
 ## 5. Keys and redaction
 
 - Keys are read from the environment only:
   `GEMINI_API_KEY` and `OPENROUTER_API_KEY`.
-- The CLI calls `load_dotenv()` first. It reads `.env` (or
-  `WIKIMIND_ENV_FILE`) without overriding existing environment values.
-  `.env` is gitignored; values are never logged.
-- `redact_secrets(text)` replaces exact environment key values and
-  common key shapes (`AIza...`, `sk-or-v1-...`, `Bearer ...`,
+- The CLI calls `load_dotenv()` first. It reads UTF-8/UTF-8-BOM `.env`
+  (or `WIKIMIND_ENV_FILE`) without overriding non-empty environment
+  values; empty values count as unset, and unquoted ` # comment` tails
+  are stripped. `.env` is gitignored; values are never logged.
+- `redact_secrets(text, extra=...)` replaces exact environment key
+  values, explicit keys passed to a client, and common key shapes
+  (`AIza...`, `sk-or-v1-...`, `Bearer ...` including `+/=` tails,
   `api_key=...`).
 - Every error raised by this layer passes its message through the
-  redactor. Never put a key in `meta`, a prompt, a URL, or a log line.
+  redactor, including provider errors that echo an explicitly supplied
+  key. The CLI redacts unexpected exceptions at the command boundary.
+  Never put a key in `meta`, a prompt, a URL, or a log line.
 - Tests assert that keys never appear in log output or in raised
   exception messages.
 
@@ -257,12 +313,15 @@ vectors = embedder.embed(["text one", "text two"])  # list[list[float]], 384 eac
   Set `WIKIMIND_EMBED_CACHE` or pass `cache_folder` to relocate the
   cache.
 - Output dimension is enforced as 384 (`EMBED_DIM`).
-- Every embedding batch emits a `CostEvent` with `shadow_cost_usd = 0`,
-  `in_tokens ≈ characters / 4`, `out_tokens = 0`, and meta
-  `{"texts": N, "dim": 384}`.
+- Every non-empty embedding batch emits a `CostEvent` with
+  `shadow_cost_usd = 0`, `in_tokens ≈ characters / 4`, `out_tokens = 0`,
+  and meta `{"texts": N, "dim": 384}`. Empty input returns `[]` without
+  loading the model or emitting an event.
+- The embedder validates its model price in the constructor and calls
+  `meter.preflight()` before loading/encoding.
 - `FakeEmbedder` is deterministic: SHAKE-256 of the UTF-8 text expanded
   to 384 floats, L2-normalized. Same text in -> same vector out across
-  runs and platforms. No network.
+  runs and platforms. No network. Empty input emits no event.
 
 ## 7. Fakes
 
@@ -275,7 +334,10 @@ vectors = embedder.embed(["text one", "text two"])  # list[list[float]], 384 eac
 - Use `fake.calls` to assert prompt labeling, for example that untrusted
   source text was wrapped in `<untrusted_source>...</untrusted_source>`.
 - Exhaustion raises `AssertionError`; scripted exceptions are raised.
-- If a meter is supplied, fake calls emit zero-cost events.
+- Invalid `call_site` or `max_retries` values raise `ValueError`;
+  unpriced models raise `PricingError` in the constructor.
+- If a meter is supplied, fake calls emit zero-cost events; without a
+  meter, no event is emitted.
 
 `FakeEmbedder` is described in §6. It is re-exported from
 `wikimind.llm.fakes`.
@@ -301,9 +363,11 @@ wikimind llm costs [--path PATH]
 - Individual failures are collected, printed (redacted), and exit 1;
   other steps still run so the report is complete.
 
-`costs` reads the ledger and prints a fixed-width table with one row per
-`call_site`: calls, in_tokens, out_tokens, shadow_cost_usd, plus TOTAL.
-Missing ledger prints `No cost events at ...` and exits 0.
+`costs` loads `.env` first, reads the ledger, and prints a fixed-width
+table with one row per `call_site`: calls, in_tokens, out_tokens,
+shadow_cost_usd, plus TOTAL. Missing ledger prints
+`No cost events at ...` and exits 0. An unreadable/invalid ledger prints
+a friendly error and exits 1.
 
 Environment:
 
@@ -314,9 +378,11 @@ Environment:
 ## 9. Integration rules for LANES 3-5
 
 1. Construct one `CostMeter` per process/run (or share one); pass it to
-   every real client. Real clients require a meter.
-2. Use a canonical `call_site`; put arm tags and model versions in
-   `meta`.
+   every real client. Real clients require a meter. Construct clients
+   before starting work so an unpriced model fails early.
+2. Use a canonical `call_site`; put JSON-serializable arm tags and model
+   versions in `meta`. Do not pass `unit_price`; prices come from
+   `prices.py`.
 3. Wrap untrusted source/page text in a clearly marked block (for
    example `<untrusted_source>...</untrusted_source>`) and instruct the
    model not to follow instructions inside it (D8). The fakes record the

@@ -10,7 +10,7 @@ from typing import Any
 import httpx
 from pydantic import BaseModel
 
-from ..prices import JUDGE_MODEL, JUDGE_SHADOW_MODEL
+from ..prices import JUDGE_MODEL, JUDGE_SHADOW_MODEL, price_for
 from .cost import CostMeter, validate_call_site
 from .errors import (
     JudgeError,
@@ -18,10 +18,11 @@ from .errors import (
     ResponseFormatError,
     RetryExhaustedError,
 )
-from .json_utils import parse_json_object
+from .json_utils import json_safe_value, parse_json_object
 from .protocols import LLMResult, ResponseSchema, Usage
 from .retry import call_with_retries
-from .secrets import openrouter_api_key, redact_secrets
+from .secrets import openrouter_api_key, redact
+from .tokens import token_count
 
 OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -73,6 +74,9 @@ class JudgeClient:
         base_delay: float = 0.5,
         meta: dict[str, Any] | None = None,
     ) -> None:
+        if "gemini" in model.lower():
+            raise ValueError("JudgeClient must not use a Gemini model")
+        price_for(model)
         self.meter = meter
         self.model = model
         self.base_url = base_url
@@ -134,6 +138,13 @@ class JudgeClient:
         meta: dict[str, Any] | None = None,
     ) -> LLMResult:
         validate_call_site(call_site)
+        if not 1 <= max_retries <= 3:
+            raise ValueError("max_retries must be between 1 and 3")
+        self.meter.preflight()
+        event_meta = dict(self.meta)
+        if meta:
+            event_meta.update(meta)
+        self.meter.validate_meta(event_meta)
         key = self._ensure_key()
         payload = self._build_payload(system, user, response_schema)
         headers = {
@@ -146,10 +157,12 @@ class JudgeClient:
             try:
                 response = self._post(payload, headers)
             except httpx.HTTPError as exc:
-                raise JudgeError(f"OpenRouter transport error: {exc}") from None
+                raise JudgeError(
+                    redact(f"OpenRouter transport error: {exc}", [key])
+                ) from None
             if response.status_code == 429 or 500 <= response.status_code <= 599:
                 raise _RetryableHTTPStatus(
-                    response.status_code, redact_secrets(response.text[:2000])
+                    response.status_code, redact(response.text[:2000], [key])
                 )
             return response
 
@@ -167,58 +180,121 @@ class JudgeClient:
                 f"HTTP {exc.status_code}: {exc.body}"
             ) from None
 
-        if response.status_code >= 400:
-            body = redact_secrets(response.text[:2000])
+        if not 200 <= response.status_code < 300:
+            body = redact(response.text[:2000], [key])
             raise JudgeError(
                 f"OpenRouter judge call failed with HTTP {response.status_code}: {body}"
             )
 
+        data: Any = None
+        parse_error: Exception | None = None
         try:
             data = response.json()
-        except ValueError:
-            raise JudgeError("OpenRouter returned a non-JSON HTTP body") from None
+        except Exception as exc:  # noqa: BLE001
+            parse_error = exc
 
-        choices = data.get("choices") or []
-        if not choices:
-            raise JudgeError("OpenRouter response contained no choices")
-        message = choices[0].get("message") or {}
-        content = message.get("content")
-        if isinstance(content, list):
-            content = "".join(
-                part.get("text", "")
-                for part in content
-                if isinstance(part, dict)
-            )
-        try:
-            parsed = parse_json_object(content if isinstance(content, str) else None)
-        except ValueError:
-            raise ResponseFormatError(
-                "OpenRouter judge response was not a JSON object"
-            ) from None
+        usage_data: dict[str, Any] = {}
+        usage_reported = False
+        if isinstance(data, dict):
+            raw_usage = data.get("usage")
+            if isinstance(raw_usage, dict):
+                usage_data = raw_usage
+                usage_reported = True
+        in_tokens, in_ok = token_count(usage_data.get("prompt_tokens"))
+        out_tokens, out_ok = token_count(usage_data.get("completion_tokens"))
+        usage_invalid = not usage_reported or not (in_ok and out_ok)
+        usage = Usage(in_tokens=in_tokens, out_tokens=out_tokens)
 
-        usage_data = data.get("usage") or {}
-        usage = Usage(
-            in_tokens=int(usage_data.get("prompt_tokens") or 0),
-            out_tokens=int(usage_data.get("completion_tokens") or 0),
+        completion_details = usage_data.get("completion_tokens_details")
+        if not isinstance(completion_details, dict):
+            completion_details = {}
+        reasoning_tokens, reasoning_ok = token_count(
+            completion_details.get("reasoning_tokens")
         )
 
-        completion_details = usage_data.get("completion_tokens_details") or {}
-        event_meta = dict(self.meta)
-        if meta:
-            event_meta.update(meta)
+        response_model = json_safe_value(
+            data.get("model") if isinstance(data, dict) else None
+        )
+        generation_id = json_safe_value(
+            data.get("id") if isinstance(data, dict) else None
+        )
+        finish_reason: Any = None
+        structural_error: str | None = None
+        parsed: dict[str, Any] | None = None
+
+        if not isinstance(data, dict):
+            structural_error = "OpenRouter response was not a JSON object"
+        else:
+            choices = data.get("choices")
+            if not isinstance(choices, list) or not choices:
+                structural_error = "OpenRouter response contained no choices"
+            else:
+                first = choices[0]
+                if not isinstance(first, dict):
+                    structural_error = "OpenRouter choice was not an object"
+                else:
+                    finish_reason = json_safe_value(first.get("finish_reason"))
+                    message = first.get("message")
+                    if not isinstance(message, dict):
+                        structural_error = "OpenRouter choice had no message object"
+                    else:
+                        content = message.get("content")
+                        if isinstance(content, list):
+                            parts: list[str] = []
+                            for part in content:
+                                if not isinstance(part, dict):
+                                    continue
+                                text_part = part.get("text")
+                                if isinstance(text_part, str):
+                                    parts.append(text_part)
+                            content = "".join(parts)
+                        if not isinstance(content, str):
+                            structural_error = "OpenRouter message content was not text"
+                        else:
+                            try:
+                                parsed = parse_json_object(content)
+                            except Exception as exc:  # noqa: BLE001
+                                parse_error = exc
+
+        schema_checked = False
+        schema_ok: bool | None = None
+        if (
+            parsed is not None
+            and isinstance(response_schema, type)
+            and issubclass(response_schema, BaseModel)
+        ):
+            schema_checked = True
+            try:
+                parsed = response_schema.model_validate(parsed).model_dump(mode="json")
+                schema_ok = True
+            except Exception as exc:  # noqa: BLE001
+                schema_ok = False
+                parse_error = parse_error or exc
+
+        actual_cost_usd = (
+            0.0
+            if self.model == JUDGE_MODEL
+            else price_for(self.model).cost_usd(usage.in_tokens, usage.out_tokens)
+        )
         event_meta.update(
             {
                 "provider": "openrouter",
-                "endpoint": self.base_url,
+                "endpoint": json_safe_value(self.base_url),
                 "pricing_basis": "paid_twin",
                 "paid_twin": JUDGE_SHADOW_MODEL,
-                "actual_cost_usd": 0.0,
-                "response_model": data.get("model"),
-                "generation_id": data.get("id"),
-                "finish_reason": choices[0].get("finish_reason"),
-                "reasoning_tokens": completion_details.get("reasoning_tokens"),
+                "actual_cost_usd": actual_cost_usd,
+                "response_model": response_model,
+                "generation_id": generation_id,
+                "finish_reason": finish_reason,
+                "reasoning_tokens": reasoning_tokens if reasoning_ok else None,
+                "usage_reported": usage_reported,
+                "usage_invalid": usage_invalid,
+                "parse_ok": parsed is not None,
+                "schema_checked": schema_checked,
+                "schema_ok": schema_ok,
             }
         )
+        self.meter.validate_meta(event_meta)
 
         self.meter.record(
             call_site=call_site,
@@ -227,4 +303,27 @@ class JudgeClient:
             out_tokens=usage.out_tokens,
             meta=event_meta,
         )
+
+        if structural_error is not None:
+            raise ResponseFormatError(
+                redact(
+                    f"OpenRouter judge response was invalid: {structural_error}",
+                    [key],
+                )
+            ) from None
+        if parsed is None:
+            raise ResponseFormatError(
+                redact(
+                    f"OpenRouter judge response was not a JSON object: {parse_error}",
+                    [key],
+                )
+            ) from None
+        if schema_ok is False:
+            raise ResponseFormatError(
+                redact(
+                    f"OpenRouter judge response did not match "
+                    f"{response_schema.__name__}: {parse_error}",
+                    [key],
+                )
+            ) from None
         return LLMResult(json=parsed, usage=usage)

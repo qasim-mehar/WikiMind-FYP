@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 import pytest
@@ -9,10 +10,12 @@ from pydantic import BaseModel
 
 from wikimind.llm import (
     CostMeter,
+    CostSinkError,
     GeminiClient,
     GeminiError,
     InMemorySink,
     MissingAPIKeyError,
+    PricingError,
     ResponseFormatError,
     RetryExhaustedError,
     Usage,
@@ -61,6 +64,10 @@ class FakeGenaiClient:
 
 class Output(BaseModel):
     ok: bool
+
+
+class DatedOutput(BaseModel):
+    when: datetime
 
 
 def make_client(outcomes: list[Any], meter: CostMeter, **kwargs: Any):
@@ -136,6 +143,8 @@ def test_retries_429_and_5xx_with_exponential_backoff() -> None:
     assert result.json == {"ok": True}
     assert len(fake.models.calls) == 3
     assert delays == [0.5, 1.0]
+    assert len(meter.events) == 1
+    assert meter.events[0].meta["parse_ok"] is True
 
 
 def test_does_not_retry_other_4xx() -> None:
@@ -219,6 +228,151 @@ def test_rejects_non_json_response() -> None:
             response_schema={"type": "object"},
             call_site="qa.test",
         )
+    assert len(meter.events) == 1
+    assert meter.events[0].meta["parse_ok"] is False
+    assert meter.events[0].in_tokens == 10
+    assert meter.events[0].out_tokens == 25
+
+
+def test_pydantic_validation_failure_still_meters() -> None:
+    meter = CostMeter(InMemorySink())
+    client, _ = make_client([FakeResponse(text='{"wrong": true}')], meter)
+    with pytest.raises(ResponseFormatError):
+        client.complete(
+            system="s",
+            user="u",
+            response_schema=Output,
+            call_site="qa.test",
+        )
+    assert len(meter.events) == 1
+    assert meter.events[0].meta["parse_ok"] is True
+    assert meter.events[0].meta["schema_checked"] is True
+    assert meter.events[0].meta["schema_ok"] is False
+
+
+def test_unpriced_model_fails_before_request() -> None:
+    meter = CostMeter(InMemorySink())
+    fake = FakeGenaiClient([FakeResponse()])
+    with pytest.raises(PricingError):
+        GeminiClient(meter=meter, client=fake, model="unknown/model")
+    assert fake.models.calls == []
+
+
+def test_max_retries_is_capped_at_three() -> None:
+    meter = CostMeter(InMemorySink())
+    client, fake = make_client([FakeResponse()], meter)
+    with pytest.raises(ValueError):
+        client.complete(
+            system="s",
+            user="u",
+            response_schema={"type": "object"},
+            call_site="qa.test",
+            max_retries=4,
+        )
+    assert fake.models.calls == []
+
+
+def test_non_json_constructor_meta_fails_before_request() -> None:
+    meter = CostMeter(InMemorySink())
+    fake = FakeGenaiClient([FakeResponse()])
+    client = GeminiClient(meter=meter, client=fake, meta={"bad": object()})
+    with pytest.raises(CostSinkError):
+        client.complete(
+            system="s",
+            user="u",
+            response_schema={"type": "object"},
+            call_site="qa.test",
+        )
+    assert fake.models.calls == []
+
+
+def test_sink_preflight_failure_prevents_request() -> None:
+    class FailingSink:
+        def preflight(self) -> None:
+            raise CostSinkError("ledger unavailable")
+
+        def emit(self, event: Any) -> None:
+            raise AssertionError("emit must not be called")
+
+    fake = FakeGenaiClient([FakeResponse()])
+    client = GeminiClient(meter=CostMeter(FailingSink()), client=fake)
+    with pytest.raises(CostSinkError):
+        client.complete(
+            system="s",
+            user="u",
+            response_schema={"type": "object"},
+            call_site="qa.test",
+        )
+    assert fake.models.calls == []
+
+
+def test_missing_usage_is_flagged() -> None:
+    meter = CostMeter(InMemorySink())
+    response = FakeResponse()
+    response.usage_metadata = None
+    client, _ = make_client([response], meter)
+    client.complete(
+        system="s",
+        user="u",
+        response_schema={"type": "object"},
+        call_site="qa.test",
+    )
+    assert meter.events[0].meta["usage_reported"] is False
+    assert meter.events[0].meta["usage_invalid"] is True
+    assert meter.events[0].in_tokens == 0
+    assert meter.events[0].out_tokens == 0
+
+
+def test_malformed_usage_is_zeroed_and_metered() -> None:
+    meter = CostMeter(InMemorySink())
+    response = FakeResponse()
+    response.usage_metadata = FakeUsage(prompt_token_count="not-a-number")
+    client, _ = make_client([response], meter)
+    result = client.complete(
+        system="s",
+        user="u",
+        response_schema={"type": "object"},
+        call_site="qa.test",
+    )
+    assert result.json == {"ok": True}
+    assert meter.events[0].in_tokens == 0
+    assert meter.events[0].out_tokens == 25
+    assert meter.events[0].meta["usage_invalid"] is True
+
+
+def test_pydantic_datetime_is_json_safe() -> None:
+    meter = CostMeter(InMemorySink())
+    client, _ = make_client(
+        [FakeResponse(text='{"when": "2026-10-23T12:00:00Z"}')],
+        meter,
+    )
+    result = client.complete(
+        system="s",
+        user="u",
+        response_schema=DatedOutput,
+        call_site="qa.test",
+    )
+    assert isinstance(result.json["when"], str)
+
+
+def test_explicit_key_is_redacted(monkeypatch) -> None:
+    key = "AIza" + "R" * 30
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    meter = CostMeter(InMemorySink())
+    client, _ = make_client(
+        [ClientError(400, {"message": f"rejected credential {key}"})],
+        meter,
+        api_key=key,
+    )
+    with pytest.raises(GeminiError) as excinfo:
+        client.complete(
+            system="s",
+            user="u",
+            response_schema={"type": "object"},
+            call_site="qa.test",
+        )
+    assert key not in str(excinfo.value)
+    assert "[REDACTED]" in str(excinfo.value)
 
 
 def test_key_never_appears_in_exception(monkeypatch) -> None:

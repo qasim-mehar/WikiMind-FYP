@@ -8,15 +8,15 @@ import os
 import struct
 from typing import Any
 
-from ..prices import EMBED_DIM, EMBED_MODEL, LOCAL_EMBED_PRICE
-from .cost import CostMeter
+from ..prices import EMBED_DIM, EMBED_MODEL, FAKE_EMBED_MODEL, price_for
+from .cost import CostMeter, validate_call_site
 from .errors import EmbeddingError
 
 
 class FakeEmbedder:
     """Deterministic hash-derived vectors, identical across runs/platforms."""
 
-    model = "fake-embedder"
+    model = FAKE_EMBED_MODEL
 
     def __init__(
         self,
@@ -28,6 +28,7 @@ class FakeEmbedder:
     ) -> None:
         if dim < 1:
             raise ValueError("dim must be positive")
+        price_for(self.model)
         self.dim = dim
         self.meter = meter
         self.call_site = call_site
@@ -41,6 +42,9 @@ class FakeEmbedder:
         return [component / norm for component in vector]
 
     def embed(self, texts: list[str]) -> list[list[float]]:
+        validate_call_site(self.call_site)
+        if not texts:
+            return []
         vectors = [self._vector(text) for text in texts]
         if self.meter is not None:
             self.meter.record(
@@ -49,7 +53,6 @@ class FakeEmbedder:
                 in_tokens=sum(max(1, len(text) // 4) for text in texts),
                 out_tokens=0,
                 meta={**self.meta, "texts": len(texts), "dim": self.dim},
-                unit_price=LOCAL_EMBED_PRICE,
             )
         return vectors
 
@@ -68,6 +71,7 @@ class SentenceTransformerEmbedder:
         meta: dict[str, Any] | None = None,
         model: Any | None = None,
     ) -> None:
+        price_for(model_name)
         self.meter = meter
         self.model_name = model_name
         self.device = device
@@ -102,8 +106,11 @@ class SentenceTransformerEmbedder:
         return self._model
 
     def embed(self, texts: list[str]) -> list[list[float]]:
+        validate_call_site(self.call_site)
         if not texts:
             return []
+        self.meter.preflight()
+        self.meter.validate_meta(self.meta)
         model = self._ensure_model()
         try:
             encoded = model.encode(
@@ -128,6 +135,5 @@ class SentenceTransformerEmbedder:
             in_tokens=sum(max(1, len(text) // 4) for text in texts),
             out_tokens=0,
             meta={**self.meta, "texts": len(texts), "dim": EMBED_DIM},
-            unit_price=LOCAL_EMBED_PRICE,
         )
         return vectors

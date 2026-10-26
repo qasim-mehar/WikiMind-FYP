@@ -97,3 +97,15 @@ def test_real_embedder_empty_input_does_not_load_model() -> None:
     assert embedder.embed([]) == []
     assert embedder._model is None
     assert meter.events == []
+
+
+def test_fake_embedder_rejects_bad_call_site() -> None:
+    embedder = FakeEmbedder(call_site="ingest.test")
+    with pytest.raises(ValueError):
+        embedder.embed(["text"])
+
+
+def test_real_embedder_rejects_unpriced_model() -> None:
+    meter = CostMeter(InMemorySink())
+    with pytest.raises(ValueError):
+        SentenceTransformerEmbedder(meter=meter, model_name="unknown/model")
