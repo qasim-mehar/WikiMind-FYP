@@ -26,6 +26,7 @@ from pydantic import (
 
 from ..prices import ModelPrice, price_for
 from .errors import CostSinkError
+from .secrets import redact
 
 CALL_SITE_PREFIXES = ("l1.", "l2.", "qa.", "judge.", "embed.")
 
@@ -72,7 +73,12 @@ class CostEvent(BaseModel):
     def _meta_is_json_safe(cls, value: Any) -> Any:
         if value is None:
             value = {}
-        _validate_meta_dict(value)
+        try:
+            _validate_meta_dict(value)
+        except TypeError as exc:
+            # Pydantic only converts ValueError/AssertionError into
+            # ValidationError; re-type so callers never see a raw TypeError.
+            raise ValueError(str(exc)) from exc
         return value
 
     @model_validator(mode="after")
@@ -133,7 +139,9 @@ class JsonlCostSink:
 
     def emit(self, event: CostEvent) -> None:
         try:
-            line = event.model_dump_json()
+            # Last-resort guard: the ledger is a durable log, so key material
+            # must never reach it, even if a caller leaked a secret into meta.
+            line = redact(event.model_dump_json())
             self.path.parent.mkdir(parents=True, exist_ok=True)
             with self._lock, self.path.open("a", encoding="utf-8") as handle:
                 handle.write(line + "\n")
@@ -301,14 +309,16 @@ def format_cost_report(events: list[CostEvent]) -> str:
     if not aggregates:
         return "No cost events."
 
+    # Keep the table aligned even when a call_site exceeds the default width.
+    site_width = max(24, *(len(item.call_site) for item in aggregates))
     header = (
-        f"{'call_site':<24} {'calls':>7} {'in_tokens':>12} "
+        f"{'call_site':<{site_width}} {'calls':>7} {'in_tokens':>12} "
         f"{'out_tokens':>12} {'shadow_cost_usd':>20}"
     )
     lines = [header, "-" * len(header)]
     for item in aggregates:
         lines.append(
-            f"{item.call_site:<24} {item.calls:>7} {item.in_tokens:>12} "
+            f"{item.call_site:<{site_width}} {item.calls:>7} {item.in_tokens:>12} "
             f"{item.out_tokens:>12} {format_usd(item.shadow_cost_usd):>20}"
         )
 
@@ -318,7 +328,7 @@ def format_cost_report(events: list[CostEvent]) -> str:
     total_cost = round(sum(item.shadow_cost_usd for item in aggregates), 12)
     lines.append("-" * len(header))
     lines.append(
-        f"{'TOTAL':<24} {total_calls:>7} {total_in:>12} "
+        f"{'TOTAL':<{site_width}} {total_calls:>7} {total_in:>12} "
         f"{total_out:>12} {format_usd(total_cost):>20}"
     )
     return "\n".join(lines)

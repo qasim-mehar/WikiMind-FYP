@@ -131,6 +131,19 @@ def test_cost_event_rejects_non_json_meta() -> None:
         )
 
 
+def test_cost_event_rejects_non_dict_meta_as_value_error() -> None:
+    # A non-dict meta must surface as a pydantic ValidationError (a ValueError),
+    # never a raw TypeError escaping the model.
+    with pytest.raises(ValueError):
+        CostEvent(
+            call_site="l1.test",
+            model=GEMINI_MODEL,
+            unit_price=GEMINI_2_5_FLASH_PRICE,
+            shadow_cost_usd=0.0,
+            meta=["not", "a", "dict"],  # type: ignore[list-item]
+        )
+
+
 def test_cost_event_validates_tokens() -> None:
     with pytest.raises(ValueError):
         CostEvent(
@@ -205,6 +218,30 @@ def test_jsonl_sink_preflight_rejects_unwritable_path(tmp_path) -> None:
     sink = JsonlCostSink(tmp_path)
     with pytest.raises(CostSinkError):
         sink.preflight()
+
+
+def test_jsonl_sink_redacts_key_material_from_meta(monkeypatch, tmp_path) -> None:
+    key = "sk-or-v1-" + "k" * 32
+    monkeypatch.setenv("OPENROUTER_API_KEY", key)
+    path = tmp_path / "costs.jsonl"
+    meter = CostMeter(JsonlCostSink(path))
+
+    meter.record(
+        call_site="judge.test",
+        model=JUDGE_MODEL,
+        in_tokens=10,
+        out_tokens=2,
+        meta={"note": f"echo {key}", "shape": "Bearer deadbeef"},
+    )
+
+    raw = path.read_text(encoding="utf-8")
+    assert key not in raw
+    assert "deadbeef" not in raw
+    assert "[REDACTED]" in raw
+    # The redacted line must still be a valid CostEvent on read-back.
+    events = read_cost_events(path)
+    assert len(events) == 1
+    assert events[0].call_site == "judge.test"
 
 
 def test_missing_ledger_is_empty(tmp_path) -> None:
