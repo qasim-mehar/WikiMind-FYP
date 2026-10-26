@@ -275,7 +275,7 @@ def _check_claim_document_provenance(conn: psycopg.Connection, report: CheckRepo
 def pgvector_version(conn: psycopg.Connection) -> str | None:
     """Return the installed ``vector`` extension version, or None."""
 
-    row = conn.execute("SELECT ext_version FROM pg_extension WHERE extname = 'vector'").fetchone()
+    row = conn.execute("SELECT extversion FROM pg_extension WHERE extname = 'vector'").fetchone()
     return str(row[0]) if row else None
 
 
@@ -348,10 +348,18 @@ def _check_embeddings(conn: psycopg.Connection, report: CheckReport) -> None:
 def run_checks(
     conn: psycopg.Connection,
     migrations_dir: str | Path | None = None,
+    report: CheckReport | None = None,
 ) -> CheckReport:
-    """Run all schema and invariant checks against an open connection."""
+    """Run all schema and invariant checks against an open connection.
 
-    report = CheckReport()
+    Findings are appended to ``report`` (a new one when omitted) as they are
+    produced, so partial results survive a late failure.  The connection
+    should be in autocommit mode: a failed check query must not abort a
+    shared transaction and poison every later check.
+    """
+
+    if report is None:
+        report = CheckReport()
     tables_complete = _check_expected_tables(conn, report)
 
     for problem in verify_migration_hashes(conn, migrations_dir):
@@ -359,8 +367,12 @@ def run_checks(
 
     try:
         report.pgvector_version = pgvector_version(conn)
-    except psycopg.Error:
+    except psycopg.Error as exc:
         report.pgvector_version = None
+        report.warning(
+            "pgvector.version_unknown",
+            f"could not read pgvector version: {redact(exc)}",
+        )
 
     if not tables_complete:
         return report
@@ -381,13 +393,13 @@ def check_database(
 
     report = CheckReport()
     try:
-        conn = connect(dsn)
+        conn = connect(dsn, autocommit=True)
     except (psycopg.Error, DatabaseNotConfigured, ValueError, OSError) as exc:
         report.error("db.connect", f"cannot connect: {redact(exc)}")
         return report
 
     try:
-        report.findings.extend(run_checks(conn, migrations_dir).findings)
+        run_checks(conn, migrations_dir, report)
     except (psycopg.Error, ValueError, OSError) as exc:
         report.error("check.failed", f"check failed: {redact(exc)}")
     finally:
