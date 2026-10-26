@@ -140,11 +140,11 @@ class JudgeClient:
         validate_call_site(call_site)
         if not 1 <= max_retries <= 3:
             raise ValueError("max_retries must be between 1 and 3")
-        self.meter.preflight()
         event_meta = dict(self.meta)
         if meta:
             event_meta.update(meta)
         self.meter.validate_meta(event_meta)
+        self.meter.preflight()
         key = self._ensure_key()
         payload = self._build_payload(system, user, response_schema)
         headers = {
@@ -278,7 +278,6 @@ class JudgeClient:
         )
         event_meta.update(
             {
-                "provider": "openrouter",
                 "endpoint": json_safe_value(self.base_url),
                 "pricing_basis": "paid_twin",
                 "paid_twin": JUDGE_SHADOW_MODEL,
@@ -294,6 +293,8 @@ class JudgeClient:
                 "schema_ok": schema_ok,
             }
         )
+        # Match GeminiClient: a caller-supplied "provider" tag wins.
+        event_meta.setdefault("provider", "openrouter")
         self.meter.validate_meta(event_meta)
 
         self.meter.record(

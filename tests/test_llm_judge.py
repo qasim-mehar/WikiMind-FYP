@@ -122,6 +122,22 @@ def test_success_request_shape_and_shadow_cost() -> None:
     assert event.meta["parse_ok"] is True
 
 
+def test_caller_provider_tag_is_respected() -> None:
+    meter = CostMeter(InMemorySink())
+    client, _ = make_client(
+        lambda request: httpx.Response(200, json=success_body()),
+        meter,
+    )
+    client.complete(
+        system="s",
+        user="u",
+        response_schema={"type": "object"},
+        call_site="judge.test",
+        meta={"provider": "openrouter-eu"},
+    )
+    assert meter.events[0].meta["provider"] == "openrouter-eu"
+
+
 def test_pydantic_schema_is_in_system_prompt() -> None:
     meter = CostMeter(InMemorySink())
     client, requests = make_client(
