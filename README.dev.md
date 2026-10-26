@@ -12,18 +12,13 @@ database contract. Do not edit any of those files from a lane branch.
 ## Prerequisites
 
 - Python 3.11 or newer.
-- Postgres 14 or newer with pgvector available. `000_enable_vector.sql` runs
-  `CREATE EXTENSION IF NOT EXISTS vector`.
+- A local PostgreSQL 18 server on `localhost:5432` with the `vector`
+  extension available (install pgvector for your server build — see
+  <https://github.com/pgvector/pgvector> for platform packages).
+  `000_enable_vector.sql` runs `CREATE EXTENSION IF NOT EXISTS vector`.
+  Docker is not used locally; CI runs Postgres in a GitHub service container.
 - On Windows, invoke the interpreter explicitly; shell activation is not
   required and should not be assumed by scripts.
-
-If the local server has no pgvector, use the pinned Docker fallback:
-
-```powershell
-docker run -d --name wikimind-pg -p 5433:5432 -e POSTGRES_PASSWORD=wikimind pgvector/pgvector:pg16
-```
-
-Then point `WIKIMIND_DB` at `localhost:5433`.
 
 ## Setup
 
@@ -149,8 +144,10 @@ gate after L3-L5. Neither gate replaces the later evaluation in
 
 ## Troubleshooting
 
-- **`vector` extension unavailable**: install pgvector for your server or use
-  the Docker fallback, then re-run `db migrate`.
+- **`vector` extension unavailable or permission denied**: install pgvector
+  for your PostgreSQL 18 server (platform package, EDB Stack Builder, or a
+  source build), or have an admin run `CREATE EXTENSION vector` on the target
+  database once; then re-run `db migrate`.
 - **`db check` says a migration is not applied**: run `db migrate`. A hash
   mismatch is an error, not a prompt to edit `schema_migrations`.
 - **Migration hash mismatch after switching worktrees on Windows**: migration

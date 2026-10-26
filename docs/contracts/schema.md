@@ -79,16 +79,20 @@ store a short `anchor_quote` excerpt for citation, never the full source body.
 
 | Column | Type | Notes |
 | --- | --- | --- |
-| `id` | TEXT PK | `sha256(kind || U+001F || normalized_text)` |
+| `id` | TEXT, PK `(id, document_id)` | `sha256(kind || U+001F || normalized_text)` |
 | `project_id` | UUID NOT NULL FK `projects(id)` | |
-| `document_id` | UUID NOT NULL FK `documents(id)` ON DELETE CASCADE | |
+| `document_id` | UUID NOT NULL FK `documents(id)` ON DELETE CASCADE, PK part | |
 | `kind` | TEXT NOT NULL | e.g. `paragraph`, `table`, `heading` |
 | `ordinal` | INTEGER NOT NULL | non-negative position in the document |
 | `raw_text` | TEXT NOT NULL | immutable source text |
 
 Keys and indexes:
 
-- `id` is the primary key; `document_id` and `project_id` are indexed.
+- **Uniqueness is per document**: primary key `(id, document_id)`. The content
+  hash is not globally unique — the same paper parsed by two parsers (e.g.
+  `pdf-fallback` and `grobid`) yields identical channel text, and repeated
+  reference strings collide between documents. The hash derivation itself is
+  unchanged.
 - `channel_id(kind, normalized_text)` from `wikimind.db.ids` computes the ID
   with ASCII unit separator `0x1f`. The separator is part of the contract.
 
@@ -150,7 +154,8 @@ the units cited by L2 ledger blocks.
 | `id` | UUID PK | |
 | `project_id` | UUID NOT NULL FK `projects(id)` | |
 | `citation_node_id` | UUID NOT NULL FK `nodes(id)` ON DELETE CASCADE | L1 citation node |
-| `channel_id` | TEXT NOT NULL FK `channels(id)` ON DELETE CASCADE | passage |
+| `channel_id` | TEXT NOT NULL, FK `(channel_id, document_id)` -> `channels` ON DELETE CASCADE | passage |
+| `document_id` | UUID NOT NULL FK `documents(id)` ON DELETE CASCADE | document the channel belongs to |
 | `anchor_quote` | TEXT NOT NULL | exact supported text |
 | `anchor_span` | JSONB NOT NULL | span coordinates/offsets |
 | `text` | TEXT NOT NULL | distilled claim |
@@ -284,7 +289,9 @@ the application API.
 ## Cross-table rules
 
 1. A citation node (L1) may own claims. Claims must point at a citation node
-   and a channel in the same project.
+   and a channel in the same project. A claim's channel belongs to its
+   citation node's document: `(citation_node_id, document_id)` must appear in
+   `node_sources`, and `db check` enforces this.
 2. A ledger block references a page node and (for `claim` blocks) a claim.
    Removing a claim removes its blocks; removing a page removes its blocks.
 3. Edges are unique per `(project, src, dst, type)` and need at least one row
@@ -299,17 +306,34 @@ the application API.
 7. Raw text must not appear in `node_versions.rendered_text` or any other
    distilled field.
 
+## Writer lock
+
+The single-writer lock per project (D9) is canonical:
+
+```sql
+pg_advisory_xact_lock(hashtextextended(project_id::text, 0))
+```
+
+It is transaction-scoped: acquire it inside your transaction; commit or
+rollback releases it. **All lanes must acquire it through
+`wikimind.db.with_writer_lock(project_id)` — never issue raw advisory-lock
+SQL and never derive lock keys any other way.** Project IDs are canonicalized
+to their UUID string form before hashing, so `UUID` objects and strings take
+the same lock.
+
 ## Invariant checks and exit codes
 
 `wikimind db check` verifies:
 
 - every expected table exists and `project_id` is `NOT NULL`;
 - migration files and recorded SHA-256 hashes agree;
-- `claims`, `ledger_blocks`, and `node_versions` have no orphans or
-  cross-project references;
+- `claims`, `ledger_blocks`, `node_versions`, `edge_sources`, and
+  `node_sources` have no orphans or cross-project references;
 - every edge has at least one `edge_sources` provenance row;
+- every claim's channel belongs to its citation node's document;
 - every enum-like column only contains its documented domain;
 - `embeddings.vec` is `vector(384)` and sampled rows have 384 dimensions.
 
-Exit codes: `0` clean, `1` warnings only, `2` one or more errors. A missing
-connection or an unmigrated database is an error (2).
+It also reports the installed pgvector version. Exit codes: `0` clean, `1`
+warnings only, `2` one or more errors. A missing connection or an unmigrated
+database is an error (2).
