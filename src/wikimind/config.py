@@ -9,15 +9,11 @@ from pathlib import Path
 
 _ENV_KEY = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _DSN_PASSWORD = re.compile(r"(?i)(postgres(?:ql)?://[^:/@\s]+:)([^@\s]+)(@)")
-_SECRET_KEY = r"(?i)\b(?P<key>password|passwd|pwd|api[_-]?key|secret|token)\b"
-_SECRET_QUOTED = re.compile(
-    _SECRET_KEY
-    + r"""(?P<key_quote>["']?)(?P<sep>\s*[=:]\s*)(?P<quote>["'])(?P<value>.*?)(?P=quote)"""
-)
-_SECRET_BARE = re.compile(
-    _SECRET_KEY + r"""(?P<key_quote>["']?)(?P<sep>\s*[=:]\s*)(?P<value>[^&\s,;"']+)"""
-)
 _BEARER = re.compile(r"(?i)(bearer\s+)([A-Za-z0-9._~+/=-]+)")
+
+# Redaction is value-based: the actual secret values known to this process are
+# replaced wherever they appear, so key-name patterns cannot miss variants.
+SECRET_ENV_KEYS = ("GEMINI_API_KEY", "OPENROUTER_API_KEY", "WIKIMIND_DB")
 
 DEFAULT_ENV_FILE = ".env"
 
@@ -94,21 +90,41 @@ def get_settings(*, load_env: bool = True) -> Settings:
     return Settings.from_env()
 
 
-def _mask_inline_secret(match: re.Match[str]) -> str:
-    quote = match.groupdict().get("quote") or ""
-    return f"{match.group('key')}{match.group('key_quote')}{match.group('sep')}{quote}***{quote}"
+def secret_values() -> tuple[str, ...]:
+    """Return the secret values this process knows, longest first.
+
+    Covers the API keys and the password embedded in the configured DSN.
+    Empty and unset values are skipped.  Never log the result.
+    """
+
+    values: set[str] = set()
+    for key in SECRET_ENV_KEYS:
+        raw = os.environ.get(key)
+        if not raw:
+            continue
+        if key == "WIKIMIND_DB":
+            match = _DSN_PASSWORD.search(raw)
+            if match:
+                values.add(match.group(2))
+            continue
+        values.add(raw)
+    return tuple(sorted((value for value in values if value), key=len, reverse=True))
 
 
 def redact(value: object) -> str:
-    """Redact credentials from a DSN or other diagnostic string."""
+    """Redact credentials from a DSN or other diagnostic string.
+
+    Structurally masks DSN passwords and bearer tokens, then replaces every
+    occurrence of each known secret value with ``***``.
+    """
 
     if value is None:
         return ""
     text = str(value)
     text = _DSN_PASSWORD.sub(r"\1***\3", text)
-    text = _SECRET_QUOTED.sub(_mask_inline_secret, text)
-    text = _SECRET_BARE.sub(_mask_inline_secret, text)
     text = _BEARER.sub(r"\1***", text)
+    for secret in secret_values():
+        text = text.replace(secret, "***")
     return text
 
 

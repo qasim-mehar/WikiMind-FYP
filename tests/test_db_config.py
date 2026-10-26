@@ -17,19 +17,46 @@ def test_redact_masks_dsn_password() -> None:
     assert "hunter2" not in result
 
 
-def test_redact_masks_inline_and_bearer_secrets() -> None:
-    assert "abc" not in redact("password=abc&host=x")
-    assert "tok" not in redact("Authorization: Bearer tok123")
+def test_redact_masks_env_secret_values_in_log_lines(monkeypatch) -> None:
+    monkeypatch.setenv("GEMINI_API_KEY", "AIzaSyFakeKeyValue123")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-v1-fake-value")
+    log_line = (
+        "llm call failed: GEMINI_API_KEY=AIzaSyFakeKeyValue123 "
+        "OPENROUTER_API_KEY=sk-or-v1-fake-value"
+    )
+    result = redact(log_line)
+    assert "AIzaSyFakeKeyValue123" not in result
+    assert "sk-or-v1-fake-value" not in result
+    assert result.count("***") == 2
 
 
-def test_redact_masks_json_and_quoted_secrets() -> None:
-    payload = '{"password": "hunter2", "api_key": "sk-123", "token": "abc 123"}'
-    result = redact(payload)
+def test_redact_masks_dsn_password_from_env(monkeypatch) -> None:
+    dsn = "postgresql://wikimind:wikimind-dev-2026@localhost:5432/postgres"
+    monkeypatch.setenv("WIKIMIND_DB", dsn)
+    result = redact(f"cannot connect: {dsn}")
+    assert "wikimind-dev-2026" not in result
+    assert "postgresql://wikimind:***@localhost:5432/postgres" in result
+
+
+def test_redact_masks_env_secrets_inside_json(monkeypatch) -> None:
+    monkeypatch.setenv("GEMINI_API_KEY", "hunter2")
+    result = redact('{"api_key": "hunter2", "note": "value hunter2 again"}')
     assert "hunter2" not in result
-    assert "sk-123" not in result
-    assert "abc 123" not in result
-    assert result == '{"password": "***", "api_key": "***", "token": "***"}'
-    assert redact("password='quoted value'") == "password='***'"
+    assert result == '{"api_key": "***", "note": "value *** again"}'
+
+
+def test_redact_without_env_secrets_does_not_crash(monkeypatch) -> None:
+    for key in ("GEMINI_API_KEY", "OPENROUTER_API_KEY", "WIKIMIND_DB"):
+        monkeypatch.delenv(key, raising=False)
+    assert redact("nothing to hide") == "nothing to hide"
+    assert redact("postgresql://alice:hunter2@localhost/db") == (
+        "postgresql://alice:***@localhost/db"
+    )
+    assert redact(None) == ""
+
+
+def test_redact_masks_bearer_tokens() -> None:
+    assert "tok" not in redact("Authorization: Bearer tok123")
 
 
 def test_settings_repr_is_redacted() -> None:
