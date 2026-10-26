@@ -17,8 +17,7 @@ def parse_text(data: bytes, source_filename: str) -> ParsedDocument:
         text = data.decode("utf-8-sig")
     except UnicodeDecodeError as exc:
         raise ParseError(
-            f"{source_filename}: text parser requires UTF-8 input "
-            f"(byte {exc.start} is invalid)"
+            f"{source_filename}: text parser requires UTF-8 input (byte {exc.start} is invalid)"
         ) from exc
 
     builder = ChannelBuilder()

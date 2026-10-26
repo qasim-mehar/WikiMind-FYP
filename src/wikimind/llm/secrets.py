@@ -55,11 +55,7 @@ def load_dotenv(path: str | Path | None = None) -> bool:
     Only well-formed environment variable names are accepted.
     """
 
-    env_path = (
-        Path(path)
-        if path is not None
-        else Path(os.environ.get("WIKIMIND_ENV_FILE", ".env"))
-    )
+    env_path = Path(path) if path is not None else Path(os.environ.get("WIKIMIND_ENV_FILE", ".env"))
     if not env_path.is_file():
         return False
 
@@ -105,9 +101,7 @@ def redact(text: str, secrets: list[str] | None = None) -> str:
 
     values = _secret_values() if secrets is None else list(secrets)
     redacted = text
-    for value in sorted(
-        (v for v in values if v and len(v) >= 4), key=len, reverse=True
-    ):
+    for value in sorted((v for v in values if v and len(v) >= 4), key=len, reverse=True):
         redacted = redacted.replace(value, "[REDACTED]")
 
     redacted = _SECRET_PATTERNS[0].sub("[REDACTED]", redacted)

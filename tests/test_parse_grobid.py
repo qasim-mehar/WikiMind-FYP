@@ -16,9 +16,7 @@ PDF_BYTES = b"%PDF-1.4 synthetic"
 
 
 class FakeResponse:
-    def __init__(
-        self, status_code: int = 200, content: bytes = b"", text: str = ""
-    ) -> None:
+    def __init__(self, status_code: int = 200, content: bytes = b"", text: str = "") -> None:
         self.status_code = status_code
         self.content = content
         self.text = text
@@ -92,11 +90,7 @@ def test_parse_tei_rejects_entity_declarations() -> None:
 
 
 def test_parse_tei_accepts_utf16_without_entities() -> None:
-    text = (
-        TEI.read_bytes()
-        .decode("utf-8")
-        .replace('encoding="UTF-8"', 'encoding="UTF-16"')
-    )
+    text = TEI.read_bytes().decode("utf-8").replace('encoding="UTF-8"', 'encoding="UTF-16"')
     document = parse_tei(text.encode("utf-16"), data=PDF_BYTES, source_filename="x.pdf")
     assert document.channels_of_kind("title")[0].text == "A Synthetic TEI Paper"
 

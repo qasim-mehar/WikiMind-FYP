@@ -80,9 +80,7 @@ def test_tei_fixture_hash_and_full_snapshot() -> None:
 
 
 @pytest.mark.parametrize("filename,parser", GOLDEN_CASES)
-def test_channel_ids_are_identical_across_two_parses(
-    filename: str, parser: str
-) -> None:
+def test_channel_ids_are_identical_across_two_parses(filename: str, parser: str) -> None:
     path = FIXTURES / filename
     before = hashlib.sha256(path.read_bytes()).hexdigest()
 

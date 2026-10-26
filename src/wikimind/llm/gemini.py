@@ -90,9 +90,7 @@ class GeminiClient:
             from google import genai
             from google.genai import types
         except ImportError as exc:  # pragma: no cover - depends on optional extra
-            raise GeminiError(
-                "google-genai is not installed; install the 'llm' extra"
-            ) from exc
+            raise GeminiError("google-genai is not installed; install the 'llm' extra") from exc
         self._client = genai.Client(
             api_key=key,
             http_options=types.HttpOptions(timeout=int(self.timeout * 1000)),
@@ -113,9 +111,7 @@ class GeminiClient:
         if response_schema is not None:
             if isinstance(response_schema, dict):
                 kwargs["response_json_schema"] = response_schema
-            elif isinstance(response_schema, type) and issubclass(
-                response_schema, BaseModel
-            ):
+            elif isinstance(response_schema, type) and issubclass(response_schema, BaseModel):
                 kwargs["response_schema"] = response_schema
             else:
                 raise TypeError(
@@ -144,9 +140,7 @@ class GeminiClient:
         try:
             config = self._build_config(system, response_schema)
         except ImportError as exc:  # pragma: no cover - depends on optional extra
-            raise GeminiError(
-                "google-genai is not installed; install the 'llm' extra"
-            ) from exc
+            raise GeminiError("google-genai is not installed; install the 'llm' extra") from exc
 
         def attempt() -> Any:
             return self._ensure_client().models.generate_content(
@@ -168,22 +162,16 @@ class GeminiClient:
         except Exception as exc:  # noqa: BLE001
             if is_retryable_gemini_error(exc):
                 raise RetryExhaustedError(
-                    self._redact(
-                        f"Gemini call failed after {max_retries} attempts: {exc}"
-                    )
+                    self._redact(f"Gemini call failed after {max_retries} attempts: {exc}")
                 ) from None
             raise GeminiError(self._redact(f"Gemini call failed: {exc}")) from None
 
         usage_metadata = getattr(response, "usage_metadata", None)
-        in_tokens, in_ok = token_count(
-            getattr(usage_metadata, "prompt_token_count", None)
-        )
+        in_tokens, in_ok = token_count(getattr(usage_metadata, "prompt_token_count", None))
         candidates_tokens, candidates_ok = token_count(
             getattr(usage_metadata, "candidates_token_count", None)
         )
-        thinking_tokens, _ = token_count(
-            getattr(usage_metadata, "thoughts_token_count", None)
-        )
+        thinking_tokens, _ = token_count(getattr(usage_metadata, "thoughts_token_count", None))
         usage_reported = usage_metadata is not None
         # thoughts_token_count is optional (non-thinking models omit it), so a
         # missing thought count does not invalidate otherwise-complete usage.
@@ -219,25 +207,19 @@ class GeminiClient:
         ):
             schema_checked = True
             try:
-                payload = response_schema.model_validate(payload).model_dump(
-                    mode="json"
-                )
+                payload = response_schema.model_validate(payload).model_dump(mode="json")
                 schema_ok = True
             except Exception as exc:  # noqa: BLE001
                 schema_ok = False
                 parse_error = parse_error or exc
 
         event_meta.setdefault("provider", "google-genai")
-        response_model_version = json_safe_value(
-            getattr(response, "model_version", None)
-        )
+        response_model_version = json_safe_value(getattr(response, "model_version", None))
         if response_model_version:
             event_meta["model_version"] = response_model_version
         else:
             event_meta.setdefault("model_version", self.model)
-        event_meta["response_id"] = json_safe_value(
-            getattr(response, "response_id", None)
-        )
+        event_meta["response_id"] = json_safe_value(getattr(response, "response_id", None))
         event_meta["thinking_tokens"] = thinking_tokens
         event_meta["usage_reported"] = usage_reported
         event_meta["usage_invalid"] = usage_invalid
@@ -261,8 +243,7 @@ class GeminiClient:
         if schema_ok is False:
             raise ResponseFormatError(
                 self._redact(
-                    f"Gemini response did not match {response_schema.__name__}: "
-                    f"{parse_error}"
+                    f"Gemini response did not match {response_schema.__name__}: {parse_error}"
                 )
             ) from None
         return LLMResult(json=payload, usage=usage)

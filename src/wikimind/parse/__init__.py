@@ -24,9 +24,7 @@ from .registry import (
 from .skip import filter_known
 
 
-def parse_bytes(
-    data: bytes, source_filename: str, parser: str | None = None
-) -> ParsedDocument:
+def parse_bytes(data: bytes, source_filename: str, parser: str | None = None) -> ParsedDocument:
     """Parse raw bytes with an explicit parser or the filename default."""
 
     name = parser if parser is not None else parser_name_for_path(source_filename)

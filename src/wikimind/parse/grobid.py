@@ -37,9 +37,7 @@ def grobid_base_url() -> str:
     try:
         parsed = httpx.URL(base)
     except httpx.InvalidURL as exc:
-        raise GrobidUnavailableError(
-            f"WIKIMIND_GROBID_URL is not a valid URL: {url!r}"
-        ) from exc
+        raise GrobidUnavailableError(f"WIKIMIND_GROBID_URL is not a valid URL: {url!r}") from exc
     if parsed.scheme not in {"http", "https"} or not parsed.host:
         raise GrobidUnavailableError(
             f"WIKIMIND_GROBID_URL must be an http(s) URL with a host: {url!r}"
@@ -89,9 +87,7 @@ def _find_abstract(root: ET.Element) -> str:
 
 
 def _emit_figure(figure: ET.Element, builder: ChannelBuilder) -> None:
-    kind = (
-        "table" if (figure.get("type") or "").lower() == "table" else "figure_caption"
-    )
+    kind = "table" if (figure.get("type") or "").lower() == "table" else "figure_caption"
     head = _text(figure.find(f"{_NS}head"))
     description = _text(figure.find(f"{_NS}figDesc"))
     if head and description:

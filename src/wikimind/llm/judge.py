@@ -47,9 +47,7 @@ def _schema_json(response_schema: ResponseSchema) -> dict[str, Any] | None:
         return response_schema
     if isinstance(response_schema, type) and issubclass(response_schema, BaseModel):
         return response_schema.model_json_schema()
-    raise TypeError(
-        "response_schema must be a JSON-schema dict or a Pydantic model class"
-    )
+    raise TypeError("response_schema must be a JSON-schema dict or a Pydantic model class")
 
 
 class JudgeClient:
@@ -157,9 +155,7 @@ class JudgeClient:
             try:
                 response = self._post(payload, headers)
             except httpx.HTTPError as exc:
-                raise JudgeError(
-                    redact(f"OpenRouter transport error: {exc}", [key])
-                ) from None
+                raise JudgeError(redact(f"OpenRouter transport error: {exc}", [key])) from None
             if response.status_code == 429 or 500 <= response.status_code <= 599:
                 raise _RetryableHTTPStatus(
                     response.status_code, redact(response.text[:2000], [key])
@@ -208,16 +204,10 @@ class JudgeClient:
         completion_details = usage_data.get("completion_tokens_details")
         if not isinstance(completion_details, dict):
             completion_details = {}
-        reasoning_tokens, reasoning_ok = token_count(
-            completion_details.get("reasoning_tokens")
-        )
+        reasoning_tokens, reasoning_ok = token_count(completion_details.get("reasoning_tokens"))
 
-        response_model = json_safe_value(
-            data.get("model") if isinstance(data, dict) else None
-        )
-        generation_id = json_safe_value(
-            data.get("id") if isinstance(data, dict) else None
-        )
+        response_model = json_safe_value(data.get("model") if isinstance(data, dict) else None)
+        generation_id = json_safe_value(data.get("id") if isinstance(data, dict) else None)
         finish_reason: Any = None
         structural_error: str | None = None
         parsed: dict[str, Any] | None = None

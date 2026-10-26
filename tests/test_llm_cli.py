@@ -9,7 +9,9 @@ from wikimind.llm import CostMeter, JsonlCostSink, LLMResult, Usage, cli
 from wikimind.llm.cli import app
 from wikimind.prices import EMBED_DIM, EMBED_MODEL, GEMINI_MODEL, JUDGE_MODEL
 
-runner = CliRunner()
+# COLUMNS forces a deterministic rich console width: the --help assertions
+# below match option names that soft-wrap on narrow terminals (CI has none).
+runner = CliRunner(env={"COLUMNS": "200"})
 
 
 class StubGemini:
@@ -117,9 +119,7 @@ def test_costs_aggregates_ledger(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("WIKIMIND_ENV_FILE", str(tmp_path / "missing.env"))
     ledger = tmp_path / "costs.jsonl"
     meter = CostMeter(JsonlCostSink(ledger))
-    meter.record(
-        call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100
-    )
+    meter.record(call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100)
     meter.record(call_site="qa.test", model=GEMINI_MODEL, in_tokens=500, out_tokens=50)
 
     result = runner.invoke(app, ["llm", "costs", "--path", str(ledger)])
@@ -135,9 +135,7 @@ def test_costs_aggregates_ledger(monkeypatch, tmp_path) -> None:
 
 def test_costs_missing_ledger(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("WIKIMIND_ENV_FILE", str(tmp_path / "missing.env"))
-    result = runner.invoke(
-        app, ["llm", "costs", "--path", str(tmp_path / "none.jsonl")]
-    )
+    result = runner.invoke(app, ["llm", "costs", "--path", str(tmp_path / "none.jsonl")])
     assert result.exit_code == 0
     assert "No cost events" in result.output
 
@@ -189,9 +187,7 @@ def test_default_path_is_used(monkeypatch, tmp_path) -> None:
 def test_costs_loads_dotenv(monkeypatch, tmp_path) -> None:
     ledger = tmp_path / "dotenv.jsonl"
     meter = CostMeter(JsonlCostSink(ledger))
-    meter.record(
-        call_site="l1.dotenv", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100
-    )
+    meter.record(call_site="l1.dotenv", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100)
     env_file = tmp_path / "custom.env"
     env_file.write_text(f"WIKIMIND_COSTS_PATH={ledger}\n", encoding="utf-8")
     monkeypatch.delenv("WIKIMIND_COSTS_PATH", raising=False)
@@ -223,9 +219,7 @@ def test_live_smoke_success(monkeypatch, tmp_path) -> None:
     assert ledger.is_file()
 
 
-def test_live_smoke_partial_failure_redacts_and_keeps_going(
-    monkeypatch, tmp_path
-) -> None:
+def test_live_smoke_partial_failure_redacts_and_keeps_going(monkeypatch, tmp_path) -> None:
     key = "AIza" + "S" * 30
     monkeypatch.setenv("WIKIMIND_LIVE", "1")
     monkeypatch.setenv("WIKIMIND_ENV_FILE", str(tmp_path / "missing.env"))

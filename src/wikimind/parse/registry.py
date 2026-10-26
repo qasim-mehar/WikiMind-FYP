@@ -41,9 +41,7 @@ def get_parser(name: str) -> Parser:
         return _PARSERS[name]
     except KeyError as exc:
         known = ", ".join(sorted(_PARSERS)) or "(none)"
-        raise UnknownParserError(
-            f"unknown parser {name!r}; registered parsers: {known}"
-        ) from exc
+        raise UnknownParserError(f"unknown parser {name!r}; registered parsers: {known}") from exc
 
 
 def parser_names() -> tuple[str, ...]:
@@ -65,6 +63,5 @@ def parser_name_for_path(path: str | Path) -> str:
     if suffix in {".txt", ".md"}:
         return "text"
     raise UnknownParserError(
-        f"no default parser for {suffix or 'extensionless'} file; "
-        "pass an explicit parser name"
+        f"no default parser for {suffix or 'extensionless'} file; pass an explicit parser name"
     )

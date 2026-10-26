@@ -34,9 +34,7 @@ def test_redact_openrouter_key_shape() -> None:
 
 
 def test_redact_bearer_token() -> None:
-    assert redact("Authorization: Bearer abc.def-123") == (
-        "Authorization: Bearer [REDACTED]"
-    )
+    assert redact("Authorization: Bearer abc.def-123") == ("Authorization: Bearer [REDACTED]")
     assert redact("Bearer abc+/def==") == "Bearer [REDACTED]"
 
 
@@ -47,9 +45,7 @@ def test_redact_bearer_inside_json_stays_valid() -> None:
     assert "abc123" not in redacted
     import json as _json
 
-    assert _json.loads(redacted) == {
-        "meta": {"header": "Bearer [REDACTED]", "n": 1}
-    }
+    assert _json.loads(redacted) == {"meta": {"header": "Bearer [REDACTED]", "n": 1}}
 
 
 def test_redact_secrets_accepts_extra_values() -> None:
@@ -97,13 +93,10 @@ def test_load_dotenv_missing_file(tmp_path) -> None:
     assert load_dotenv(tmp_path / "missing.env") is False
 
 
-def test_load_dotenv_handles_bom_empty_env_and_inline_comments(
-    monkeypatch, tmp_path
-) -> None:
+def test_load_dotenv_handles_bom_empty_env_and_inline_comments(monkeypatch, tmp_path) -> None:
     env_file = tmp_path / ".env"
     env_file.write_text(
-        "\ufeffGEMINI_API_KEY=dotenv-gemini # comment\n"
-        "OPENROUTER_API_KEY=dotenv-openrouter\n",
+        "\ufeffGEMINI_API_KEY=dotenv-gemini # comment\nOPENROUTER_API_KEY=dotenv-openrouter\n",
         encoding="utf-8",
     )
     monkeypatch.setenv(GEMINI_API_KEY_ENV, "")

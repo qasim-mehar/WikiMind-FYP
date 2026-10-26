@@ -105,9 +105,7 @@ _CAPTION_RE = re.compile(
     r"^(?:figure|fig\.?|table)\s+(?:[A-Z]?\d+[a-z]?|[IVX]+)\s*[:.\-—|]",
     re.IGNORECASE,
 )
-_NUMBERED_HEADING_RE = re.compile(
-    r"^(?P<number>\d{1,2}(?:\.\d{1,3}){0,3})\.?\s+(?P<rest>\S.*)$"
-)
+_NUMBERED_HEADING_RE = re.compile(r"^(?P<number>\d{1,2}(?:\.\d{1,3}){0,3})\.?\s+(?P<rest>\S.*)$")
 _REFERENCE_ENTRY_RE = re.compile(r"^(?:\[\d{1,3}\]|\d{1,3}\.(?:\s+|[A-Z]))")
 _NUMBERING_PREFIX_RE = re.compile(r"^(?:\d+(?:\.\d+)*|[A-Z](?:\.\d+)*)\.?\s+")
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9'’\-]*")
@@ -191,9 +189,7 @@ def _looks_like_appendix_heading(text: str) -> bool:
     if rest.isupper():
         return False
     lowered = rest.lower()
-    if lowered.startswith(
-        ("figure", "fig.", "table", "algorithm", "listing", "equation", "eq.")
-    ):
+    if lowered.startswith(("figure", "fig.", "table", "algorithm", "listing", "equation", "eq.")):
         return False
     if " et al" in lowered:
         return False
@@ -380,9 +376,7 @@ def _is_abstract_stop(text: str) -> bool:
     return lowered.startswith(_ABSTRACT_STOP_PREFIXES)
 
 
-def _find_abstract(
-    lines: list[_Line], start: int
-) -> tuple[str | None, int | None, int | None]:
+def _find_abstract(lines: list[_Line], start: int) -> tuple[str | None, int | None, int | None]:
     limit = min(len(lines), start + 250)
     for index in range(start, limit):
         text = lines[index].text
@@ -466,11 +460,7 @@ def _emit_sections(lines: list[_Line], start: int, builder: ChannelBuilder) -> N
             continue
 
         heading = _heading_title(text, allow_unnumbered=caption_guard == 0)
-        if (
-            heading is not None
-            and not _is_hard_heading(heading)
-            and _caption_within(lines, index)
-        ):
+        if heading is not None and not _is_hard_heading(heading) and _caption_within(lines, index):
             heading = None
         if heading is not None:
             caption_guard = 0
@@ -559,9 +549,7 @@ def parse_pdf_fallback(data: bytes, source_filename: str) -> ParsedDocument:
         pages.append(_Page(number, text))
 
     if not any(page.text.strip() for page in pages):
-        raise ParseError(
-            f"{source_filename}: no extractable text (scanned or image-only PDF?)"
-        )
+        raise ParseError(f"{source_filename}: no extractable text (scanned or image-only PDF?)")
 
     lines = _flatten(pages)
     builder = ChannelBuilder()

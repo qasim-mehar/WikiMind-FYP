@@ -303,12 +303,8 @@ def test_cost_meter_retains_event_when_sink_fails() -> None:
 def test_aggregate_and_report() -> None:
     sink = InMemorySink()
     meter = CostMeter(sink)
-    meter.record(
-        call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100
-    )
-    meter.record(
-        call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100
-    )
+    meter.record(call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100)
+    meter.record(call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100)
     meter.record(call_site="qa.test", model=GEMINI_MODEL, in_tokens=500, out_tokens=50)
 
     aggregates = aggregate_costs(meter.events)

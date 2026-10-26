@@ -17,9 +17,7 @@ def _escape(text: str) -> str:
 
 
 def _open_tag(channel: Channel) -> str:
-    return (
-        f'<untrusted source="channel:{channel.channel_id}" kind="{channel.kind.value}">'
-    )
+    return f'<untrusted source="channel:{channel.channel_id}" kind="{channel.kind.value}">'
 
 
 def _default_caps(

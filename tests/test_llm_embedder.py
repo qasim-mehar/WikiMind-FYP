@@ -44,9 +44,7 @@ def test_fake_embedder_differs_by_text() -> None:
 
 # SHA-256 of the JSON serialization of FakeEmbedder().embed(["same text"])[0].
 # Pinned so any platform/run drift in the hash-derived vectors fails loudly.
-FAKE_VECTOR_DIGEST = (
-    "e87e398fd6730ad968d54263555f4066961b861ed803d3a2c09498c24dee9676"
-)
+FAKE_VECTOR_DIGEST = "e87e398fd6730ad968d54263555f4066961b861ed803d3a2c09498c24dee9676"
 
 
 def test_fake_embedder_vectors_are_pinned_across_platforms() -> None:

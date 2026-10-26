@@ -38,6 +38,7 @@ DECISIONS.md wins on conflict. Relevant frozen decisions:
 ```python
 from wikimind.llm import LLMClient, Embedder, LLMResult, Usage
 
+
 class LLMClient(Protocol):
     def complete(
         self,
@@ -47,8 +48,9 @@ class LLMClient(Protocol):
         response_schema: dict | type[pydantic.BaseModel] | None,
         call_site: str,
         max_retries: int = 3,
-        meta: dict | None = None,   # additive extension; see below
+        meta: dict | None = None,  # additive extension; see below
     ) -> LLMResult: ...
+
 
 class Embedder(Protocol):
     def embed(self, texts: list[str]) -> list[list[float]]: ...
@@ -61,6 +63,7 @@ class Embedder(Protocol):
 class LLMResult:
     json: dict
     usage: Usage
+
 
 @dataclass(frozen=True)
 class Usage:
@@ -112,14 +115,14 @@ local schema validation:
 
 ```python
 class CostEvent(BaseModel):
-    call_site: str                 # must start with a canonical prefix
-    model: str                     # the model ID actually requested
+    call_site: str  # must start with a canonical prefix
+    model: str  # the model ID actually requested
     in_tokens: int
     out_tokens: int
-    unit_price: ModelPrice         # USD per 1M tokens, input and output
+    unit_price: ModelPrice  # USD per 1M tokens, input and output
     shadow_cost_usd: float
     meta: dict
-    timestamp: datetime            # UTC, ISO 8601 in JSONL
+    timestamp: datetime  # UTC, ISO 8601 in JSONL
 ```
 
 `CostEvent` validates price integrity on construction:

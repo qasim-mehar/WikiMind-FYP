@@ -99,12 +99,15 @@ These formulas are the ID contract. They must not change for
 import hashlib
 import unicodedata
 
+
 def normalize_text(text: str) -> str:
     return " ".join(unicodedata.normalize("NFC", text).split())
+
 
 def channel_id(kind: str, normalized: str) -> str:
     payload = kind + "\x1f" + normalized
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
 
 def document_sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()

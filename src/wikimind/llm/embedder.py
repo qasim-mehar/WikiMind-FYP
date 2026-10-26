@@ -76,9 +76,7 @@ class SentenceTransformerEmbedder:
         self.model_name = model_name
         self.device = device
         self.cache_folder = (
-            cache_folder
-            if cache_folder is not None
-            else os.environ.get("WIKIMIND_EMBED_CACHE")
+            cache_folder if cache_folder is not None else os.environ.get("WIKIMIND_EMBED_CACHE")
         )
         self.call_site = call_site
         self.meta = dict(meta or {})
@@ -125,9 +123,7 @@ class SentenceTransformerEmbedder:
         vectors = [[float(component) for component in vector] for vector in encoded]
         for vector in vectors:
             if len(vector) != EMBED_DIM:
-                raise EmbeddingError(
-                    f"embedder returned dim {len(vector)}, expected {EMBED_DIM}"
-                )
+                raise EmbeddingError(f"embedder returned dim {len(vector)}, expected {EMBED_DIM}")
 
         self.meter.record(
             call_site=self.call_site,

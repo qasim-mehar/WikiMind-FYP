@@ -54,9 +54,7 @@ class Channel(BaseModel):
         expected_normalized = normalize_text(self.text)
         expected_id = channel_id(self.kind.value, expected_normalized)
         if self.normalized is not None and self.normalized != expected_normalized:
-            raise ValueError(
-                "normalized text does not match the normalization contract"
-            )
+            raise ValueError("normalized text does not match the normalization contract")
         if self.channel_id is not None and self.channel_id != expected_id:
             raise ValueError("channel_id does not match the ID contract")
         object.__setattr__(self, "normalized", expected_normalized)
@@ -128,8 +126,7 @@ class ParsedDocument(BaseModel):
                     raise ValueError("pdf-fallback channels require page")
                 if channel.page > self.page_count:
                     raise ValueError(
-                        f"channel page {channel.page} exceeds page_count "
-                        f"{self.page_count}"
+                        f"channel page {channel.page} exceeds page_count {self.page_count}"
                     )
         else:
             if self.page_count is not None:
@@ -153,9 +150,7 @@ class ChannelBuilder:
         self._channels: list[Channel] = []
         self._counts: dict[ChannelKind, int] = {}
 
-    def add(
-        self, kind: ChannelKind | str, text: str, page: int | None = None
-    ) -> Channel:
+    def add(self, kind: ChannelKind | str, text: str, page: int | None = None) -> Channel:
         resolved = ChannelKind(kind)
         ordinal = self._counts.get(resolved, 0)
         channel = Channel(

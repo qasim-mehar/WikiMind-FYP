@@ -92,9 +92,7 @@ class CostEvent(BaseModel):
         if not (info.context or {}).get("historical"):
             expected_price = price_for(self.model)
             if self.unit_price != expected_price:
-                raise ValueError(
-                    f"unit_price does not match the audited price for {self.model!r}"
-                )
+                raise ValueError(f"unit_price does not match the audited price for {self.model!r}")
         return self
 
 
@@ -133,9 +131,7 @@ class JsonlCostSink:
             with self.path.open("a", encoding="utf-8"):
                 pass
         except OSError as exc:
-            raise CostSinkError(
-                f"could not open cost ledger {self.path}: {exc}"
-            ) from exc
+            raise CostSinkError(f"could not open cost ledger {self.path}: {exc}") from exc
 
     def emit(self, event: CostEvent) -> None:
         try:
@@ -149,9 +145,7 @@ class JsonlCostSink:
                 if self.fsync:
                     os.fsync(handle.fileno())
         except (OSError, TypeError, ValueError) as exc:
-            raise CostSinkError(
-                f"could not write cost event to {self.path}: {exc}"
-            ) from exc
+            raise CostSinkError(f"could not write cost event to {self.path}: {exc}") from exc
 
     def read_events(self) -> list[CostEvent]:
         return read_cost_events(self.path)
@@ -177,14 +171,10 @@ class DbCostSink:
         self.connection = connection
 
     def preflight(self) -> None:
-        raise NotImplementedError(
-            "DbCostSink is an interface stub; the trunk lane wires Postgres"
-        )
+        raise NotImplementedError("DbCostSink is an interface stub; the trunk lane wires Postgres")
 
     def emit(self, event: CostEvent) -> None:
-        raise NotImplementedError(
-            "DbCostSink is an interface stub; the trunk lane wires Postgres"
-        )
+        raise NotImplementedError("DbCostSink is an interface stub; the trunk lane wires Postgres")
 
 
 class CostMeter:
@@ -259,15 +249,11 @@ def read_cost_events(path: str | Path | None = None) -> list[CostEvent]:
         if not stripped:
             continue
         try:
-            events.append(
-                CostEvent.model_validate_json(stripped, context={"historical": True})
-            )
+            events.append(CostEvent.model_validate_json(stripped, context={"historical": True}))
         except ValueError as exc:
             if line_number == len(lines) and not text.endswith(("\n", "\r")):
                 continue
-            raise CostSinkError(
-                f"invalid cost event at {costs_path}:{line_number}: {exc}"
-            ) from exc
+            raise CostSinkError(f"invalid cost event at {costs_path}:{line_number}: {exc}") from exc
     return events
 
 

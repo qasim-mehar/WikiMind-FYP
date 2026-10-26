@@ -38,9 +38,7 @@ class FakeLLM:
         meter: CostMeter | None = None,
     ) -> None:
         price_for(model)
-        if isinstance(responses, (dict, str, LLMResult, BaseException)) or callable(
-            responses
-        ):
+        if isinstance(responses, (dict, str, LLMResult, BaseException)) or callable(responses):
             responses = [responses]
         self._responses: deque[Any] = deque(responses)
         self.usage = usage or Usage()
@@ -99,8 +97,7 @@ class FakeLLM:
             result = LLMResult(json=item, usage=self.usage)
         else:
             raise TypeError(
-                "FakeLLM responses must be dicts, JSON strings, LLMResult, "
-                "exceptions, or callables"
+                "FakeLLM responses must be dicts, JSON strings, LLMResult, exceptions, or callables"
             )
 
         if self.meter is not None:

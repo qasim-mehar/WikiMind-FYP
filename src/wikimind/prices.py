@@ -74,8 +74,7 @@ class ModelPrice(BaseModel):
         if in_tokens < 0 or out_tokens < 0:
             raise ValueError("token counts must be non-negative")
         return round(
-            (in_tokens * self.input_per_mtok + out_tokens * self.output_per_mtok)
-            / 1_000_000,
+            (in_tokens * self.input_per_mtok + out_tokens * self.output_per_mtok) / 1_000_000,
             12,
         )
 
