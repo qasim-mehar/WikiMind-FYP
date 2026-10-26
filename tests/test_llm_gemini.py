@@ -340,6 +340,30 @@ def test_malformed_usage_is_zeroed_and_metered() -> None:
     assert meter.events[0].meta["usage_invalid"] is True
 
 
+def test_absent_thought_tokens_do_not_invalidate_usage() -> None:
+    @dataclass
+    class UsageWithoutThoughts:
+        prompt_token_count: int = 10
+        candidates_token_count: int = 20
+
+    meter = CostMeter(InMemorySink())
+    response = FakeResponse()
+    response.usage_metadata = UsageWithoutThoughts()
+    client, _ = make_client([response], meter)
+    client.complete(
+        system="s",
+        user="u",
+        response_schema={"type": "object"},
+        call_site="qa.test",
+    )
+    event = meter.events[0]
+    assert event.in_tokens == 10
+    assert event.out_tokens == 20
+    assert event.meta["thinking_tokens"] == 0
+    assert event.meta["usage_reported"] is True
+    assert event.meta["usage_invalid"] is False
+
+
 def test_pydantic_datetime_is_json_safe() -> None:
     meter = CostMeter(InMemorySink())
     client, _ = make_client(

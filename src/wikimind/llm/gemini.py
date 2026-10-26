@@ -136,11 +136,11 @@ class GeminiClient:
         validate_call_site(call_site)
         if not 1 <= max_retries <= 3:
             raise ValueError("max_retries must be between 1 and 3")
-        self.meter.preflight()
         event_meta = dict(self.meta)
         if meta:
             event_meta.update(meta)
         self.meter.validate_meta(event_meta)
+        self.meter.preflight()
         try:
             config = self._build_config(system, response_schema)
         except ImportError as exc:  # pragma: no cover - depends on optional extra
@@ -181,13 +181,13 @@ class GeminiClient:
         candidates_tokens, candidates_ok = token_count(
             getattr(usage_metadata, "candidates_token_count", None)
         )
-        thinking_tokens, thinking_ok = token_count(
+        thinking_tokens, _ = token_count(
             getattr(usage_metadata, "thoughts_token_count", None)
         )
         usage_reported = usage_metadata is not None
-        usage_invalid = not usage_reported or not (
-            in_ok and candidates_ok and thinking_ok
-        )
+        # thoughts_token_count is optional (non-thinking models omit it), so a
+        # missing thought count does not invalidate otherwise-complete usage.
+        usage_invalid = not usage_reported or not (in_ok and candidates_ok)
         usage = Usage(
             in_tokens=in_tokens,
             out_tokens=candidates_tokens + thinking_tokens,
