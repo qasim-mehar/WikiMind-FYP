@@ -8,6 +8,7 @@ the database suite.  The configured role needs CREATEDB.
 from __future__ import annotations
 
 import os
+import time
 import uuid
 from collections.abc import Iterator
 
@@ -17,6 +18,7 @@ from psycopg import sql
 
 from wikimind.db.connection import with_dbname
 from wikimind.db.migrations import run_migrations
+from wikimind.db.reset import TEMPLATE_DATABASE, template_exists
 
 
 def _connect_admin(dsn: str) -> psycopg.Connection:
@@ -27,15 +29,42 @@ def _drop_database(base_dsn: str, name: str) -> None:
     with _connect_admin(base_dsn) as conn:
         conn.execute(
             "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
-            "WHERE datname = %s AND pid <> pg_backend_pid()",
+            "WHERE datname = %s AND pid <> pg_backend_pid() "
+            "AND backend_type = 'client backend'",
             (name,),
         )
+        for attempt in range(3):
+            try:
+                conn.execute(
+                    sql.SQL("DROP DATABASE IF EXISTS {} WITH (FORCE)").format(
+                        sql.Identifier(name)
+                    )
+                )
+                return
+            except psycopg.ObjectInUse:
+                time.sleep(0.5 * (attempt + 1))
         conn.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(name)))
 
 
 def _create_database(base_dsn: str, name: str) -> None:
+    """Create a throwaway database, from the pgvector template when present.
+
+    The local role is not a superuser, so ``CREATE EXTENSION vector`` fails;
+    locally every database is created ``WITH TEMPLATE wikimind_template``.
+    CI service containers have no template but a superuser role, so a plain
+    ``CREATE DATABASE`` plus the migration's ``CREATE EXTENSION IF NOT
+    EXISTS`` covers them.
+    """
+
     with _connect_admin(base_dsn) as conn:
-        conn.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
+        if template_exists(conn):
+            conn.execute(
+                sql.SQL("CREATE DATABASE {} TEMPLATE {}").format(
+                    sql.Identifier(name), sql.Identifier(TEMPLATE_DATABASE)
+                )
+            )
+        else:
+            conn.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
 
 
 @pytest.fixture(scope="session")

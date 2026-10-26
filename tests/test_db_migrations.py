@@ -24,7 +24,11 @@ def _copy_migrations(target: Path) -> None:
 
 def test_migrations_apply_once(empty_db_dsn: str) -> None:
     applied = run_migrations(empty_db_dsn)
-    assert applied == ["000_enable_vector.sql", "001_schema_v1.sql"]
+    assert applied == [
+        "000_enable_vector.sql",
+        "001_schema_v1.sql",
+        "002_channels_per_document.sql",
+    ]
     assert run_migrations(empty_db_dsn) == []
 
 

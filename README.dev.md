@@ -12,11 +12,17 @@ database contract. Do not edit any of those files from a lane branch.
 ## Prerequisites
 
 - Python 3.11 or newer.
-- A local PostgreSQL 18 server on `localhost:5432` with the `vector`
-  extension available (install pgvector for your server build — see
-  <https://github.com/pgvector/pgvector> for platform packages).
-  `000_enable_vector.sql` runs `CREATE EXTENSION IF NOT EXISTS vector`.
+- A local PostgreSQL 18 server on `localhost:5432` with pgvector installed
+  (see <https://github.com/pgvector/pgvector> for platform packages).
   Docker is not used locally; CI runs Postgres in a GitHub service container.
+- Role `wikimind` (non-superuser, with `CREATEDB`). Because the role cannot
+  run `CREATE EXTENSION`, a template database `wikimind_template` (owner
+  `wikimind`, `vector` installed, `IS_TEMPLATE`) carries the extension:
+  every WikiMind database — `wikimind_l0` and the per-session test databases
+  — is created `WITH TEMPLATE wikimind_template`. `000_enable_vector.sql`
+  keeps `CREATE EXTENSION IF NOT EXISTS vector` as a no-op safeguard, and CI
+  (GitHub's `pgvector/pgvector:pg16` service, superuser role) has no template
+  and falls back to a plain `CREATE DATABASE`.
 - On Windows, invoke the interpreter explicitly; shell activation is not
   required and should not be assumed by scripts.
 
@@ -59,8 +65,12 @@ over `.env`. `wikimind.config.redact()` is available for diagnostic messages.
 - `db check` exits 0 when clean, 1 for warnings, and 2 for errors. It verifies
   `project_id NOT NULL`, migration hashes, orphan rows, edge provenance, enum
   domains, and 384-dimensional embeddings.
-- `db reset --confirm` drops and recreates the `public` schema and re-applies
-  migrations. It is intentionally destructive and requires the flag.
+- `db reset --confirm` rebuilds the target database. When the
+  `wikimind_template` database exists (local), it drops the target and
+  recreates it `WITH TEMPLATE wikimind_template` before re-applying
+  migrations; otherwise (CI) it drops and recreates the `public` schema.
+  It is intentionally destructive and requires the flag. It refuses to touch
+  `postgres` or the template itself.
 - `db` commands resolve `migrations/` from the checkout. Use
   `--migrations-dir PATH` when running from a wheel install or relocated
   checkout.
@@ -144,10 +154,12 @@ gate after L3-L5. Neither gate replaces the later evaluation in
 
 ## Troubleshooting
 
-- **`vector` extension unavailable or permission denied**: install pgvector
-  for your PostgreSQL 18 server (platform package, EDB Stack Builder, or a
-  source build), or have an admin run `CREATE EXTENSION vector` on the target
-  database once; then re-run `db migrate`.
+- **`vector` extension unavailable or permission denied**: locally, create
+  databases from `wikimind_template` (the migration's `CREATE EXTENSION` is
+  then a no-op). On a fresh server without the template, install pgvector and
+  have an admin create the template database once:
+  `CREATE DATABASE wikimind_template IS_TEMPLATE;` then
+  `CREATE EXTENSION vector;` inside it, as the superuser.
 - **`db check` says a migration is not applied**: run `db migrate`. A hash
   mismatch is an error, not a prompt to edit `schema_migrations`.
 - **Migration hash mismatch after switching worktrees on Windows**: migration
