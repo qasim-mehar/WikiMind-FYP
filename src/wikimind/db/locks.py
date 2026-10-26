@@ -30,6 +30,10 @@ def with_writer_lock(
     The lock is a transaction-scoped advisory lock, so it is released by
     commit or rollback.  Passing a connection lets a caller combine the lock
     with its own writes in one transaction.
+
+    The key derivation below is canonical (docs/contracts/schema.md,
+    "Writer lock"): all lanes must take this lock through this helper, never
+    with raw advisory-lock SQL.
     """
 
     owns_connection = conn is None

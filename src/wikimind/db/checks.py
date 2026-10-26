@@ -55,7 +55,7 @@ ORPHAN_QUERIES: dict[str, str] = {
         SELECT count(*)
         FROM claims c
         LEFT JOIN nodes n ON n.id = c.citation_node_id
-        LEFT JOIN channels ch ON ch.id = c.channel_id
+        LEFT JOIN channels ch ON ch.id = c.channel_id AND ch.document_id = c.document_id
         WHERE n.id IS NULL
            OR ch.id IS NULL
            OR n.project_id <> c.project_id
@@ -77,6 +77,26 @@ ORPHAN_QUERIES: dict[str, str] = {
         LEFT JOIN nodes n ON n.id = v.node_id
         WHERE n.id IS NULL OR n.project_id <> v.project_id
     """,
+    "edge_sources": """
+        SELECT count(*)
+        FROM edge_sources s
+        LEFT JOIN edges e ON e.id = s.edge_id
+        LEFT JOIN claims c ON c.id = s.claim_id
+        WHERE e.id IS NULL
+           OR c.id IS NULL
+           OR e.project_id <> s.project_id
+           OR c.project_id <> s.project_id
+    """,
+    "node_sources": """
+        SELECT count(*)
+        FROM node_sources s
+        LEFT JOIN nodes n ON n.id = s.node_id
+        LEFT JOIN documents d ON d.id = s.document_id
+        WHERE n.id IS NULL
+           OR d.id IS NULL
+           OR n.project_id <> s.project_id
+           OR d.project_id <> s.project_id
+    """,
 }
 
 
@@ -90,6 +110,7 @@ class Finding:
 @dataclass
 class CheckReport:
     findings: list[Finding] = field(default_factory=list)
+    pgvector_version: str | None = None
 
     def error(self, code: str, message: str) -> None:
         self.findings.append(Finding("error", code, message))
@@ -215,6 +236,49 @@ def _check_edge_provenance(conn: psycopg.Connection, report: CheckReport) -> Non
         )
 
 
+def _check_claim_document_provenance(conn: psycopg.Connection, report: CheckReport) -> None:
+    """Every claim's channel must belong to its citation node's document.
+
+    The composite FK guarantees the claim's ``document_id`` matches its
+    channel; the remaining question is whether the citation node is actually
+    sourced from that document via ``node_sources``.
+    """
+
+    try:
+        count = int(
+            conn.execute(
+                """
+                SELECT count(*)
+                FROM claims c
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM node_sources s
+                    WHERE s.node_id = c.citation_node_id
+                      AND s.document_id = c.document_id
+                )
+                """
+            ).fetchone()[0]
+        )
+    except psycopg.Error as exc:
+        report.error(
+            "claims.query_failed",
+            f"could not check claim document provenance: {redact(exc)}",
+        )
+        return
+    if count:
+        report.error(
+            "claims.channel_document_mismatch",
+            f"{count} claim(s) cite a channel from a document their citation "
+            "node is not sourced from",
+        )
+
+
+def pgvector_version(conn: psycopg.Connection) -> str | None:
+    """Return the installed ``vector`` extension version, or None."""
+
+    row = conn.execute("SELECT ext_version FROM pg_extension WHERE extname = 'vector'").fetchone()
+    return str(row[0]) if row else None
+
+
 def _check_enums(conn: psycopg.Connection, report: CheckReport) -> None:
     for (table, column), values in ENUM_COLUMNS.items():
         query = sql.SQL("SELECT count(*) FROM {} WHERE {} IS NULL OR {} NOT IN ({})").format(
@@ -293,11 +357,17 @@ def run_checks(
     for problem in verify_migration_hashes(conn, migrations_dir):
         report.error("migrations.integrity", problem)
 
+    try:
+        report.pgvector_version = pgvector_version(conn)
+    except psycopg.Error:
+        report.pgvector_version = None
+
     if not tables_complete:
         return report
 
     _check_orphans(conn, report)
     _check_edge_provenance(conn, report)
+    _check_claim_document_provenance(conn, report)
     _check_enums(conn, report)
     _check_embeddings(conn, report)
     return report

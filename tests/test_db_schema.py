@@ -127,6 +127,65 @@ def test_document_memoization_key_is_unique(db_conn: psycopg.Connection) -> None
         )
 
 
+def test_channels_are_unique_per_document(db_conn: psycopg.Connection) -> None:
+    project_id = _project(db_conn, "dup-channels")
+    doc_a = _document(db_conn, project_id)
+    doc_b = _document(db_conn, project_id)
+    shared_id = uuid.uuid4().hex
+
+    for document_id in (doc_a, doc_b):
+        db_conn.execute(
+            """
+            INSERT INTO channels (id, project_id, document_id, kind, ordinal, raw_text)
+            VALUES (%s, %s, %s, 'paragraph', 0, 'Identical title text.')
+            """,
+            (shared_id, project_id, document_id),
+        )
+    assert db_conn.execute(
+        "SELECT count(*) FROM channels WHERE id = %s", (shared_id,)
+    ).fetchone() == (2,)
+
+    with pytest.raises(psycopg.errors.UniqueViolation), db_conn.transaction():
+        db_conn.execute(
+            """
+            INSERT INTO channels (id, project_id, document_id, kind, ordinal, raw_text)
+            VALUES (%s, %s, %s, 'paragraph', 1, 'Identical title text.')
+            """,
+            (shared_id, project_id, doc_a),
+        )
+
+
+def test_claim_references_channel_per_document(db_conn: psycopg.Connection) -> None:
+    project_id = _project(db_conn, "claim-channel-fk")
+    doc_a = _document(db_conn, project_id)
+    doc_b = _document(db_conn, project_id)
+    channel_id = db_conn.execute(
+        """
+        INSERT INTO channels (id, project_id, document_id, kind, ordinal, raw_text)
+        VALUES (%s, %s, %s, 'paragraph', 0, 'Text only in document A.')
+        RETURNING id
+        """,
+        (uuid.uuid4().hex, project_id, doc_a),
+    ).fetchone()
+    assert channel_id is not None
+
+    with pytest.raises(psycopg.errors.ForeignKeyViolation), db_conn.transaction():
+        db_conn.execute(
+            """
+            INSERT INTO claims
+                (project_id, citation_node_id, channel_id, document_id,
+                 anchor_quote, anchor_span, text)
+            VALUES (%s, %s, %s, %s, 'x', '{}'::jsonb, 'claim')
+            """,
+            (
+                project_id,
+                _node(db_conn, project_id, "citation/x", "citation"),
+                channel_id[0],
+                doc_b,
+            ),
+        )
+
+
 def test_claim_ledger_edges_and_provenance_round_trip(db_conn: psycopg.Connection) -> None:
     project_id = _project(db_conn, "graph")
     document_id = _document(db_conn, project_id)
@@ -148,14 +207,16 @@ def test_claim_ledger_edges_and_provenance_round_trip(db_conn: psycopg.Connectio
     claim_id = db_conn.execute(
         """
         INSERT INTO claims
-            (project_id, citation_node_id, channel_id, anchor_quote, anchor_span, text)
-        VALUES (%s, %s, %s, %s, %s::jsonb, %s)
+            (project_id, citation_node_id, channel_id, document_id,
+             anchor_quote, anchor_span, text)
+        VALUES (%s, %s, %s, %s, %s, %s::jsonb, %s)
         RETURNING id
         """,
         (
             project_id,
             citation_id,
             channel[0],
+            document_id,
             channel_text,
             '{"start": 0, "end": 26}',
             "The paper introduces the Transformer.",
@@ -195,6 +256,10 @@ def test_claim_ledger_edges_and_provenance_round_trip(db_conn: psycopg.Connectio
     db_conn.execute(
         "INSERT INTO node_sources (project_id, node_id, document_id) VALUES (%s, %s, %s)",
         (project_id, entity_id, document_id),
+    )
+    db_conn.execute(
+        "INSERT INTO node_sources (project_id, node_id, document_id) VALUES (%s, %s, %s)",
+        (project_id, citation_id, document_id),
     )
 
     assert db_conn.execute(

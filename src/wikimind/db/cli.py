@@ -78,6 +78,10 @@ def check(
     """Check schema, migration hashes, orphans, provenance, enums, and embedding sizes."""
 
     report = check_database(_dsn_or_exit(dsn), migrations_dir)
+    if report.pgvector_version:
+        typer.echo(f"pgvector {report.pgvector_version}")
+    else:
+        typer.echo("pgvector: not installed")
     for finding in report.findings:
         typer.echo(f"{finding.level:<7} {finding.code}: {finding.message}")
 
