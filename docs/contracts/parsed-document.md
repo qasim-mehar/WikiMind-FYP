@@ -254,9 +254,11 @@ input. A caller supplies the persisted SHA set later.
 - Text before the first detected section heading is not emitted (it is usually
   author metadata or footnotes). If no heading is found, the remaining body
   becomes one `section`.
-- Single-line captions starting `Figure N:`/`Table N:` (or `.`/`-`/`|` after
-  the number) become `figure_caption`/`table` channels and are removed from the
-  section body. Caption continuation lines are not reconstructed.
+- Single-line captions starting `Figure N:`/`Fig. N`/`Table N:` become
+  `figure_caption`/`table` channels and are removed from the section body. The
+  number may be a roman numeral and may carry an optional letter suffix
+  (`Figure 3a:`); it must be followed by one of `:`, `.`, `-`, `—`, or `|`.
+  Caption continuation lines are not reconstructed.
 - A `References`/`Bibliography` block is split into `reference` channels on
   `[n]` or `n.` entry starts where `n` is 1–3 digits, so years and volume
   numbers do not create false entries. A bracketed marker may stand alone or be

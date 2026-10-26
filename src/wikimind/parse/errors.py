@@ -16,4 +16,4 @@ class GrobidError(ParseError):
 
 
 class GrobidUnavailableError(GrobidError):
-    """Raised when WIKIMIND_GROBID_URL is not configured."""
+    """Raised when WIKIMIND_GROBID_URL is missing or invalid."""
