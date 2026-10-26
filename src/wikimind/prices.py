@@ -18,8 +18,10 @@ Judge
     Closest acceptable substitute: ``nvidia/nemotron-3-super-120b-a12b:free``
     -- free, NON-Gemini (120B total / 12B active MoE), 262K context, and it
     advertises structured-output support.  The judge is NEVER a Gemini model.
-    This is outside Ruling 8's enumerated DeepSeek/Qwen/Llama families; it is
-    recorded here for human confirmation.
+    This is outside Ruling 8's enumerated DeepSeek/Qwen/Llama families;
+    the re-pin is confirmed and recorded in V0-NOTES Ruling 10
+    (2026-10-27).  Binding constraints for any future re-pin: never a
+    Gemini model, :free tier, competent at entailment checking.
 
     The judge endpoint itself costs $0.  Shadow cost prices its paid twin,
     ``nvidia/nemotron-3-super-120b-a12b``: $0.30 input / $2.40 output per 1M

@@ -43,6 +43,14 @@ def test_unknown_model_has_no_price() -> None:
         price_for("unknown/model")
 
 
+def test_judge_models_are_never_gemini_family() -> None:
+    # V0-NOTES Ruling 10: the judge must never be a Gemini model. Guard
+    # both the free endpoint and its paid twin against a future re-pin
+    # that violates the family constraint.
+    for judge_model in (JUDGE_MODEL, JUDGE_SHADOW_MODEL):
+        assert "gemini" not in judge_model.lower()
+
+
 def test_cost_meter_prices_and_emits() -> None:
     sink = InMemorySink()
     meter = CostMeter(sink)

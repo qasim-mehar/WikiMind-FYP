@@ -10,19 +10,25 @@ DECISIONS.md wins on conflict. Relevant frozen decisions:
   the final answer and entailment checks. V0-NOTES approved deviation #1
   waives the Pro-class answerer for V0: both arms use
   `gemini-2.5-flash`, which is why the lane card pins one Gemini model.
-- **V0-NOTES Ruling 5 / Ruling 8** — `gemini-2.5-flash` for BOTH the
-  distill and QA arms (identical model), local `BAAI/bge-small-en-v1.5`
-  embeddings, and a non-Gemini judge. Ruling 8 prefers a DeepSeek-class
-  OpenRouter `:free` model; Qwen- or Llama-class are acceptable
-  fallbacks.
-- **Ruling 6** — every call is metered; shadow cost uses production list
-  prices even when the call itself is free. **Open conflict to resolve at
-  merge:** Ruling 6 says answer-role calls are shadow-priced at
-  `gemini-2.5-pro` list price, while this lane card says to price
-  `gemini-2.5-flash` for both arms. This implementation follows the lane
-  card (Flash price for `qa.*`). Honoring Ruling 6 would require a Pro
-  price plus a role-based shadow-price override; that is a human
-  decision, not a silent code change.
+- **V0-NOTES Ruling 5 / Ruling 8 / Ruling 10** — `gemini-2.5-flash` for
+  BOTH the distill and QA arms (identical model), local
+  `BAAI/bge-small-en-v1.5` embeddings, and a non-Gemini judge. Ruling 8
+  preferred a DeepSeek-class OpenRouter `:free` model; Ruling 10
+  re-pinned the judge to `nvidia/nemotron-3-super-120b-a12b:free` after
+  the catalog dropped the DeepSeek-class `:free` models, and confirmed
+  the pin (Qasim, 2026-10-27). Binding constraints for any future
+  re-pin: never a Gemini model, `:free` tier, competent at entailment
+  checking.
+- **Ruling 6 / Ruling 11** — every call is metered; shadow cost uses
+  production list prices even when the call itself is free. Ruling 11
+  (2026-10-27) fixed the pricing convention: shadow cost prices the
+  call that was actually made. If the called model has a production
+  list price, use it — both V0 arms run `gemini-2.5-flash`, so both
+  arms price at flash list; no arm is priced at a model it does not
+  run. If the endpoint is `:free` (no list price), price the pinned
+  paid twin recorded in `prices.py`. Arm tags travel in the cost event
+  meta. This resolves the earlier Ruling 6 answer-role question: the
+  Pro-class shadow price is never applied in V0.
 - **D8** — distilled pages and raw source text are untrusted. Callers must
   label untrusted text in prompts; the model layer does not do this for
   you.
@@ -143,8 +149,13 @@ today's `prices.py` entry, so historical ledgers survive price updates.
 ```
 
 rounded to 12 decimal places. It is always the **production list price**,
-even when the provider call is free. The judge's actual endpoint cost is
-recorded as `meta["actual_cost_usd"] = 0.0`.
+even when the provider call is free. Per V0-NOTES **Ruling 11
+(2026-10-27)**, the price used is the one for the model actually called:
+both V0 arms run `gemini-2.5-flash` and price at flash list; a `:free`
+endpoint (the judge) prices its pinned paid twin from `prices.py`, and
+the judge's actual endpoint cost is recorded as
+`meta["actual_cost_usd"] = 0.0`. No arm is ever priced at a model it
+does not run.
 
 Example JSONL line:
 
@@ -256,9 +267,9 @@ free, non-Gemini model with advertised structured-output support is
 `nvidia/nemotron-3-super-120b-a12b:free`: a 120B total / 12B active MoE
 with 262K context. It is **never** a Gemini model, so the binding
 family-difference constraint holds. Its paid twin is used for shadow
-cost. **Flag for human:** NVIDIA is outside Ruling 8's enumerated
-DeepSeek/Qwen/Llama fallback families; the card's "closest such model"
-instruction was followed, but the human should confirm this choice.
+cost. NVIDIA is outside Ruling 8's enumerated DeepSeek/Qwen/Llama
+fallback families; V0-NOTES **Ruling 10 (2026-10-27)** records the
+re-pin and Qasim's confirmation of this choice.
 
 Free-tier reality: OpenRouter `:free` models have low daily caps
 (roughly 50 requests/day without the one-time $10 credit; roughly
