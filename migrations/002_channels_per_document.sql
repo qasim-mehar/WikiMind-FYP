@@ -7,8 +7,11 @@
 -- (id, document_id); the hash derivation itself is unchanged.
 --
 -- claims must say which document a claim's channel belongs to, so they carry
--- document_id and reference the composite key.  Safe because all tables are
--- still empty.
+-- document_id and reference the composite key.  The old claims FK on
+-- channel_id alone depends on the old primary key and is dropped first.
+-- Safe because all tables are still empty.
+
+ALTER TABLE claims DROP CONSTRAINT claims_channel_id_fkey;
 
 ALTER TABLE channels DROP CONSTRAINT channels_pkey;
 ALTER TABLE channels
@@ -17,7 +20,6 @@ ALTER TABLE channels
 ALTER TABLE claims
     ADD COLUMN document_id UUID NOT NULL REFERENCES documents (id) ON DELETE CASCADE;
 
-ALTER TABLE claims DROP CONSTRAINT claims_channel_id_fkey;
 ALTER TABLE claims
     ADD CONSTRAINT claims_channel_document_fkey
     FOREIGN KEY (channel_id, document_id)
