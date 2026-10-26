@@ -114,3 +114,20 @@ strong hybrid-search baseline once the engine answers end-to-end. It
 uses the protocol's metrics. It is a directional smoke test only. The
 decision table's CI thresholds apply only to the full run.
 Authorized by Qasim, 2026-10-24.
+
+### Ruling 10 — Judge model re-pinned (2026-10-27)
+The OpenRouter catalog dropped the DeepSeek-class :free models enumerated
+in Ruling 8. The judge is re-pinned to nvidia/nemotron-3-super-120b-a12b:free
+(chosen by Lane 2, confirmed by Qasim). The binding constraints are
+unchanged and remain: (a) never a Gemini model, (b) :free tier, (c) competent
+at entailment checking. Any future re-pin must satisfy all three and be
+recorded here.
+Authorized by Qasim, 2026-10-27.
+
+### Ruling 11 — Shadow pricing convention (2026-10-27)
+Shadow cost prices the call that was actually made. If the called model has
+a production list price, use it — both V0 arms run gemini-2.5-flash, so both
+arms price at flash; no arm is priced at a model it does not run. If the
+endpoint is :free (no list price), price the pinned paid twin recorded in
+prices.py. Arm tags travel in the cost event meta.
+Authorized by Qasim, 2026-10-27.
