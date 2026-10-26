@@ -46,7 +46,7 @@ def base_dsn() -> str:
     try:
         with psycopg.connect(dsn, connect_timeout=5):
             pass
-    except psycopg.OperationalError:
+    except (psycopg.OperationalError, psycopg.InterfaceError, ValueError, OSError):
         pytest.skip("WIKIMIND_DB is not reachable; DB tests skipped")
     return dsn
 
