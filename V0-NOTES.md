@@ -115,19 +115,24 @@ uses the protocol's metrics. It is a directional smoke test only. The
 decision table's CI thresholds apply only to the full run.
 Authorized by Qasim, 2026-10-24.
 
-### Ruling 10 — Judge model re-pinned (2026-10-27)
-The OpenRouter catalog dropped the DeepSeek-class :free models enumerated
-in Ruling 8. The judge is re-pinned to nvidia/nemotron-3-super-120b-a12b:free
-(chosen by Lane 2, confirmed by Qasim). The binding constraints are
-unchanged and remain: (a) never a Gemini model, (b) :free tier, (c) competent
-at entailment checking. Any future re-pin must satisfy all three and be
-recorded here.
+### Ruling 10 — Judge model pin (adjudicator family exclusion) (2026-10-27)
+The compile-time adjudicator ("judge") is pinned to
+nvidia/nemotron-3-super-120b-a12b:free on OpenRouter. The judge model id
+must never belong to the Gemini family: the author pipeline drafts with
+Gemini, and a Gemini judge grading Gemini output imports self-preference
+bias into every acceptance decision written to the graph. Enforcement is
+in code, not convention — tests/test_llm_cost.py asserts that no judge id
+matches a Gemini-family pattern; that guard test may not be deleted or
+weakened. Changing the judge model requires a new ruling that names the
+successor and re-states the family-exclusion rationale.
 Authorized by Qasim, 2026-10-27.
 
-### Ruling 11 — Shadow pricing convention (2026-10-27)
-Shadow cost prices the call that was actually made. If the called model has
-a production list price, use it — both V0 arms run gemini-2.5-flash, so both
-arms price at flash; no arm is priced at a model it does not run. If the
-endpoint is :free (no list price), price the pinned paid twin recorded in
-prices.py. Arm tags travel in the cost event meta.
+### Ruling 11 — Shadow pricing (2026-10-27)
+The cost ledger prices every LLM call by the model actually invoked, at
+the rates pinned in src/wikimind/prices.py. Calls routed to an OpenRouter
+:free variant are priced at that model's paid twin as pinned in
+prices.py — never at zero. Free-tier pricing is a transient OpenRouter
+subsidy; V0's cost evaluation exists to estimate steady-state production
+cost, and zero-pricing free calls would collapse the cost axis of the
+evaluation. Changing any pin or the twin mapping requires a new ruling.
 Authorized by Qasim, 2026-10-27.
