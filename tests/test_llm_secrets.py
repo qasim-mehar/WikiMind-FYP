@@ -40,6 +40,18 @@ def test_redact_bearer_token() -> None:
     assert redact("Bearer abc+/def==") == "Bearer [REDACTED]"
 
 
+def test_redact_bearer_inside_json_stays_valid() -> None:
+    # The Bearer pattern must not swallow JSON string/structural characters.
+    text = '{"meta": {"header": "Bearer abc123", "n": 1}}'
+    redacted = redact(text)
+    assert "abc123" not in redacted
+    import json as _json
+
+    assert _json.loads(redacted) == {
+        "meta": {"header": "Bearer [REDACTED]", "n": 1}
+    }
+
+
 def test_redact_secrets_accepts_extra_values() -> None:
     assert redact_secrets("explicit-sentinel", ["explicit-sentinel"]) == ("[REDACTED]")
 

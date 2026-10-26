@@ -19,7 +19,9 @@ _KEY_VALUE_RE = re.compile(r"^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$
 _SECRET_PATTERNS = (
     re.compile(r"AIza[0-9A-Za-z_\-]{20,}"),
     re.compile(r"sk-or-v1-[0-9A-Za-z_\-]{16,}"),
-    re.compile(r"(?i)(bearer\s+)\S+"),
+    # The token class stops at JSON string/structural characters so redacting
+    # a serialized JSON line can never corrupt it.
+    re.compile(r"(?i)(bearer\s+)[^\s\"',}]+"),
     re.compile(r"(?i)(api[_-]?key[\"']?\s*[:=]\s*[\"']?)[^\"'\s,}]+"),
 )
 
