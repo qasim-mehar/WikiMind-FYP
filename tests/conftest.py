@@ -36,9 +36,7 @@ def _drop_database(base_dsn: str, name: str) -> None:
         for attempt in range(3):
             try:
                 conn.execute(
-                    sql.SQL("DROP DATABASE IF EXISTS {} WITH (FORCE)").format(
-                        sql.Identifier(name)
-                    )
+                    sql.SQL("DROP DATABASE IF EXISTS {} WITH (FORCE)").format(sql.Identifier(name))
                 )
                 return
             except psycopg.ObjectInUse:
