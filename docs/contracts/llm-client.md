@@ -188,7 +188,10 @@ zero tokens and flagged with `usage_invalid=true`, never dropped.
 - `CostSink` protocol: `emit(event: CostEvent) -> None` and
   `preflight() -> None`.
 - Default: `JsonlCostSink`, append-only JSONL at `costs.jsonl` in the
-  current working directory, or `WIKIMIND_COSTS_PATH` if set.
+  current working directory, or `WIKIMIND_COSTS_PATH` if set. Every line
+  is passed through the redactor before it is written, so key material
+  can never reach the ledger even if a caller leaked a secret into
+  `meta` (defense in depth; never rely on it — keep keys out of `meta`).
 - `InMemorySink`: tests and session reports.
 - `DbCostSink`: **interface stub only**. `emit` and `preflight` raise
   `NotImplementedError`; trunk wires the Postgres sink in a later lane.
@@ -288,8 +291,12 @@ request.
   `api_key=...`).
 - Every error raised by this layer passes its message through the
   redactor, including provider errors that echo an explicitly supplied
-  key. The CLI redacts unexpected exceptions at the command boundary.
-  Never put a key in `meta`, a prompt, a URL, or a log line.
+  key. The CLI redacts unexpected exceptions at the command boundary,
+  and `JsonlCostSink` redacts each ledger line before writing it. The
+  Bearer-token and `api_key=` shape patterns stop at JSON
+  string/structural characters so redacting a serialized JSON line
+  cannot corrupt it. Never put a key in `meta`, a prompt, a URL, or a
+  log line.
 - Tests assert that keys never appear in log output or in raised
   exception messages.
 

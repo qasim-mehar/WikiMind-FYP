@@ -142,6 +142,18 @@ def test_costs_missing_ledger(monkeypatch, tmp_path) -> None:
     assert "No cost events" in result.output
 
 
+def test_costs_corrupt_ledger_is_a_friendly_error(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("WIKIMIND_ENV_FILE", str(tmp_path / "missing.env"))
+    ledger = tmp_path / "corrupt.jsonl"
+    ledger.write_text('{"call_site": "l1.test", "broken"\n', encoding="utf-8")
+
+    result = runner.invoke(app, ["llm", "costs", "--path", str(ledger)])
+
+    assert result.exit_code == 1
+    assert "Could not read cost ledger" in result.output
+    assert "corrupt.jsonl" in result.output
+
+
 def test_llm_help() -> None:
     result = runner.invoke(app, ["llm", "--help"])
     assert result.exit_code == 0

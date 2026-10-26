@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 
 import pytest
@@ -38,6 +40,19 @@ def test_fake_embedder_differs_by_text() -> None:
     embedder = FakeEmbedder()
     a, b = embedder.embed(["alpha", "beta"])
     assert a != b
+
+
+# SHA-256 of the JSON serialization of FakeEmbedder().embed(["same text"])[0].
+# Pinned so any platform/run drift in the hash-derived vectors fails loudly.
+FAKE_VECTOR_DIGEST = (
+    "e87e398fd6730ad968d54263555f4066961b861ed803d3a2c09498c24dee9676"
+)
+
+
+def test_fake_embedder_vectors_are_pinned_across_platforms() -> None:
+    vector = FakeEmbedder().embed(["same text"])[0]
+    digest = hashlib.sha256(json.dumps(vector).encode("utf-8")).hexdigest()
+    assert digest == FAKE_VECTOR_DIGEST
 
 
 def test_fake_embedder_empty_input() -> None:
