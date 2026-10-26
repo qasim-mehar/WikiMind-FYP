@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>A Synthetic TEI Paper</title>
+      </titleStmt>
+    </fileDesc>
+    <profileDesc>
+      <abstract>
+        <p>This is a synthetic abstract used only to test TEI parsing.</p>
+        <p>It has a second paragraph so the parser must join both.</p>
+      </abstract>
+    </profileDesc>
+  </teiHeader>
+  <text>
+    <body>
+      <div>
+        <head>1 Introduction</head>
+        <p>First paragraph of the introduction.</p>
+        <p>Second paragraph of the introduction.</p>
+        <figure type="table">
+          <head>Table 1: Synthetic results</head>
+          <figDesc>Numbers that exist only in this fixture.</figDesc>
+        </figure>
+      </div>
+      <div>
+        <head>2 Method</head>
+        <p>The method paragraph.</p>
+        <div>
+          <head>2.1 Details</head>
+          <p>A nested detail paragraph.</p>
+          <figure>
+            <head>Figure 1: Overview</head>
+            <figDesc>A diagram that is not actually present.</figDesc>
+          </figure>
+        </div>
+      </div>
+    </body>
+    <back>
+      <div>
+        <listBibl>
+          <biblStruct>
+            <analytic>
+              <title>First synthetic reference</title>
+              <author><persName>Ada Example</persName></author>
+            </analytic>
+            <monogr><title>Journal of Fixtures</title></monogr>
+          </biblStruct>
+          <biblStruct>
+            <analytic>
+              <title>Second synthetic reference</title>
+              <author><persName>Grace Example</persName></author>
+            </analytic>
+            <monogr><title>Journal of Fixtures</title></monogr>
+          </biblStruct>
+        </listBibl>
+      </div>
+    </back>
+  </text>
+</TEI>
