@@ -31,9 +31,7 @@ from .secrets import (
     redact_secrets,
 )
 
-app = typer.Typer(no_args_is_help=True, help="WikiMind (Compendium) CLI.")
-llm_app = typer.Typer(no_args_is_help=True, help="Model access layer.")
-app.add_typer(llm_app, name="llm")
+app = typer.Typer(no_args_is_help=True, help="Model access layer commands.")
 
 GEMINI_SMOKE_SCHEMA = {
     "type": "object",
@@ -68,7 +66,7 @@ def _dry_run_message(path: Path) -> str:
     )
 
 
-@llm_app.command("smoke")
+@app.command("smoke")
 def smoke(
     costs_path: Path | None = typer.Option(  # noqa: B008
         None,
@@ -168,7 +166,7 @@ def smoke(
     typer.echo("smoke: OK")
 
 
-@llm_app.command("costs")
+@app.command("costs")
 def costs(
     path: Path | None = typer.Option(  # noqa: B008
         None,

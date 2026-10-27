@@ -15,6 +15,7 @@ from collections.abc import Iterator
 import psycopg
 import pytest
 from psycopg import sql
+from psycopg.errors import ObjectInUse
 
 from wikimind.db.connection import with_dbname
 from wikimind.db.migrations import run_migrations
@@ -39,7 +40,7 @@ def _drop_database(base_dsn: str, name: str) -> None:
                     sql.SQL("DROP DATABASE IF EXISTS {} WITH (FORCE)").format(sql.Identifier(name))
                 )
                 return
-            except psycopg.ObjectInUse:
+            except ObjectInUse:
                 time.sleep(0.5 * (attempt + 1))
         conn.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(name)))
 

@@ -27,12 +27,15 @@ EXPECTED_TABLES = (
     "jobs",
     "cost_events",
     "events",
+    "compile_runs",
+    "compile_units",
 )
 
 ENUM_COLUMNS: dict[tuple[str, str], tuple[str, ...]] = {
     ("nodes", "node_type"): ("citation", "entity", "concept", "synthetic", "memory"),
     ("nodes", "status"): ("active", "stale", "superseded", "archived", "retracted"),
     ("ledger_blocks", "block_type"): ("claim", "derived"),
+    ("compile_runs", "status"): ("running", "done", "failed"),
     (
         "edges",
         "edge_type",

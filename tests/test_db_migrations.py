@@ -28,6 +28,8 @@ def test_migrations_apply_once(empty_db_dsn: str) -> None:
         "000_enable_vector.sql",
         "001_schema_v1.sql",
         "002_channels_per_document.sql",
+        "003_compile_runs.sql",
+        "004_compile_units.sql",
     ]
     assert run_migrations(empty_db_dsn) == []
 
