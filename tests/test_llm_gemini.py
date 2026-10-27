@@ -40,7 +40,7 @@ class FakeResponse:
         self.text = text
         self.parsed = parsed
         self.usage_metadata = usage or FakeUsage()
-        self.model_version = "gemini-2.5-flash-001"
+        self.model_version = "gemini-3.1-flash-lite-001"
         self.response_id = "resp-1"
 
 
@@ -104,7 +104,7 @@ def test_success_parses_json_usage_and_meter_event() -> None:
     assert event.meta["arm"] == "B"
     assert event.meta["provider"] == "google-genai"
     assert event.meta["thinking_tokens"] == 5
-    assert event.meta["model_version"] == "gemini-2.5-flash-001"
+    assert event.meta["model_version"] == "gemini-3.1-flash-lite-001"
 
 
 def test_pydantic_schema_uses_response_schema() -> None:

@@ -8,23 +8,30 @@ DECISIONS.md wins on conflict. Relevant frozen decisions:
 
 - **D12** — Flash-class model for distilling/updating; Pro-class only for
   the final answer and entailment checks. V0-NOTES approved deviation #1
-  waives the Pro-class answerer for V0: both arms use
-  `gemini-2.5-flash`, which is why the lane card pins one Gemini model.
-- **V0-NOTES Ruling 5 / Ruling 8 / Ruling 10** — `gemini-2.5-flash` for
-  BOTH the distill and QA arms (identical model), local
-  `BAAI/bge-small-en-v1.5` embeddings, and a non-Gemini judge. Ruling 8
-  preferred a DeepSeek-class OpenRouter `:free` model; Ruling 10
-  re-pinned the judge to `nvidia/nemotron-3-super-120b-a12b:free` after
-  the catalog dropped the DeepSeek-class `:free` models, and confirmed
-  the pin (Qasim, 2026-10-27). Binding constraints for any future
-  re-pin: never a Gemini model, `:free` tier, competent at entailment
-  checking.
+  waives the Pro-class answerer for V0: both arms use one Gemini-class
+  drafter model, which is why the lane pins one Gemini model. The
+  drafter is `gemini-3.1-flash-lite` (V0-NOTES Ruling 12, 2026-10-27);
+  the original `gemini-2.5-flash` pin is permanently retired upstream.
+- **V0-NOTES Ruling 5 / Rulings 8 / 10 / 12 / 13** — one Gemini-class
+  model for BOTH the distill and QA arms (identical model), local
+  `BAAI/bge-small-en-v1.5` embeddings, and a non-Gemini judge. The
+  drafter is re-pinned by Ruling 12 to `gemini-3.1-flash-lite`: the
+  live pre-flight smoke of 2026-10-27 proved `gemini-2.5-flash`
+  permanently retired (404 for new users) and the vendor-named
+  successor `gemini-3.8-flash` unusable (503 x3, 504 at 180 s).
+  Ruling 12's principle: a model pin requires a working live inference
+  path through our own client, proven by live smoke — catalog listing
+  is not liveness. The judge is re-pinned by Ruling 13 to
+  `nvidia/nemotron-3-ultra-550b-a55b:free` (the Ruling 10 pin's free
+  route is per-account dead upstream). Binding constraints for any
+  future judge re-pin: never a Gemini model, `:free` tier, competent at
+  entailment checking.
 - **Ruling 6 / Ruling 11** — every call is metered; shadow cost uses
   production list prices even when the call itself is free. Ruling 11
   (2026-10-27) fixed the pricing convention: shadow cost prices the
   call that was actually made. If the called model has a production
-  list price, use it — both V0 arms run `gemini-2.5-flash`, so both
-  arms price at flash list; no arm is priced at a model it does not
+  list price, use it — both V0 arms run `gemini-3.1-flash-lite`, so
+  both arms price at its list; no arm is priced at a model it does not
   run. If the endpoint is `:free` (no list price), price the pinned
   paid twin recorded in `prices.py`. Arm tags travel in the cost event
   meta. This resolves the earlier Ruling 6 answer-role question: the
@@ -139,7 +146,7 @@ today's `prices.py` entry, so historical ledgers survive price updates.
 `ModelPrice` is:
 
 ```json
-{"input_per_mtok": 0.30, "output_per_mtok": 2.50, "currency": "USD"}
+{"input_per_mtok": 0.25, "output_per_mtok": 1.50, "currency": "USD"}
 ```
 
 `shadow_cost_usd` is computed as:
@@ -151,7 +158,7 @@ today's `prices.py` entry, so historical ledgers survive price updates.
 rounded to 12 decimal places. It is always the **production list price**,
 even when the provider call is free. Per V0-NOTES **Ruling 11
 (2026-10-27)**, the price used is the one for the model actually called:
-both V0 arms run `gemini-2.5-flash` and price at flash list; a `:free`
+both V0 arms run `gemini-3.1-flash-lite` and price at its list; a `:free`
 endpoint (the judge) prices its pinned paid twin from `prices.py`, and
 the judge's actual endpoint cost is recorded as
 `meta["actual_cost_usd"] = 0.0`. No arm is ever priced at a model it
@@ -160,7 +167,7 @@ does not run.
 Example JSONL line:
 
 ```json
-{"call_site":"judge.grade","model":"nvidia/nemotron-3-super-120b-a12b:free","in_tokens":1200,"out_tokens":80,"unit_price":{"input_per_mtok":0.3,"output_per_mtok":2.4,"currency":"USD"},"shadow_cost_usd":0.000552,"meta":{"arm":"B","provider":"openrouter","pricing_basis":"paid_twin","paid_twin":"nvidia/nemotron-3-super-120b-a12b","actual_cost_usd":0.0},"timestamp":"2026-10-23T12:00:00Z"}
+{"call_site":"judge.grade","model":"nvidia/nemotron-3-ultra-550b-a55b:free","in_tokens":1200,"out_tokens":80,"unit_price":{"input_per_mtok":0.6,"output_per_mtok":2.4,"currency":"USD"},"shadow_cost_usd":0.000912,"meta":{"arm":"B","provider":"openrouter","pricing_basis":"paid_twin","paid_twin":"nvidia/nemotron-3-ultra-550b-a55b","actual_cost_usd":0.0},"timestamp":"2026-10-27T12:00:00Z"}
 ```
 
 ### Call-site taxonomy
@@ -182,7 +189,7 @@ costs` report aggregates by the full `call_site`.
 A/B arm tags and model versions travel in `meta`, for example:
 
 ```python
-client.complete(..., meta={"arm": "B", "model_version": "gemini-2.5-flash"})
+client.complete(..., meta={"arm": "B", "model_version": "gemini-3.1-flash-lite"})
 ```
 
 Gemini adds `provider`, `model_version`, `response_id`,
@@ -251,25 +258,28 @@ of truth. `PRICES_VERIFIED_ON = "2026-10-23"`.
 
 | Model | Role | Input | Output | Source |
 | --- | --- | --- | --- | --- |
-| `gemini-2.5-flash` | distill (`l1.*`) and QA (`qa.*`) | $0.30 | $2.50 | Google Gemini API pricing (`ai.google.dev/gemini-api/docs/pricing`), corroborated by trackers refreshed 2026-10-11 / 2026-10-17 |
-| `nvidia/nemotron-3-super-120b-a12b:free` | judge (`judge.*`) | $0 actual | $0 actual | OpenRouter model catalog (`openrouter.ai/api/v1/models`), fetched 2026-10-23 |
-| `nvidia/nemotron-3-super-120b-a12b` | judge shadow (paid twin) | $0.30 | $2.40 | same OpenRouter catalog fetch |
+| `gemini-3.1-flash-lite` | distill (`l1.*`) and QA (`qa.*`) | $0.25 | $1.50 | Google Gemini API pricing (`ai.google.dev/gemini-api/docs/pricing`), retrieved 2026-10-27 (standard paid tier, text) |
+| `nvidia/nemotron-3-ultra-550b-a55b:free` | judge (`judge.*`) | $0 actual | $0 actual | OpenRouter model catalog, probed live 2026-10-27 (working free route) |
+| `nvidia/nemotron-3-ultra-550b-a55b` | judge shadow (paid twin) | $0.60 | $2.40 | OpenRouter model page, probed 2026-10-27 |
 | `BAAI/bge-small-en-v1.5` | local embeddings | $0 | $0 | local CPU model |
 | `fake-llm` | keyless tests | $0 | $0 | test fake |
 | `fake-embedder` | keyless tests | $0 | $0 | test fake |
 
 ### Why this judge
 
-The card's default, `deepseek/deepseek-chat-v3-0324:free`, was checked at
-pin time and is no longer listed by OpenRouter. The 2026-10-23 catalog
-contained **no** DeepSeek, Qwen, or Llama `:free` variants. The closest
-free, non-Gemini model with advertised structured-output support is
-`nvidia/nemotron-3-super-120b-a12b:free`: a 120B total / 12B active MoE
-with 262K context. It is **never** a Gemini model, so the binding
-family-difference constraint holds. Its paid twin is used for shadow
-cost. NVIDIA is outside Ruling 8's enumerated DeepSeek/Qwen/Llama
-fallback families; V0-NOTES **Ruling 10 (2026-10-27)** records the
-re-pin and Qasim's confirmation of this choice.
+Pin history: the card's default, `deepseek/deepseek-chat-v3-0324:free`,
+was dropped from OpenRouter (Ruling 10 re-pinned to
+`nvidia/nemotron-3-super-120b-a12b:free`); the live pre-flight smoke of
+2026-10-27 then showed that pin's free route is per-account dead (404
+from the Nvidia provider while the catalog still lists the slug —
+catalog listing is not liveness). Ruling 13 (2026-10-27) re-pins the
+judge to `nvidia/nemotron-3-ultra-550b-a55b:free`, proven working via
+Nvidia (~2 s) through our own client during the same smoke. The
+`nvidia/nemotron-3.5-lightning:free` candidate was disqualified: it
+returned `content=None`. It is **never** a Gemini model, so the binding
+family-difference constraint holds (a guard test enforces this). Its
+paid twin is used for shadow cost, per Ruling 11: free routes are
+priced at the paid twin, never at zero.
 
 Free-tier reality: OpenRouter `:free` models have low daily caps
 (roughly 50 requests/day without the one-time $10 credit; roughly
@@ -279,12 +289,13 @@ are rate-limited too; the meter still prices them at list price.
 
 ### Model pin
 
-`GEMINI_MODEL = "gemini-2.5-flash"` is used for both arms. The model
-stack is frozen before tuning (V0-NOTES). If the exact Gemini ID is
-unavailable for a key, V0-NOTES pre-authorizes substituting the current
-Flash-class equivalent, but that is a human decision; this lane defaults
-to the frozen ID and will report a live-smoke failure rather than
-silently changing models. Every client and embedder calls `price_for`
+`GEMINI_MODEL = "gemini-3.1-flash-lite"` is used for both arms (pinned
+by V0-NOTES Ruling 12, 2026-10-27). The model stack is frozen before
+tuning (V0-NOTES). A pin is only valid once a live smoke through our own
+client proves the exact ID answers; catalog listing is not liveness.
+This lane reports live-smoke failures rather than silently changing
+models; a re-pin is a governance ruling plus a `prices.py` update with
+source and retrieval date, never a silent substitution. Every client and embedder calls `price_for`
 in its constructor, so an unpriced model fails before any network
 request.
 

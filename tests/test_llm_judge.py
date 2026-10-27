@@ -110,7 +110,7 @@ def test_success_request_shape_and_shadow_cost() -> None:
     assert event.call_site == "judge.test"
     assert event.model == JUDGE_MODEL
     assert event.unit_price == JUDGE_SHADOW_PRICE
-    assert event.shadow_cost_usd == 0.000078
+    assert event.shadow_cost_usd == 0.000108
     assert event.meta["arm"] == "A"
     assert event.meta["provider"] == "openrouter"
     assert event.meta["pricing_basis"] == "paid_twin"
@@ -309,7 +309,7 @@ def test_gemini_judge_model_is_rejected() -> None:
         JudgeClient(
             meter=meter,
             api_key="test-openrouter-key",
-            model="google/gemini-2.5-flash",
+            model="google/gemini-2.5-pro",
         )
 
 
