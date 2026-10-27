@@ -6,6 +6,8 @@ never exercised live here (the compile command requires WIKIMIND_LIVE=1).
 
 from __future__ import annotations
 
+import re
+
 import psycopg
 from psycopg.rows import dict_row
 from typer.testing import CliRunner
@@ -13,6 +15,14 @@ from typer.testing import CliRunner
 from wikimind.cli import app as root_app
 
 runner = CliRunner(env={"COLUMNS": "200"})
+
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def plain_help(output: str) -> str:
+    """Strip styling and whitespace so assertions match option names, not layout."""
+
+    return re.sub(r"\s+", "", _ANSI_RE.sub("", output))
 
 
 def test_compile_requires_live_flag(monkeypatch, tmp_path) -> None:
@@ -28,8 +38,9 @@ def test_compile_requires_live_flag(monkeypatch, tmp_path) -> None:
 def test_compile_help() -> None:
     result = runner.invoke(root_app, ["compile", "--help"])
     assert result.exit_code == 0
-    assert "--min-score" in result.output
-    assert "--delay" in result.output
+    plain = plain_help(result.output)
+    assert "--min-score" in plain
+    assert "--delay" in plain
 
 
 def _connect(dsn: str) -> psycopg.Connection:
