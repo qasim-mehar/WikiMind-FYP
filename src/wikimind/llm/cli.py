@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Callable
 from pathlib import Path
 
 import typer
@@ -98,9 +99,15 @@ def smoke(
         raise typer.Exit(code=0)
 
     meter = CostMeter(JsonlCostSink(path))
-    failures: list[tuple[str, str]] = []
+    leg_status: list[tuple[str, str]] = []
 
-    try:
+    def run_leg(name: str, fn: Callable[[], str]) -> None:
+        try:
+            leg_status.append((name, f"OK {fn()}"))
+        except Exception as exc:  # noqa: BLE001
+            leg_status.append((name, f"FAILED {redact_secrets(str(exc))}"))
+
+    def gemini_leg() -> str:
         gemini = GeminiClient(api_key=gemini_key, meter=meter)
         gemini_result = gemini.complete(
             system=(
@@ -113,11 +120,9 @@ def smoke(
             max_retries=3,
             meta={"arm": "smoke", "model_version": GEMINI_MODEL},
         )
-        typer.echo(f"Gemini: {json.dumps(gemini_result.json, sort_keys=True)}")
-    except Exception as exc:  # noqa: BLE001
-        failures.append(("gemini", redact_secrets(str(exc))))
+        return json.dumps(gemini_result.json, sort_keys=True)
 
-    try:
+    def judge_leg() -> str:
         judge = JudgeClient(api_key=openrouter_key, meter=meter)
         judge_result = judge.complete(
             system=(
@@ -130,32 +135,37 @@ def smoke(
             max_retries=3,
             meta={"arm": "smoke"},
         )
-        typer.echo(f"Judge: {json.dumps(judge_result.json, sort_keys=True)}")
-    except Exception as exc:  # noqa: BLE001
-        failures.append(("judge", redact_secrets(str(exc))))
+        return json.dumps(judge_result.json, sort_keys=True)
 
-    try:
+    def embed_leg() -> str:
         embedder = SentenceTransformerEmbedder(meter=meter, call_site="embed.smoke")
         vectors = embedder.embed(
             ["WikiMind smoke test.", "Source-tracked knowledge graph.", "Compendium."]
         )
-        typer.echo(
-            f"Embedder: {len(vectors)} vectors, dim={len(vectors[0])}, "
+        return (
+            f"{len(vectors)} vectors, dim={len(vectors[0])}, "
             f"norm0={sum(v * v for v in vectors[0]) ** 0.5:.6f}"
         )
-    except Exception as exc:  # noqa: BLE001
-        failures.append(("embed", redact_secrets(str(exc))))
+
+    run_leg("gemini", gemini_leg)
+    run_leg("judge", judge_leg)
+    run_leg("embed", embed_leg)
+
+    for name, status in leg_status:
+        typer.echo(f"{name}: {status}")
 
     typer.echo("")
     typer.echo("Cost report (this session):")
     typer.echo(format_cost_report(meter.events))
     typer.echo(f"Total session shadow cost: {format_usd(meter.total_shadow_cost_usd)}")
     typer.echo(f"Cost ledger: {path}")
+    typer.echo("")
 
-    if failures:
-        for name, message in failures:
-            typer.echo(f"{name} failed: {message}", err=True)
+    failed = [name for name, status in leg_status if status.startswith("FAILED")]
+    if failed:
+        typer.echo(f"smoke: FAILED ({', '.join(failed)})", err=True)
         raise typer.Exit(code=1)
+    typer.echo("smoke: OK")
 
 
 @llm_app.command("costs")

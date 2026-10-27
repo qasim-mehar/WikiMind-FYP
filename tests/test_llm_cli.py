@@ -93,7 +93,10 @@ def test_smoke_is_dry_without_live_flag(monkeypatch, tmp_path) -> None:
 
     assert result.exit_code == 0
     assert "dry run" in result.output.lower()
-    assert "gemini-2.5-flash" in result.output
+    # The hardcoded literal below is deliberate: an ungoverned repin of the
+    # drafter fails CI right here. Update it only together with prices.py and
+    # the governing ruling; see V0-NOTES Rulings 12/13.
+    assert "gemini-3.1-flash-lite" in result.output
     assert "judge.smoke" in result.output
     assert not ledger.exists()
 
@@ -128,9 +131,9 @@ def test_costs_aggregates_ledger(monkeypatch, tmp_path) -> None:
     assert "l1.test" in result.output
     assert "qa.test" in result.output
     assert "TOTAL" in result.output
-    assert "$0.000550000000" in result.output
-    assert "$0.000275000000" in result.output
-    assert "$0.000825000000" in result.output
+    assert "$0.000400000000" in result.output
+    assert "$0.000200000000" in result.output
+    assert "$0.000600000000" in result.output
 
 
 def test_costs_missing_ledger(monkeypatch, tmp_path) -> None:
@@ -216,10 +219,12 @@ def test_live_smoke_success(monkeypatch, tmp_path) -> None:
     result = runner.invoke(app, ["llm", "smoke", "--costs-path", str(ledger)])
 
     assert result.exit_code == 0
-    assert "Gemini:" in result.output
-    assert "Judge:" in result.output
-    assert "Embedder: 3 vectors" in result.output
+    assert "gemini: OK" in result.output
+    assert "judge: OK" in result.output
+    assert "embed: OK 3 vectors" in result.output
+    assert "Cost report (this session):" in result.output
     assert "Total session shadow cost" in result.output
+    assert "smoke: OK" in result.output
     assert ledger.is_file()
 
 
@@ -239,9 +244,45 @@ def test_live_smoke_partial_failure_redacts_and_keeps_going(
     result = runner.invoke(app, ["llm", "smoke", "--costs-path", str(ledger)])
 
     assert result.exit_code == 1
-    assert "gemini failed" in result.output
+    assert "gemini: FAILED" in result.output
+    assert "smoke: FAILED (gemini)" in result.output
     assert key not in result.output
     assert "[REDACTED]" in result.output
-    assert "Judge:" in result.output
-    assert "Embedder: 3 vectors" in result.output
+    assert "judge: OK" in result.output
+    assert "embed: OK 3 vectors" in result.output
+    assert "Cost report (this session):" in result.output
+    assert "Total session shadow cost" in result.output
+    assert ledger.is_file()
+
+
+class FailingJudge:
+    def __init__(self, *, api_key: str, meter: CostMeter) -> None:
+        pass
+
+    def complete(self, **kwargs: Any) -> LLMResult:
+        raise RuntimeError("judge is down")
+
+
+def test_smoke_failed_legs_are_listed_in_banner(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("WIKIMIND_LIVE", "1")
+    monkeypatch.setenv("WIKIMIND_ENV_FILE", str(tmp_path / "missing.env"))
+    monkeypatch.setenv("GEMINI_API_KEY", "test-gemini-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
+    ledger = tmp_path / "live-multi.jsonl"
+    monkeypatch.setattr(cli, "GeminiClient", FailingGemini)
+    monkeypatch.setattr(cli, "JudgeClient", FailingJudge)
+    monkeypatch.setattr(cli, "SentenceTransformerEmbedder", StubEmbedder)
+
+    result = runner.invoke(app, ["llm", "smoke", "--costs-path", str(ledger)])
+
+    assert result.exit_code == 1
+    assert "gemini: FAILED" in result.output
+    assert "judge: FAILED" in result.output
+    assert "embed: OK 3 vectors" in result.output
+    # Status lines come first; the cost table still prints; banner is last.
+    assert result.output.index("gemini: FAILED") < result.output.index(
+        "Cost report (this session):"
+    )
+    assert "Cost report (this session):" in result.output
+    assert result.output.rstrip().endswith("smoke: FAILED (gemini, judge)")
     assert ledger.is_file()
