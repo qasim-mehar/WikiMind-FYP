@@ -3,3 +3,6 @@
 __pycache__/
 .venv/
 *.pyc
+
+# Cost ledger (runtime artifact, never committed)
+costs.jsonl
