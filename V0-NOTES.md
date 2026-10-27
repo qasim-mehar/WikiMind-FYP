@@ -117,22 +117,57 @@ Authorized by Qasim, 2026-10-24.
 
 ### Ruling 10 — Judge model pin (adjudicator family exclusion) (2026-10-27)
 The compile-time adjudicator ("judge") is pinned to
-nvidia/nemotron-3-super-120b-a12b:free on OpenRouter. The judge model id
+`nvidia/nemotron-3-super-120b-a12b:free` on OpenRouter. The judge model id
 must never belong to the Gemini family: the author pipeline drafts with
 Gemini, and a Gemini judge grading Gemini output imports self-preference
 bias into every acceptance decision written to the graph. Enforcement is
-in code, not convention — tests/test_llm_cost.py asserts that no judge id
-matches a Gemini-family pattern; that guard test may not be deleted or
+in code, not convention — `tests/test_llm_cost.py` asserts that no judge
+id matches a Gemini-family pattern; that guard test may not be deleted or
 weakened. Changing the judge model requires a new ruling that names the
 successor and re-states the family-exclusion rationale.
 Authorized by Qasim, 2026-10-27.
 
 ### Ruling 11 — Shadow pricing (2026-10-27)
 The cost ledger prices every LLM call by the model actually invoked, at
-the rates pinned in src/wikimind/prices.py. Calls routed to an OpenRouter
-:free variant are priced at that model's paid twin as pinned in
-prices.py — never at zero. Free-tier pricing is a transient OpenRouter
+the rates pinned in `src/wikimind/prices.py`. Calls routed to an
+OpenRouter `:free` variant are priced at that model's paid twin as pinned
+in prices.py — never at zero. Free-tier pricing is a transient OpenRouter
 subsidy; V0's cost evaluation exists to estimate steady-state production
 cost, and zero-pricing free calls would collapse the cost axis of the
 evaluation. Changing any pin or the twin mapping requires a new ruling.
+Authorized by Qasim, 2026-10-27.
+
+### Ruling 12 — Drafter model pin (stability over novelty) (2026-10-27)
+The author-pipeline drafter is pinned to `gemini-3.1-flash-lite` via the
+Gemini API. The prior pin `gemini-2.5-flash` is retired by the vendor
+(permanent 404); the vendor-named successor `gemini-3.8-flash` answered
+503 on three consecutive probes and 504 at a 180-second timeout for our
+key, and is rejected on operational grounds. Pin policy: a model pin
+requires a working live inference path through the app's own client,
+proven by `wikimind llm smoke` with `WIKIMIND_LIVE=1` — catalog listing
+is not evidence of liveness (the catalog still advertised the retired
+`gemini-2.5-flash`). Rates are pinned in `src/wikimind/prices.py` from
+the vendor's published price sheet, with source and retrieval date
+recorded in `PRICING_SOURCES`. The drafter tier may be raised by a future
+ruling if compile-run telemetry (judge rejection rates, re-draft loops)
+shows the drafter is the binding constraint; cost alone is not grounds.
+Authorized by Qasim, 2026-10-27.
+
+### Ruling 13 — Judge model successor (supersedes the pin in Ruling 10; principle reaffirmed) (2026-10-27)
+The compile-time adjudicator is re-pinned to
+`nvidia/nemotron-3-ultra-550b-a55b:free` on OpenRouter. The prior pin
+`nvidia/nemotron-3-super-120b-a12b:free` is dead upstream — a
+per-account 404 from the provider, while the catalog still listed the
+slug (catalog is not liveness). Ruling 10's principle is reaffirmed in
+full: the judge must never belong to the Gemini family; the guard test
+in `tests/test_llm_cost.py` stands unchanged and may not be deleted or
+weakened; any future judge change requires a new ruling naming the
+successor and re-stating the family-exclusion rationale. Shadow price is
+the paid twin `nvidia/nemotron-3-ultra-550b-a55b` at the rates pinned in
+`src/wikimind/prices.py` (probed 2026-10-27 via OpenRouter: $0.60/M
+input, $2.40/M output), per Ruling 11. If the `:free` route dies and the
+pipeline must temporarily fall back to the paid route, no new ruling is
+required so long as the model id and pinned rates are unchanged — record
+a one-line dated incident note in V0-NOTES; the ledger is unaffected
+either way.
 Authorized by Qasim, 2026-10-27.
