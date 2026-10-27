@@ -60,15 +60,10 @@ EMBED_DIM = 384
 
 PRICES_VERIFIED_ON = "2026-10-27"
 PRICING_SOURCES = {
-    GEMINI_MODEL: (
-        "https://ai.google.dev/gemini-api/docs/pricing (retrieved 2026-10-27)"
-    ),
-    JUDGE_MODEL: (
-        "https://openrouter.ai/model-catalog (probed 2026-10-27; endpoint :free)"
-    ),
+    GEMINI_MODEL: ("https://ai.google.dev/gemini-api/docs/pricing (retrieved 2026-10-27)"),
+    JUDGE_MODEL: ("https://openrouter.ai/model-catalog (probed 2026-10-27; endpoint :free)"),
     JUDGE_SHADOW_MODEL: (
-        "OpenRouter model page for nvidia/nemotron-3-ultra-550b-a55b "
-        "(probed 2026-10-27)"
+        "OpenRouter model page for nvidia/nemotron-3-ultra-550b-a55b (probed 2026-10-27)"
     ),
 }
 
