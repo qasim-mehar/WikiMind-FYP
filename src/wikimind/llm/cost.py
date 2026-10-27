@@ -28,7 +28,7 @@ from ..prices import ModelPrice, price_for
 from .errors import CostSinkError
 from .secrets import redact
 
-CALL_SITE_PREFIXES = ("l1.", "l2.", "qa.", "judge.", "embed.")
+CALL_SITE_PREFIXES = ("l1.", "l2.", "qa.", "judge.", "embed.", "index.")
 
 
 def validate_call_site(call_site: str) -> str:

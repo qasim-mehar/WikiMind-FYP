@@ -33,6 +33,14 @@ except ModuleNotFoundError as exc:
 else:
     app.add_typer(llm_cli.app, name="llm")
 
+try:
+    from wikimind.index import cli as index_cli
+except ModuleNotFoundError as exc:
+    if exc.name not in {"wikimind.index", "wikimind.index.cli"}:
+        raise
+else:
+    app.command(name="index")(index_cli.index)
+
 
 def main() -> None:
     """Run the WikiMind command line application."""
