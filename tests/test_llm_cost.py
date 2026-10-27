@@ -19,7 +19,7 @@ from wikimind.llm import (
 from wikimind.llm.errors import CostSinkError, PricingError
 from wikimind.prices import (
     FAKE_EMBED_MODEL,
-    GEMINI_2_5_FLASH_PRICE,
+    GEMINI_3_1_FLASH_LITE_PRICE,
     GEMINI_MODEL,
     JUDGE_MODEL,
     JUDGE_SHADOW_MODEL,
@@ -30,12 +30,12 @@ from wikimind.prices import (
 
 
 def test_gemini_list_price() -> None:
-    assert GEMINI_2_5_FLASH_PRICE.cost_usd(1_000_000, 1_000_000) == 2.80
+    assert GEMINI_3_1_FLASH_LITE_PRICE.cost_usd(1_000_000, 1_000_000) == 1.75
 
 
 def test_judge_shadow_price_is_paid_twin() -> None:
     assert price_for(JUDGE_SHADOW_MODEL) == JUDGE_SHADOW_PRICE
-    assert JUDGE_SHADOW_PRICE.cost_usd(1_000_000, 1_000_000) == 2.70
+    assert JUDGE_SHADOW_PRICE.cost_usd(1_000_000, 1_000_000) == 3.00
 
 
 def test_unknown_model_has_no_price() -> None:
@@ -44,9 +44,9 @@ def test_unknown_model_has_no_price() -> None:
 
 
 def test_judge_models_are_never_gemini_family() -> None:
-    # V0-NOTES Ruling 10: the judge must never be a Gemini model. Guard
-    # both the free endpoint and its paid twin against a future re-pin
-    # that violates the family constraint.
+    # V0-NOTES Rulings 10/13: the judge must never be a Gemini model.
+    # Guard both the free endpoint and its paid twin against a future
+    # re-pin that violates the family constraint.
     for judge_model in (JUDGE_MODEL, JUDGE_SHADOW_MODEL):
         assert "gemini" not in judge_model.lower()
 
@@ -62,13 +62,13 @@ def test_cost_meter_prices_and_emits() -> None:
         meta={"arm": "B"},
     )
 
-    assert event.shadow_cost_usd == 0.00155
-    assert event.unit_price == GEMINI_2_5_FLASH_PRICE
+    assert event.shadow_cost_usd == 0.001
+    assert event.unit_price == GEMINI_3_1_FLASH_LITE_PRICE
     assert event.meta == {"arm": "B"}
     assert event.timestamp.tzinfo is not None
     assert sink.events == [event]
     assert meter.events == [event]
-    assert meter.total_shadow_cost_usd == 0.00155
+    assert meter.total_shadow_cost_usd == 0.001
 
 
 def test_cost_meter_prices_fake_models_at_zero() -> None:
@@ -133,7 +133,7 @@ def test_cost_event_rejects_non_json_meta() -> None:
         CostEvent(
             call_site="l1.test",
             model=GEMINI_MODEL,
-            unit_price=GEMINI_2_5_FLASH_PRICE,
+            unit_price=GEMINI_3_1_FLASH_LITE_PRICE,
             shadow_cost_usd=0.0,
             meta={"object": object()},
         )
@@ -146,7 +146,7 @@ def test_cost_event_rejects_non_dict_meta_as_value_error() -> None:
         CostEvent(
             call_site="l1.test",
             model=GEMINI_MODEL,
-            unit_price=GEMINI_2_5_FLASH_PRICE,
+            unit_price=GEMINI_3_1_FLASH_LITE_PRICE,
             shadow_cost_usd=0.0,
             meta=["not", "a", "dict"],  # type: ignore[list-item]
         )
@@ -159,7 +159,7 @@ def test_cost_event_validates_tokens() -> None:
             model=GEMINI_MODEL,
             in_tokens=-1,
             out_tokens=0,
-            unit_price=GEMINI_2_5_FLASH_PRICE,
+            unit_price=GEMINI_3_1_FLASH_LITE_PRICE,
             shadow_cost_usd=0.0,
         )
 
@@ -171,7 +171,7 @@ def test_cost_event_rejects_inconsistent_shadow_cost() -> None:
             model=GEMINI_MODEL,
             in_tokens=1_000_000,
             out_tokens=0,
-            unit_price=GEMINI_2_5_FLASH_PRICE,
+            unit_price=GEMINI_3_1_FLASH_LITE_PRICE,
             shadow_cost_usd=0.0,
         )
 
@@ -283,7 +283,7 @@ def test_read_cost_events_accepts_historical_price(monkeypatch, tmp_path) -> Non
     )
     events = read_cost_events(path)
     assert len(events) == 1
-    assert events[0].unit_price == GEMINI_2_5_FLASH_PRICE
+    assert events[0].unit_price == GEMINI_3_1_FLASH_LITE_PRICE
 
 
 def test_cost_meter_retains_event_when_sink_fails() -> None:
@@ -337,7 +337,7 @@ def test_db_sink_is_a_stub() -> None:
                 model=GEMINI_MODEL,
                 in_tokens=0,
                 out_tokens=0,
-                unit_price=GEMINI_2_5_FLASH_PRICE,
+                unit_price=GEMINI_3_1_FLASH_LITE_PRICE,
                 shadow_cost_usd=0.0,
             )
         )
@@ -354,7 +354,7 @@ def test_cost_event_requires_aware_timestamp() -> None:
         model=GEMINI_MODEL,
         in_tokens=0,
         out_tokens=0,
-        unit_price=GEMINI_2_5_FLASH_PRICE,
+        unit_price=GEMINI_3_1_FLASH_LITE_PRICE,
         shadow_cost_usd=0.0,
         timestamp=datetime(2026, 10, 23, 12, 0, 0),
     )
