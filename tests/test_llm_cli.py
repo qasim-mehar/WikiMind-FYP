@@ -104,7 +104,7 @@ def test_smoke_is_dry_without_live_flag(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("WIKIMIND_ENV_FILE", str(tmp_path / "missing.env"))
     ledger = tmp_path / "costs.jsonl"
 
-    result = runner.invoke(app, ["llm", "smoke", "--costs-path", str(ledger)])
+    result = runner.invoke(app, ["smoke", "--costs-path", str(ledger)])
 
     assert result.exit_code == 0
     assert "dry run" in result.output.lower()
@@ -123,7 +123,7 @@ def test_smoke_reports_missing_keys(monkeypatch, tmp_path) -> None:
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     ledger = tmp_path / "costs.jsonl"
 
-    result = runner.invoke(app, ["llm", "smoke", "--costs-path", str(ledger)])
+    result = runner.invoke(app, ["smoke", "--costs-path", str(ledger)])
 
     assert result.exit_code == 0
     assert "Missing keys" in result.output
@@ -138,7 +138,7 @@ def test_costs_aggregates_ledger(monkeypatch, tmp_path) -> None:
     meter.record(call_site="l1.test", model=GEMINI_MODEL, in_tokens=1000, out_tokens=100)
     meter.record(call_site="qa.test", model=GEMINI_MODEL, in_tokens=500, out_tokens=50)
 
-    result = runner.invoke(app, ["llm", "costs", "--path", str(ledger)])
+    result = runner.invoke(app, ["costs", "--path", str(ledger)])
 
     assert result.exit_code == 0
     assert "l1.test" in result.output
@@ -151,7 +151,7 @@ def test_costs_aggregates_ledger(monkeypatch, tmp_path) -> None:
 
 def test_costs_missing_ledger(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("WIKIMIND_ENV_FILE", str(tmp_path / "missing.env"))
-    result = runner.invoke(app, ["llm", "costs", "--path", str(tmp_path / "none.jsonl")])
+    result = runner.invoke(app, ["costs", "--path", str(tmp_path / "none.jsonl")])
     assert result.exit_code == 0
     assert "No cost events" in result.output
 
@@ -161,7 +161,7 @@ def test_costs_corrupt_ledger_is_a_friendly_error(monkeypatch, tmp_path) -> None
     ledger = tmp_path / "corrupt.jsonl"
     ledger.write_text('{"call_site": "l1.test", "broken"\n', encoding="utf-8")
 
-    result = runner.invoke(app, ["llm", "costs", "--path", str(ledger)])
+    result = runner.invoke(app, ["costs", "--path", str(ledger)])
 
     assert result.exit_code == 1
     assert "Could not read cost ledger" in result.output
@@ -169,20 +169,36 @@ def test_costs_corrupt_ledger_is_a_friendly_error(monkeypatch, tmp_path) -> None
 
 
 def test_llm_help() -> None:
-    result = runner.invoke(app, ["llm", "--help"])
+    result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
     assert "smoke" in result.output
     assert "costs" in result.output
 
 
+def test_root_cli_mounts_llm_without_double_nesting() -> None:
+    # C7 papercut: the canonical invocation is `wikimind llm smoke`; the llm
+    # module's app must not nest an `llm` sub-typer inside itself again.
+    from wikimind.cli import app as root_app
+
+    result = runner.invoke(root_app, ["llm", "--help"])
+    assert result.exit_code == 0
+    assert "smoke" in result.output
+    assert "costs" in result.output
+    assert "llm llm" not in result.output
+
+    nested = runner.invoke(root_app, ["llm", "smoke", "--help"])
+    assert nested.exit_code == 0
+    assert "costs-path" in plain_help(nested.output)
+
+
 def test_smoke_help() -> None:
-    result = runner.invoke(app, ["llm", "smoke", "--help"])
+    result = runner.invoke(app, ["smoke", "--help"])
     assert result.exit_code == 0
     assert "costs-path" in plain_help(result.output)
 
 
 def test_costs_help() -> None:
-    result = runner.invoke(app, ["llm", "costs", "--help"])
+    result = runner.invoke(app, ["costs", "--help"])
     assert result.exit_code == 0
     assert "--path" in plain_help(result.output)
 
@@ -194,7 +210,7 @@ def test_default_path_is_used(monkeypatch, tmp_path) -> None:
     meter = CostMeter(JsonlCostSink(ledger))
     meter.record(call_site="judge.test", model=GEMINI_MODEL, in_tokens=10, out_tokens=2)
 
-    result = runner.invoke(app, ["llm", "costs"])
+    result = runner.invoke(app, ["costs"])
     assert result.exit_code == 0
     assert "judge.test" in result.output
     assert Path(ledger).is_file()
@@ -209,7 +225,7 @@ def test_costs_loads_dotenv(monkeypatch, tmp_path) -> None:
     monkeypatch.delenv("WIKIMIND_COSTS_PATH", raising=False)
     monkeypatch.setenv("WIKIMIND_ENV_FILE", str(env_file))
 
-    result = runner.invoke(app, ["llm", "costs"])
+    result = runner.invoke(app, ["costs"])
 
     assert result.exit_code == 0
     assert "l1.dotenv" in result.output
@@ -225,7 +241,7 @@ def test_live_smoke_success(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(cli, "JudgeClient", StubJudge)
     monkeypatch.setattr(cli, "SentenceTransformerEmbedder", StubEmbedder)
 
-    result = runner.invoke(app, ["llm", "smoke", "--costs-path", str(ledger)])
+    result = runner.invoke(app, ["smoke", "--costs-path", str(ledger)])
 
     assert result.exit_code == 0
     assert "gemini: OK" in result.output
@@ -248,7 +264,7 @@ def test_live_smoke_partial_failure_redacts_and_keeps_going(monkeypatch, tmp_pat
     monkeypatch.setattr(cli, "JudgeClient", StubJudge)
     monkeypatch.setattr(cli, "SentenceTransformerEmbedder", StubEmbedder)
 
-    result = runner.invoke(app, ["llm", "smoke", "--costs-path", str(ledger)])
+    result = runner.invoke(app, ["smoke", "--costs-path", str(ledger)])
 
     assert result.exit_code == 1
     assert "gemini: FAILED" in result.output
@@ -280,7 +296,7 @@ def test_smoke_failed_legs_are_listed_in_banner(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(cli, "JudgeClient", FailingJudge)
     monkeypatch.setattr(cli, "SentenceTransformerEmbedder", StubEmbedder)
 
-    result = runner.invoke(app, ["llm", "smoke", "--costs-path", str(ledger)])
+    result = runner.invoke(app, ["smoke", "--costs-path", str(ledger)])
 
     assert result.exit_code == 1
     assert "gemini: FAILED" in result.output

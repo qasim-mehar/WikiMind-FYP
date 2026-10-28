@@ -41,6 +41,18 @@ except ModuleNotFoundError as exc:
 else:
     app.command(name="index")(index_cli.index)
 
+try:
+    from wikimind.compile import cli as compile_cli
+except ModuleNotFoundError as exc:
+    if exc.name not in {"wikimind.compile", "wikimind.compile.cli"}:
+        raise
+else:
+    # `wikimind compile <project>` is a command, not a sub-app; the project
+    # and document registration helpers mount as their own groups.
+    app.command(name="compile")(compile_cli.compile_cmd)
+    app.add_typer(compile_cli.project_app, name="project")
+    app.add_typer(compile_cli.document_app, name="document")
+
 
 def main() -> None:
     """Run the WikiMind command line application."""
