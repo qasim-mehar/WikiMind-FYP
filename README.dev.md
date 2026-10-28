@@ -28,6 +28,9 @@ database contract. Do not edit any of those files from a lane branch.
 
 ## Setup
 
+The venv must be Python 3.11.x: 3.12+ Neumaier summation shifts FakeEmbedder
+pinned digests by 1 ULP (observed on 3.13 by Lane 4).
+
 ```powershell
 git fetch origin
 git worktree add ..\WikiMind-L0 -b lane/0-trunk origin/main

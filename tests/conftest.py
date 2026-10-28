@@ -15,11 +15,45 @@ from collections.abc import Iterator
 import psycopg
 import pytest
 from psycopg import sql
+from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from psycopg.errors import ObjectInUse
 
+from wikimind.config import redact
 from wikimind.db.connection import with_dbname
 from wikimind.db.migrations import run_migrations
 from wikimind.db.reset import TEMPLATE_DATABASE, template_exists
+
+
+class RedactedDsn(str):
+    """DSN string whose repr is masked.
+
+    pytest renders a failing test's fixture arguments with ``repr``, so a
+    DSN carrying a password would leak it into tracebacks (observed in
+    Lane 3).  This subclass behaves exactly like ``str`` everywhere —
+    ``psycopg.connect``, ``conninfo`` helpers, dict keys — but its repr goes
+    through the redactor.  Belt: the fixtures below already strip the
+    password from the DSN and hand it to libpq via ``PGPASSWORD``; the
+    masked repr only matters if a password ever re-enters a DSN.
+    """
+
+    def __repr__(self) -> str:
+        return repr(redact(str(self)))
+
+
+def _dsn_without_password(dsn: str) -> str:
+    """Return ``dsn`` with any password removed, moved to ``PGPASSWORD``.
+
+    pytest's assertion diff prints raw string text (not reprs), so masking
+    the repr is not enough: the password must not be in any string pytest
+    can print at all.  libpq reads ``PGPASSWORD`` for every connection made
+    through these fixtures, so behavior is unchanged.
+    """
+
+    params = conninfo_to_dict(dsn)
+    password = params.pop("password", None)
+    if password:
+        os.environ["PGPASSWORD"] = password
+    return make_conninfo(**params)
 
 
 def _connect_admin(dsn: str) -> psycopg.Connection:
@@ -76,7 +110,7 @@ def base_dsn() -> str:
             pass
     except (psycopg.OperationalError, psycopg.InterfaceError, ValueError, OSError):
         pytest.skip("WIKIMIND_DB is not reachable; DB tests skipped")
-    return dsn
+    return RedactedDsn(_dsn_without_password(dsn))
 
 
 @pytest.fixture(scope="session")
@@ -84,7 +118,7 @@ def test_dsn(base_dsn: str) -> Iterator[str]:
     name = f"wikimind_test_{os.getpid()}"
     _drop_database(base_dsn, name)
     _create_database(base_dsn, name)
-    dsn = with_dbname(base_dsn, name)
+    dsn = RedactedDsn(with_dbname(base_dsn, name))
     try:
         run_migrations(dsn)
         yield dsn
@@ -96,7 +130,7 @@ def test_dsn(base_dsn: str) -> Iterator[str]:
 def empty_db_dsn(base_dsn: str) -> Iterator[str]:
     name = f"wikimind_test_{os.getpid()}_{uuid.uuid4().hex[:8]}"
     _create_database(base_dsn, name)
-    dsn = with_dbname(base_dsn, name)
+    dsn = RedactedDsn(with_dbname(base_dsn, name))
     try:
         yield dsn
     finally:

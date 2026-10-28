@@ -85,7 +85,7 @@ def test_run_analyze_success_and_call_site() -> None:
     assert result.value is not None
     assert result.value.claims[0].claim_id_hint == "c1"
     call = fake.calls[0]
-    assert call.call_site == "l2.analyze"
+    assert call.call_site == "compile.analyze"
     assert call.meta == {"run": "r1"}
     # The pinned prompt is the message body; the passage is untrusted-tagged.
     assert call.user.startswith(ANALYZE_PROMPT)
@@ -130,7 +130,7 @@ def test_run_write_and_judge_call_sites_and_prompts() -> None:
 
     assert written.ok and written.value is not None
     assert written.value.disposition == "new"
-    assert write_fake.calls[0].call_site == "l2.write"
+    assert write_fake.calls[0].call_site == "compile.write"
     assert write_fake.calls[0].user.startswith(WRITE_PROMPT)
     assert "<untrusted_candidate>" in write_fake.calls[0].user
     assert "<untrusted_neighborhood>" in write_fake.calls[0].user
@@ -138,7 +138,7 @@ def test_run_write_and_judge_call_sites_and_prompts() -> None:
     assert judged.ok and judged.value is not None
     assert judged.value.entailed is True
     assert judged.value.score == 5
-    assert judge_fake.calls[0].call_site == "judge.compile"
+    assert judge_fake.calls[0].call_site == "compile.judge"
     assert "<untrusted_claim>" in judge_fake.calls[0].user
 
 
@@ -162,7 +162,7 @@ def test_fake_meter_records_zero_cost_events() -> None:
 
     assert len(sink.events) == 1
     event = sink.events[0]
-    assert event.call_site == "l2.analyze"
+    assert event.call_site == "compile.analyze"
     assert event.in_tokens == 100
     assert event.out_tokens == 20
     assert event.shadow_cost_usd == 0.0  # fake-llm prices at zero

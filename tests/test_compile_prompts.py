@@ -53,12 +53,11 @@ def test_judge_prompt_is_verbatim() -> None:
 
 
 def test_call_sites_use_canonical_prefixes() -> None:
-    # The lane card's compile.* names are rejected by the frozen Lane 2
-    # validator; the mapped sites keep the three stages separately
-    # aggregable in the ledger.  See prompts.py module docstring.
-    assert CALL_SITE_ANALYZE == "l2.analyze"
-    assert CALL_SITE_WRITE == "l2.write"
-    assert CALL_SITE_JUDGE == "judge.compile"
+    # L3 addendum C11: the compile.* prefix is part of the canonical
+    # call-site taxonomy; the three stages stay separately aggregable.
+    assert CALL_SITE_ANALYZE == "compile.analyze"
+    assert CALL_SITE_WRITE == "compile.write"
+    assert CALL_SITE_JUDGE == "compile.judge"
     for call_site in (CALL_SITE_ANALYZE, CALL_SITE_WRITE, CALL_SITE_JUDGE):
         from wikimind.llm.cost import validate_call_site
 

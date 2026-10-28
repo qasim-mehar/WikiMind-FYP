@@ -183,8 +183,9 @@ Example JSONL line:
 | `l1.*` | Level 1 distillation, one reference node per document | `l1.distill`, `l1.claim_extract` |
 | `l2.*` | Level 2 entity/concept/synthesis compilation | `l2.merge`, `l2.update` |
 | `qa.*` | Query-time rewriting/answer synthesis | `qa.rewrite`, `qa.answer`, `qa.smoke` |
-| `judge.*` | OpenRouter judge calls | `judge.grade`, `judge.entail`, `judge.smoke` |
+| `judge.*` | OpenRouter judge calls outside the compile pipeline | `judge.grade`, `judge.entail`, `judge.smoke` |
 | `embed.*` | Local embedding calls | `embed.ingest`, `embed.query`, `embed.smoke` |
+| `compile.*` | Lane 3 compile pipeline stages (drafter analyze/write, judge gate) | `compile.analyze`, `compile.write`, `compile.judge` |
 
 The suffix is yours to choose, but keep it stable: the `wikimind llm
 costs` report aggregates by the full `call_site`.

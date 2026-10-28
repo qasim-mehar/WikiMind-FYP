@@ -5,24 +5,20 @@ or improve them.  Only the input sections (passage / neighborhood / claim)
 are interpolated after the trailing "follows." line of each prompt.  Any
 change to a prompt requires a new governance instruction.
 
-Call-site note: the lane card names the compile call sites
-``compile.analyze`` / ``compile.write`` / ``compile.judge``, but the frozen
-Lane 2 contract restricts call-site prefixes to l1./l2./qa./judge./embed.
-(``wikimind.llm.cost.CALL_SITE_PREFIXES`` validates them and the lane card
-does not authorize edits to the audit spine).  The three stages therefore
-map onto the canonical prefixes whose documented meanings match:
-``l2.analyze`` and ``l2.write`` (Level 2 compilation) and ``judge.compile``
-(OpenRouter judge call).  The three stages remain separately aggregable in
-the cost ledger.
+Call sites (unified by the L3 addendum card, C11): ``compile.analyze``,
+``compile.write``, ``compile.judge`` — the ``compile.`` prefix is part of
+the canonical call-site taxonomy in ``wikimind.llm.cost``.  Historical
+costs.jsonl rows keep their pre-unification labels (append-only ledger;
+Ruling 11 prices by model, not call-site).
 """
 
 from __future__ import annotations
 
 COMPILE_PROMPT_VERSION = "compile-v0"
 
-CALL_SITE_ANALYZE = "l2.analyze"
-CALL_SITE_WRITE = "l2.write"
-CALL_SITE_JUDGE = "judge.compile"
+CALL_SITE_ANALYZE = "compile.analyze"
+CALL_SITE_WRITE = "compile.write"
+CALL_SITE_JUDGE = "compile.judge"
 
 ANALYZE_PROMPT = """You are the analyzer stage of a knowledge compiler. You read one source
 passage and extract candidate claims from it. You do not decide what is

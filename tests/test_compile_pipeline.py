@@ -140,9 +140,11 @@ PASSAGE = (
 def _happy_script(
     drafter: ScriptedLLM, judge: ScriptedLLM, *, text: str = "Alpha joined Beta Labs in 2017."
 ) -> None:
-    drafter.queue("l2.analyze", _one(text, text, [{"name": "Alpha", "type": "person"}]))
-    drafter.queue("l2.write", _write(text=text, entities=[{"name": "Alpha", "type": "person"}]))
-    judge.queue("judge.compile", _judge(True, 5))
+    drafter.queue("compile.analyze", _one(text, text, [{"name": "Alpha", "type": "person"}]))
+    drafter.queue(
+        "compile.write", _write(text=text, entities=[{"name": "Alpha", "type": "person"}])
+    )
+    judge.queue("compile.judge", _judge(True, 5))
 
 
 # --------------------------------------------------------------------------
@@ -303,9 +305,9 @@ def test_supersede_chain_extends_across_documents(test_dsn: str) -> None:
     def _supersede_doc(filename: str, text: str, target: UUID) -> None:
         _register(conn, project_id, filename, text + " Additional context sentence.")
         d, j = ScriptedLLM(), ScriptedLLM()
-        d.queue("l2.analyze", _one(text, text, [{"name": "Alpha", "type": "person"}]))
+        d.queue("compile.analyze", _one(text, text, [{"name": "Alpha", "type": "person"}]))
         d.queue(
-            "l2.write",
+            "compile.write",
             _write(
                 disposition="supersedes",
                 text=text,
@@ -313,7 +315,7 @@ def test_supersede_chain_extends_across_documents(test_dsn: str) -> None:
                 entities=[{"name": "Alpha", "type": "person"}],
             ),
         )
-        j.queue("judge.compile", _judge(True, 4))
+        j.queue("compile.judge", _judge(True, 4))
         result = compile_project(conn, project=project, drafter=d, judge=j)
         assert result.stats.claims_committed == 1, result.stats
 
@@ -354,7 +356,7 @@ def test_contradictions_are_recorded_never_resolved(test_dsn: str) -> None:
     _register(conn, project_id, "doc2.txt", "Alpha joined Beta Labs in 2018. Extra context.")
     d2, j2 = ScriptedLLM(), ScriptedLLM()
     d2.queue(
-        "l2.analyze",
+        "compile.analyze",
         _one(
             "Alpha joined Beta Labs in 2018.",
             "Alpha joined Beta Labs in 2018.",
@@ -362,7 +364,7 @@ def test_contradictions_are_recorded_never_resolved(test_dsn: str) -> None:
         ),
     )
     d2.queue(
-        "l2.write",
+        "compile.write",
         _write(
             disposition="contradicts",
             text="Alpha joined Beta Labs in 2018.",
@@ -370,7 +372,7 @@ def test_contradictions_are_recorded_never_resolved(test_dsn: str) -> None:
             entities=[{"name": "Alpha", "type": "person"}],
         ),
     )
-    j2.queue("judge.compile", _judge(True, 5))
+    j2.queue("compile.judge", _judge(True, 5))
     result = compile_project(conn, project=project, drafter=d2, judge=j2)
 
     assert result.stats.dispositions["contradicts"] == 1
@@ -406,7 +408,7 @@ def test_cross_document_neighborhood_reaches_write(test_dsn: str) -> None:
     _register(conn, project_id, "doc2.txt", "Alpha later left Beta Labs. More text.")
     d2, j2 = ScriptedLLM(), ScriptedLLM()
     d2.queue(
-        "l2.analyze",
+        "compile.analyze",
         _one(
             "Alpha later left Beta Labs.",
             "Alpha later left Beta Labs.",
@@ -414,13 +416,13 @@ def test_cross_document_neighborhood_reaches_write(test_dsn: str) -> None:
         ),
     )
     d2.queue(
-        "l2.write",
+        "compile.write",
         _write(text="Alpha later left Beta Labs.", entities=[{"name": "Alpha", "type": "person"}]),
     )
-    j2.queue("judge.compile", _judge(True, 4))
+    j2.queue("compile.judge", _judge(True, 4))
     compile_project(conn, project=project, drafter=d2, judge=j2)
 
-    write_user = d2.calls_for("l2.write")[0]["user"]
+    write_user = d2.calls_for("compile.write")[0]["user"]
     assert f"claim:{claim1}" in write_user  # neighborhood spans the project
     conn.close()
 
@@ -441,8 +443,8 @@ def test_judge_threshold_boundary(
     _register(conn, project_id, "doc1.txt", PASSAGE)
     drafter, judge = ScriptedLLM(), ScriptedLLM()
     _happy_script(drafter, judge)
-    judge.responses["judge.compile"].clear()
-    judge.queue("judge.compile", _judge(entailed, score))
+    judge.responses["compile.judge"].clear()
+    judge.queue("compile.judge", _judge(entailed, score))
 
     result = compile_project(
         conn, project=resolve_project(conn, str(project_id)), drafter=drafter, judge=judge
@@ -467,7 +469,7 @@ def test_dedup_prefilter_blocks_exact_duplicates_before_any_llm(test_dsn: str) -
     _register(conn, project_id, "doc2.txt", "Other passage. Nothing new here.")
     d2, j2 = ScriptedLLM(), ScriptedLLM()
     d2.queue(
-        "l2.analyze",
+        "compile.analyze",
         _one(
             "Alpha  joined Beta Labs in 2017.",
             "Other passage.",
@@ -477,7 +479,7 @@ def test_dedup_prefilter_blocks_exact_duplicates_before_any_llm(test_dsn: str) -
     result = compile_project(conn, project=project, drafter=d2, judge=j2)
 
     assert result.stats.dedup_filtered == 1
-    assert d2.calls_for("l2.write") == [] and j2.calls == []  # never reached an LLM
+    assert d2.calls_for("compile.write") == [] and j2.calls == []  # never reached an LLM
     assert len(_claim_rows(conn, project_id)) == 1
     conn.close()
 
@@ -488,7 +490,7 @@ def test_anchor_reject_drops_unverifiable_quote(test_dsn: str) -> None:
     _register(conn, project_id, "doc1.txt", PASSAGE)
     drafter, judge = ScriptedLLM(), ScriptedLLM()
     drafter.queue(
-        "l2.analyze",
+        "compile.analyze",
         _one(
             "Alpha joined Beta Labs.",
             "not a substring of the passage",
@@ -500,7 +502,7 @@ def test_anchor_reject_drops_unverifiable_quote(test_dsn: str) -> None:
     )
 
     assert result.stats.anchor_rejects == 1
-    assert drafter.calls_for("l2.write") == []
+    assert drafter.calls_for("compile.write") == []
     assert judge.calls == []
     conn.close()
 
@@ -512,7 +514,7 @@ def test_analyze_schema_reject_marks_unit_and_counts(test_dsn: str) -> None:
     _register(conn, project_id, "doc1.txt", PASSAGE)
     bad = {"claims": [{"nope": True}]}
     drafter, judge = ScriptedLLM(), ScriptedLLM()
-    drafter.queue("l2.analyze", bad, bad)
+    drafter.queue("compile.analyze", bad, bad)
 
     result = compile_project(conn, project=project, drafter=drafter, judge=judge)
     assert result.stats.schema_rejects == 1
@@ -535,7 +537,7 @@ def test_write_disposition_repairs_downgrade_to_new(test_dsn: str) -> None:
     # One analyze response carrying three candidates; each write names a
     # broken target (null, unparseable, nonexistent claim) -> all repaired.
     drafter.queue(
-        "l2.analyze",
+        "compile.analyze",
         {
             "claims": [
                 {
@@ -568,13 +570,13 @@ def test_write_disposition_repairs_downgrade_to_new(test_dsn: str) -> None:
             ]
         },
     )
-    drafter.queue("l2.write", _write(disposition="supersedes", target=None))
-    drafter.queue("l2.write", _write(disposition="supersedes", target="not-a-uuid"))
+    drafter.queue("compile.write", _write(disposition="supersedes", target=None))
+    drafter.queue("compile.write", _write(disposition="supersedes", target="not-a-uuid"))
     drafter.queue(
-        "l2.write",
+        "compile.write",
         _write(disposition="supersedes", target=f"claim:{UUID(int=999)}"),
     )
-    judge.queue("judge.compile", _judge(True, 5), _judge(True, 5), _judge(True, 5))
+    judge.queue("compile.judge", _judge(True, 5), _judge(True, 5), _judge(True, 5))
 
     result = compile_project(conn, project=project, drafter=drafter, judge=judge)
 
@@ -600,7 +602,7 @@ def test_verified_duplicate_commits_nothing(test_dsn: str) -> None:
     _register(conn, project_id, "doc2.txt", "Alpha started at Beta Labs in 2017. Per this note.")
     d2, j2 = ScriptedLLM(), ScriptedLLM()
     d2.queue(
-        "l2.analyze",
+        "compile.analyze",
         _one(
             "Alpha started at Beta Labs in 2017.",
             "Alpha started at Beta Labs in 2017.",
@@ -608,7 +610,7 @@ def test_verified_duplicate_commits_nothing(test_dsn: str) -> None:
         ),
     )
     d2.queue(
-        "l2.write",
+        "compile.write",
         _write(
             disposition="duplicate",
             target=f"claim:{claim1}",
@@ -630,14 +632,14 @@ def test_writer_reject_disposition_is_counted_not_committed(test_dsn: str) -> No
     _register(conn, project_id, "doc1.txt", PASSAGE)
     drafter, judge = ScriptedLLM(), ScriptedLLM()
     drafter.queue(
-        "l2.analyze",
+        "compile.analyze",
         _one(
             "Alpha joined Beta Labs in 2017.",
             "Alpha joined Beta Labs in 2017.",
             [{"name": "Alpha", "type": "person"}],
         ),
     )
-    drafter.queue("l2.write", _write(disposition="reject", text="too vague"))
+    drafter.queue("compile.write", _write(disposition="reject", text="too vague"))
 
     result = compile_project(
         conn, project=resolve_project(conn, str(project_id)), drafter=drafter, judge=judge
@@ -655,15 +657,15 @@ def test_judge_schema_reject_counts_and_drops(test_dsn: str) -> None:
     _register(conn, project_id, "doc1.txt", PASSAGE)
     drafter, judge = ScriptedLLM(), ScriptedLLM()
     drafter.queue(
-        "l2.analyze",
+        "compile.analyze",
         _one(
             "Alpha joined Beta Labs in 2017.",
             "Alpha joined Beta Labs in 2017.",
             [{"name": "Alpha", "type": "person"}],
         ),
     )
-    drafter.queue("l2.write", _write())
-    judge.queue("judge.compile", {"wrong": 1}, {"wrong": 2})
+    drafter.queue("compile.write", _write())
+    judge.queue("compile.judge", {"wrong": 1}, {"wrong": 2})
 
     result = compile_project(
         conn, project=resolve_project(conn, str(project_id)), drafter=drafter, judge=judge
@@ -685,7 +687,7 @@ def test_run_cost_reads_the_meter(test_dsn: str) -> None:
     from wikimind.prices import GEMINI_MODEL
 
     meter = CostMeter(InMemorySink())
-    meter.record(call_site="l2.analyze", model=GEMINI_MODEL, in_tokens=1_000_000, out_tokens=0)
+    meter.record(call_site="compile.analyze", model=GEMINI_MODEL, in_tokens=1_000_000, out_tokens=0)
 
     result = compile_project(
         conn,
