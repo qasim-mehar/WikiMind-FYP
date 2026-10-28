@@ -185,6 +185,7 @@ Example JSONL line:
 | `qa.*` | Query-time rewriting/answer synthesis | `qa.rewrite`, `qa.answer`, `qa.smoke` |
 | `judge.*` | OpenRouter judge calls | `judge.grade`, `judge.entail`, `judge.smoke` |
 | `embed.*` | Local embedding calls | `embed.ingest`, `embed.query`, `embed.smoke` |
+| `index.*` | Index-lane embedding calls (incremental node-version indexing) | `index.embed` |
 
 The suffix is yours to choose, but keep it stable: the `wikimind llm
 costs` report aggregates by the full `call_site`.
