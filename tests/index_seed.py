@@ -45,8 +45,15 @@ def seed_node_version(
     rendered_text: str,
     *,
     version: int = 1,
+    set_current: bool = True,
 ) -> UUID:
-    return conn.execute(
+    """Insert a node version; by default also make it the node's current one.
+
+    ``set_current=False`` seeds a superseded version (``nodes.current_version_id``
+    stays wherever it was), which is how historical versions are modeled.
+    """
+
+    version_id = conn.execute(
         """
         INSERT INTO node_versions (project_id, node_id, version, rendered_text)
         VALUES (%s, %s, %s, %s)
@@ -54,6 +61,12 @@ def seed_node_version(
         """,
         (project_id, node_id, version, rendered_text),
     ).fetchone()[0]
+    if set_current:
+        conn.execute(
+            "UPDATE nodes SET current_version_id = %s WHERE id = %s",
+            (version_id, node_id),
+        )
+    return version_id
 
 
 def seed_edge(

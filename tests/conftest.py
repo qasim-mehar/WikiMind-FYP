@@ -16,7 +16,7 @@ import psycopg
 import pytest
 from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
-from psycopg.errors import ObjectInUse
+from psycopg.errors import InsufficientPrivilege, ObjectInUse
 
 from wikimind.config import redact
 from wikimind.db.connection import with_dbname
@@ -68,13 +68,17 @@ def _drop_database(base_dsn: str, name: str) -> None:
             "AND backend_type = 'client backend'",
             (name,),
         )
+        # Teardown flake window (tracked debt): WITH (FORCE) termination can
+        # still race a backend that is connecting or mid-transaction, surfacing
+        # as ObjectInUse or a transient InsufficientPrivilege. Back off briefly
+        # and retry before falling back to a plain DROP.
         for attempt in range(3):
             try:
                 conn.execute(
                     sql.SQL("DROP DATABASE IF EXISTS {} WITH (FORCE)").format(sql.Identifier(name))
                 )
                 return
-            except ObjectInUse:
+            except (ObjectInUse, InsufficientPrivilege):
                 time.sleep(0.5 * (attempt + 1))
         conn.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(name)))
 

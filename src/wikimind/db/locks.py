@@ -48,3 +48,29 @@ def with_writer_lock(
     finally:
         if owns_connection:
             active.close()
+
+
+def writer_lock_held(conn: psycopg.Connection, project_id: UUID | str) -> bool:
+    """Whether ``conn``'s transaction currently holds the project writer lock.
+
+    Checks ``pg_locks`` for a granted transaction-scoped advisory lock on the
+    same canonical key :func:`with_writer_lock` takes.  Postgres stores a
+    bigint advisory key split across ``classid`` (high 32 bits) and ``objid``
+    (low 32 bits, typed ``oid``), so the two halves are compared separately;
+    both are read back through ``::bigint`` since ``objid`` cannot hold the
+    full 64-bit hash.  Read-only; usable on any connection.
+    """
+
+    row = conn.execute(
+        """
+        SELECT 1
+        FROM pg_locks
+        WHERE locktype = 'advisory'
+          AND pid = pg_backend_pid()
+          AND granted
+          AND classid::bigint = ((hashtextextended(%s::text, 0) >> 32) & 4294967295)
+          AND objid::bigint = (hashtextextended(%s::text, 0) & 4294967295)
+        """,
+        (_lock_key(project_id), _lock_key(project_id)),
+    ).fetchone()
+    return row is not None

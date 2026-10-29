@@ -6,7 +6,9 @@ convention; no update path is provided"), so the version identity acts as a
 content address: a version is already indexed exactly when an ``embeddings``
 row exists for ``(node_version_id, model)``. A run therefore embeds only
 versions that are new since the last run (or whose embedding row was
-explicitly removed), and re-runs do nothing.
+explicitly removed), and re-runs do nothing.  Only CURRENT node versions
+are indexed: a version is a candidate exactly when it is the target of its
+node's ``current_version_id``; superseded versions are never embedded.
 
 Embeddings are produced through the L2 embedder protocol at call site
 ``index.embed`` so every call is metered into the cost ledger; the local
@@ -93,13 +95,20 @@ def embedder_model_label(embedder: Embedder) -> str:
 
 
 def _candidate_versions(conn: psycopg.Connection, project_id: UUID) -> list[tuple[UUID, str]]:
-    """All canonical texts of one project in deterministic (id) order."""
+    """Canonical texts of one project's CURRENT node versions, in id order.
+
+    Only the version a node's ``current_version_id`` points at is indexed;
+    superseded versions stay unembedded (their old embedding rows, if any,
+    are simply never surfaced by retrieval, which applies the same filter).
+    """
 
     rows = conn.execute(
         """
         SELECT nv.id, nv.rendered_text
         FROM node_versions nv
+        JOIN nodes n ON n.id = nv.node_id
         WHERE nv.project_id = %s
+          AND n.current_version_id = nv.id
         ORDER BY nv.id
         """,
         (project_id,),

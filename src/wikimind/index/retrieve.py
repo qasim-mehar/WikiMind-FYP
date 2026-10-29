@@ -3,8 +3,9 @@
 Thin, library-only building blocks for the later QA lane. Deliberately no
 ranking-fusion policy and no user-facing surface: how the three signals are
 combined into answers is post-Gate-B scope. Every query scopes by
-``project_id`` per schema.md, and every list is returned in a deterministic
-order.
+``project_id`` per schema.md, every version-bearing path additionally scopes
+to a node's CURRENT version (superseded versions never surface), and every
+list is returned in a deterministic order.
 """
 
 from __future__ import annotations
@@ -73,8 +74,10 @@ def ann_search(
 ) -> list[AnnHit]:
     """Top-k node versions by cosine similarity, served by the HNSW index.
 
-    Only embeddings produced by ``model`` are searched. Ordered by similarity
-    descending, ties broken by node version id.
+    Only embeddings produced by ``model`` are searched, and only those on a
+    node's CURRENT version: superseded versions never surface, even if an
+    embedding row for them still exists. Ordered by similarity descending,
+    ties broken by node version id.
     """
 
     if k < 1:
@@ -85,7 +88,9 @@ def ann_search(
         SELECT nv.node_id, e.node_version_id, 1 - (e.vec <=> %s::vector) AS similarity
         FROM embeddings e
         JOIN node_versions nv ON nv.id = e.node_version_id
+        JOIN nodes n ON n.id = nv.node_id
         WHERE e.project_id = %s AND e.model = %s
+          AND n.current_version_id = nv.id
         ORDER BY e.vec <=> %s::vector, e.node_version_id
         LIMIT %s
         """,
@@ -161,8 +166,9 @@ def fulltext_search(
     """Match node version prose with ``websearch_to_tsquery`` over the stored tsvector.
 
     ``query`` uses Postgres websearch syntax (plain words, ``OR``, quoted
-    phrases); it never raises on odd input, it just matches nothing. Ordered
-    by ``ts_rank`` descending, ties broken by node version id.
+    phrases); it never raises on odd input, it just matches nothing.  Only a
+    node's CURRENT version is searched: superseded versions never surface.
+    Ordered by ``ts_rank`` descending, ties broken by node version id.
     """
 
     if k < 1:
@@ -172,7 +178,9 @@ def fulltext_search(
         SELECT nv.node_id, nv.id, nv.version,
                ts_rank(nv.fts, websearch_to_tsquery('english', %s)) AS score
         FROM node_versions nv
+        JOIN nodes n ON n.id = nv.node_id
         WHERE nv.project_id = %s
+          AND n.current_version_id = nv.id
           AND nv.fts @@ websearch_to_tsquery('english', %s)
         ORDER BY score DESC, nv.id
         LIMIT %s

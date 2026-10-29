@@ -47,7 +47,8 @@ def backfill(
     """Version every node of the project that has no node_versions row.
 
     Idempotent: a second run writes nothing.  Nodes that already have
-    versions are left untouched.
+    versions are left untouched, except that a node with versions but a NULL
+    current_version_id is repaired to point at its latest version.
     """
 
     resolved = dsn or get_settings().db_dsn
@@ -70,7 +71,7 @@ def backfill(
 
     typer.echo(
         f"nodes: {result.nodes_total} total, {result.versioned} versioned, "
-        f"{result.already_versioned} already versioned"
+        f"{result.already_versioned} already versioned, {result.repaired} repaired"
     )
 
 
