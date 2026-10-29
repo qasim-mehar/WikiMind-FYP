@@ -16,6 +16,7 @@ from psycopg import sql
 from psycopg.types.json import Json
 
 from ..db.locks import with_writer_lock
+from ..render.versions import materialize_version
 from .errors import AmbiguousProjectError, ProjectNotFoundError
 from .ids import (
     citation_node_slug,
@@ -117,6 +118,7 @@ class CommitCounts:
     claims: int = 0
     nodes_created: int = 0
     edges_created: int = 0
+    node_versions: int = 0
 
 
 def resolve_project(conn: psycopg.Connection, ref: str) -> ProjectRef:
@@ -502,18 +504,22 @@ def commit_unit(
     One transaction inserts: the document's citation node (per D2, one
     reference node per document), entity/concept nodes, mention and relation
     edges with claim-level provenance, supersedes/contradicts disposition
-    edges, the claims themselves, and the compile_units marker that makes
+    edges, the claims themselves, one node version per touched node whose
+    rendered content changed (Governance Ruling 14; version 1 in the same
+    transaction that creates a node), and the compile_units marker that makes
     re-runs skip this unit.  An empty ``accepted`` list still writes the
     marker so an all-rejected unit is never reprocessed.
     """
 
     created_nodes: list[int] = [0]
     created_edges: list[int] = [0]
+    touched_nodes: set[UUID] = set()
     with with_writer_lock(project_id, conn):
         citation_slug = citation_node_slug(unit.document_sha256)
         citation_node = _get_or_create_node(
             conn, project_id, citation_slug, "citation", created_nodes
         )
+        touched_nodes.add(citation_node)
         conn.execute(
             """
             INSERT INTO node_sources (project_id, node_id, document_id)
@@ -567,6 +573,7 @@ def commit_unit(
                     conn, project_id, slug, _node_type_for_entity(proposed_type), created_nodes
                 )
                 slug_to_node[slug] = node_uuid
+                touched_nodes.add(node_uuid)
                 conn.execute(
                     """
                     INSERT INTO node_sources (project_id, node_id, document_id)
@@ -613,6 +620,7 @@ def commit_unit(
                     (accepted_claim.target_claim_id, project_id),
                 ).fetchone()
                 if target_node is not None:
+                    touched_nodes.add(target_node["citation_node_id"])
                     _insert_edge(
                         conn,
                         project_id,
@@ -633,8 +641,20 @@ def commit_unit(
             (project_id, unit.document_id, unit.channel_id, compile_version, run_id),
         )
 
+        # Governance Ruling 14: every touched node leaves this transaction
+        # with a current node version.  Rendering reads the rows just written
+        # in this transaction, so the text is the same one backfill would
+        # produce.  A node whose rendered content changed across units gets
+        # version n+1 appended here (versions are append-only); unchanged
+        # nodes are no-ops.
+        node_versions = 0
+        for touched in sorted(touched_nodes):
+            if materialize_version(conn, project_id, touched) != "unchanged":
+                node_versions += 1
+
     return CommitCounts(
         claims=len(accepted),
         nodes_created=created_nodes[0],
         edges_created=created_edges[0],
+        node_versions=node_versions,
     )

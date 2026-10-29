@@ -9,7 +9,8 @@ Per document registered in the project, over each channel unit from Lane 1:
    final standalone claim text + disposition.
 4. JUDGE (judge)          — passage + FINAL claim text -> {entailed, score}.
 5. COMMIT (no LLM)        — accepted claims are written inside the canonical
-   writer lock with full provenance, then the unit marker records the
+   writer lock with full provenance, touched nodes get a node version
+   materialized (Governance Ruling 14), then the unit marker records the
    content-hash short-circuit.
 
 Single-pass discipline (V0): a rejected claim is counted, never retried by
@@ -66,6 +67,7 @@ class CompileStats:
     claims_committed: int = 0
     nodes_created: int = 0
     edges_created: int = 0
+    node_versions: int = 0
     dispositions: dict[str, int] = field(default_factory=lambda: dict.fromkeys(DISPOSITIONS, 0))
     errors: list[str] = field(default_factory=list)
 
@@ -274,6 +276,7 @@ def _process_unit(
     stats.claims_committed += counts.claims
     stats.nodes_created += counts.nodes_created
     stats.edges_created += counts.edges_created
+    stats.node_versions += counts.node_versions
     for committed in accepted:
         known_texts.add(graph.normalize_claim_text(committed.text))
 

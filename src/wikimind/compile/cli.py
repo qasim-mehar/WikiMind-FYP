@@ -113,7 +113,10 @@ def run_compile_command(
     )
     dispositions = " ".join(f"{name}={count}" for name, count in stats.dispositions.items())
     typer.echo(f"dispositions: {dispositions}")
-    typer.echo(f"graph delta: nodes +{stats.nodes_created}, edges +{stats.edges_created}")
+    typer.echo(
+        f"graph delta: nodes +{stats.nodes_created}, edges +{stats.edges_created}, "
+        f"node versions +{stats.node_versions}"
+    )
     typer.echo(f"run shadow cost: ${result.run_cost_usd:.12f}")
     return 0
 

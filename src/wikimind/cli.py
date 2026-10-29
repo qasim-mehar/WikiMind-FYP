@@ -53,6 +53,14 @@ else:
     app.add_typer(compile_cli.project_app, name="project")
     app.add_typer(compile_cli.document_app, name="document")
 
+try:
+    from wikimind.render import cli as render_cli
+except ModuleNotFoundError as exc:
+    if exc.name not in {"wikimind.render", "wikimind.render.cli"}:
+        raise
+else:
+    app.add_typer(render_cli.app, name="render")
+
 
 def main() -> None:
     """Run the WikiMind command line application."""
