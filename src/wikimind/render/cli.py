@@ -48,7 +48,9 @@ def backfill(
 
     Idempotent: a second run writes nothing.  Nodes that already have
     versions are left untouched, except that a node with versions but a NULL
-    current_version_id is repaired to point at its latest version.
+    current_version_id is repaired to point at its latest version.  Until
+    repaired, versioned-but-NULL nodes are invisible to retrieval: indexing
+    and ANN/full-text search scope to current versions only.
     """
 
     resolved = dsn or get_settings().db_dsn

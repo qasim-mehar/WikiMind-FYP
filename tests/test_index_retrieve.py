@@ -161,6 +161,30 @@ def test_retrieval_surfaces_only_current_versions(index_conn) -> None:
     assert hybrid.node_ids == [node_id]
 
 
+def test_null_current_version_node_is_absent_from_retrieval(index_conn) -> None:
+    """X4: a node WITH versions but NULL current_version_id never surfaces.
+
+    Its version even has an embedding row, but until ``wikimind render
+    backfill`` repairs the pointer the node is invisible to every
+    version-bearing retrieval path.
+    """
+
+    project_id = seed_project(index_conn, uuid4().hex)
+    node_id = seed_node(index_conn, project_id, "ghost")
+    version_id = seed_node_version(
+        index_conn,
+        project_id,
+        node_id,
+        "the unrepaired ferret page",
+        version=1,
+        set_current=False,
+    )
+    seed_embedding(index_conn, project_id, version_id, Model.A, basis_vector(0))
+
+    assert ann_search(index_conn, project_id, basis_vector(0), k=10, model=Model.A) == []
+    assert fulltext_search(index_conn, project_id, "ferret") == []
+
+
 def test_k_hop_expansion_depths_and_determinism(index_conn) -> None:
     project_id = seed_project(index_conn, uuid4().hex)
     node_a = seed_node(index_conn, project_id, "a")

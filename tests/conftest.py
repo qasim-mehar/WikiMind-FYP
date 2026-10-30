@@ -70,8 +70,9 @@ def _drop_database(base_dsn: str, name: str) -> None:
         )
         # Teardown flake window (tracked debt): WITH (FORCE) termination can
         # still race a backend that is connecting or mid-transaction, surfacing
-        # as ObjectInUse or a transient InsufficientPrivilege. Back off briefly
-        # and retry before falling back to a plain DROP.
+        # as ObjectInUse or InsufficientPrivilege. Back off between retries;
+        # if the error persists, the fallback plain DROP below re-raises it —
+        # the safety net is that propagation, not the retries themselves.
         for attempt in range(3):
             try:
                 conn.execute(
@@ -79,7 +80,8 @@ def _drop_database(base_dsn: str, name: str) -> None:
                 )
                 return
             except (ObjectInUse, InsufficientPrivilege):
-                time.sleep(0.5 * (attempt + 1))
+                if attempt < 2:
+                    time.sleep(0.5 * (attempt + 1))
         conn.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(name)))
 
 

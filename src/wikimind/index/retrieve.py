@@ -78,6 +78,11 @@ def ann_search(
     node's CURRENT version: superseded versions never surface, even if an
     embedding row for them still exists. Ordered by similarity descending,
     ties broken by node version id.
+
+    Planner caveat: the current-version filter is applied at scan time, so
+    on Postgres builds without iterative HNSW scans a corpus with many
+    superseded versions can return fewer than ``k`` current hits.
+    Correctness is unaffected; completeness at scale is the caveat.
     """
 
     if k < 1:
