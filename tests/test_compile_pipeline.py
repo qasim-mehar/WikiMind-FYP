@@ -518,6 +518,11 @@ def test_analyze_schema_reject_marks_unit_and_counts(test_dsn: str) -> None:
 
     result = compile_project(conn, project=project, drafter=drafter, judge=judge)
     assert result.stats.schema_rejects == 1
+    # H2: the early return still counts what the commit wrote (the citation
+    # node's version) instead of discarding the CommitCounts.
+    assert result.stats.node_versions == 1
+    assert result.stats.nodes_created == 1
+    assert result.stats.claims_committed == 0
 
     # The unit is marked processed: a re-run must not retry it.
     empty_drafter, empty_judge = ScriptedLLM(), ScriptedLLM()

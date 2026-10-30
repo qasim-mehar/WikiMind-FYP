@@ -17,6 +17,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 import psycopg
+import pytest
 from index_seed import seed_node, seed_node_version, seed_project
 from psycopg.rows import dict_row
 from typer.testing import CliRunner
@@ -24,10 +25,16 @@ from typer.testing import CliRunner
 from wikimind.cli import app as root_app
 from wikimind.compile import compile_project, register_document, resolve_project
 from wikimind.compile.graph import create_project
+from wikimind.db.locks import with_writer_lock
 from wikimind.llm import LLMResult, Usage
 from wikimind.parse.models import ChannelBuilder, make_document
 from wikimind.render import render_node_text
-from wikimind.render.versions import backfill_project, node_claim_texts, render_node
+from wikimind.render.versions import (
+    backfill_project,
+    materialize_version,
+    node_claim_texts,
+    render_node,
+)
 
 
 def _connect(dsn: str) -> psycopg.Connection:
@@ -220,8 +227,11 @@ def test_empty_commit_still_versions_the_citation_node(test_dsn: str) -> None:
     )
     assert result.status == "done"
 
-    # The schema-reject path discards commit counts (pre-existing pipeline
-    # behavior); assert the materialization itself in the database.
+    # The schema-reject branch still writes the citation node's version, and
+    # (H2) its CommitCounts feed the run stats instead of being discarded.
+    assert result.stats.node_versions == 1
+    assert result.stats.claims_committed == 0
+    assert result.stats.nodes_created == 1
     node = conn.execute("SELECT * FROM nodes WHERE project_id = %s", (project_id,)).fetchone()
     assert node["current_version_id"] is not None
     version = conn.execute(
@@ -289,6 +299,61 @@ def test_later_unit_appends_version_and_advances_current(test_dsn: str) -> None:
     # The claim connection is bidirectional-provenance: both claims render.
     connected = {text for _, text in node_claim_texts(conn, project_id, entity["id"])}
     assert connected == {CLAIM_1, CLAIM_2}
+    conn.close()
+
+
+def test_node_claim_texts_scopes_edge_sources_to_the_project(test_dsn: str) -> None:
+    """H4: the EXISTS path scopes ``edges.project_id`` to the outer query too.
+
+    A project-A ``edge_sources`` row pointing at a foreign edge must not
+    connect the claim to a node that edge touches.
+    """
+
+    conn = _connect(test_dsn)
+    project = create_project(conn, f"lane6-{uuid4().hex[:12]}")
+    project_id = project.id
+    _register(conn, project_id, "doc_a.txt", PASSAGE_A)
+    drafter, judge = ScriptedLLM(), ScriptedLLM()
+    _script_claim(drafter, judge, CLAIM_1)
+    assert (
+        compile_project(
+            conn, project=resolve_project(conn, str(project_id)), drafter=drafter, judge=judge
+        ).status
+        == "done"
+    )
+
+    claim_id = conn.execute(
+        "SELECT id FROM claims WHERE project_id = %s LIMIT 1", (project_id,)
+    ).fetchone()["id"]
+    orphan_id = conn.execute(
+        "INSERT INTO nodes (project_id, slug, node_type) VALUES (%s, 'orphan', 'concept') RETURNING id",
+        (project_id,),
+    ).fetchone()["id"]
+
+    foreign_id = create_project(conn, f"lane6-{uuid4().hex[:12]}").id
+    foreign_edge = conn.execute(
+        "INSERT INTO edges (project_id, src_node, dst_node, edge_type) "
+        "VALUES (%s, %s, %s, 'relates_to') RETURNING id",
+        (foreign_id, orphan_id, orphan_id),
+    ).fetchone()["id"]
+    conn.execute(
+        "INSERT INTO edge_sources (project_id, edge_id, claim_id) VALUES (%s, %s, %s)",
+        (project_id, foreign_edge, claim_id),
+    )
+    assert node_claim_texts(conn, project_id, orphan_id) == []
+
+    # Positive control: the same provenance row against a project-A edge
+    # does connect the claim.
+    own_edge = conn.execute(
+        "INSERT INTO edges (project_id, src_node, dst_node, edge_type) "
+        "VALUES (%s, %s, %s, 'relates_to') RETURNING id",
+        (project_id, orphan_id, orphan_id),
+    ).fetchone()["id"]
+    conn.execute(
+        "INSERT INTO edge_sources (project_id, edge_id, claim_id) VALUES (%s, %s, %s)",
+        (project_id, own_edge, claim_id),
+    )
+    assert [text for _, text in node_claim_texts(conn, project_id, orphan_id)] == [CLAIM_1]
     conn.close()
 
 
@@ -368,7 +433,7 @@ def test_backfill_versions_multi_unit_corpus_idempotently(test_dsn: str) -> None
     argv = ["render", "backfill", name, "--dsn", test_dsn]
     first = runner.invoke(root_app, argv)
     assert first.exit_code == 0, first.output
-    assert "3 total, 3 versioned, 0 already versioned" in first.output
+    assert "3 total, 3 versioned, 0 already versioned, 0 repaired" in first.output
 
     rows = conn.execute(
         """
@@ -405,7 +470,7 @@ def test_backfill_versions_multi_unit_corpus_idempotently(test_dsn: str) -> None
     # Idempotent: the second run writes nothing.
     second = runner.invoke(root_app, argv)
     assert second.exit_code == 0, second.output
-    assert "3 total, 0 versioned, 3 already versioned" in second.output
+    assert "3 total, 0 versioned, 3 already versioned, 0 repaired" in second.output
     after = conn.execute(
         """
         SELECT v.node_id, v.version, v.rendered_text, n.current_version_id
@@ -433,10 +498,11 @@ def test_backfill_leaves_versioned_nodes_alone(test_dsn: str) -> None:
     # Plain tuple connection: the seed helpers index rows positionally.
     with psycopg.connect(test_dsn, autocommit=True) as conn:
         project_id = seed_project(conn, f"lane5-{uuid4().hex[:12]}")
+        alpha = seed_node(conn, project_id, "alpha")
         seed_node_version(
             conn,
             project_id,
-            seed_node(conn, project_id, "alpha"),
+            alpha,
             "alpha [entity]\n\n- hand-written history stays",
         )
         seed_node(conn, project_id, "beta")  # no version
@@ -444,6 +510,8 @@ def test_backfill_leaves_versioned_nodes_alone(test_dsn: str) -> None:
         result = backfill_project(conn, project_id)
         assert result.nodes_total == 2
         assert result.versioned == 1
+        assert result.repaired == 0
+        assert result.already_versioned == 1
 
         versions = conn.execute(
             """
@@ -454,6 +522,82 @@ def test_backfill_leaves_versioned_nodes_alone(test_dsn: str) -> None:
             (project_id,),
         ).fetchall()
         assert [v[0] for v in versions] == ["alpha [entity]\n\n- hand-written history stays"]
+
+
+def test_backfill_repairs_null_current_version_id(test_dsn: str) -> None:
+    """H5: a node WITH versions but a NULL current_version_id is repaired.
+
+    Repair points the node at its latest version; no new version row is
+    written and the repair is reported in ``repaired``.
+    """
+
+    # Plain tuple connection: the seed helpers index rows positionally.
+    with psycopg.connect(test_dsn, autocommit=True) as conn:
+        project_id = seed_project(conn, f"lane6-{uuid4().hex[:12]}")
+        broken = seed_node(conn, project_id, "broken")
+        old_id = seed_node_version(
+            conn,
+            project_id,
+            broken,
+            "broken [entity]\n\n- stale text",
+            version=1,
+            set_current=False,
+        )
+        latest_id = seed_node_version(
+            conn,
+            project_id,
+            broken,
+            "broken [entity]\n\n- latest text",
+            version=2,
+            set_current=False,
+        )
+        # The node history exists but no current pointer (pre-Ruling-14 shape).
+        current = conn.execute(
+            "SELECT current_version_id FROM nodes WHERE id = %s", (broken,)
+        ).fetchone()[0]
+        assert current is None
+
+        result = backfill_project(conn, project_id)
+
+        assert result.nodes_total == 1
+        assert result.versioned == 0
+        assert result.repaired == 1
+        assert result.already_versioned == 0
+        row = conn.execute(
+            "SELECT current_version_id FROM nodes WHERE id = %s", (broken,)
+        ).fetchone()
+        assert row[0] == latest_id
+        assert row[0] != old_id
+        # Repair wrote no new version rows.
+        count = conn.execute(
+            "SELECT count(*) FROM node_versions WHERE node_id = %s", (broken,)
+        ).fetchone()[0]
+        assert count == 2
+
+        # Idempotent: a second run repairs nothing.
+        again = backfill_project(conn, project_id)
+        assert again.repaired == 0
+        assert again.already_versioned == 1
+
+
+def test_materialize_version_requires_the_writer_lock(test_dsn: str) -> None:
+    """H3: materialize_version verifies the lock instead of trusting callers."""
+
+    with psycopg.connect(test_dsn, autocommit=True) as conn:
+        project_id = seed_project(conn, f"lane6-{uuid4().hex[:12]}")
+        node_id = seed_node(conn, project_id, "alpha")
+
+        with pytest.raises(RuntimeError, match="writer lock"):
+            materialize_version(conn, project_id, node_id)
+        # Nothing was written by the rejected call.
+        versions = conn.execute(
+            "SELECT count(*) FROM node_versions WHERE node_id = %s", (node_id,)
+        ).fetchone()[0]
+        assert versions == 0
+
+        # Inside the lock the same call succeeds.
+        with with_writer_lock(project_id, conn):
+            assert materialize_version(conn, project_id, node_id) == "created"
 
 
 def test_backfill_project_resolution_errors_exit_two(test_dsn: str) -> None:

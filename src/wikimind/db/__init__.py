@@ -10,7 +10,7 @@ from wikimind.db.connection import (
     transaction,
     with_dbname,
 )
-from wikimind.db.locks import with_writer_lock
+from wikimind.db.locks import with_writer_lock, writer_lock_held
 from wikimind.db.migrations import (
     MigrationError,
     MigrationHashMismatch,
@@ -38,4 +38,5 @@ __all__ = [
     "verify_migration_hashes",
     "with_dbname",
     "with_writer_lock",
+    "writer_lock_held",
 ]

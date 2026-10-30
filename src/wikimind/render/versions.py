@@ -18,6 +18,9 @@ text is a no-op.  Nothing is ever updated or deleted.
 
 All mutating helpers here are lock-free: callers hold the canonical
 per-project writer lock (``wikimind.db.with_writer_lock``) around them.
+``materialize_version`` verifies the lock is actually held (via
+``pg_locks``) and fails loudly when it is not, instead of relying on this
+docstring.
 """
 
 from __future__ import annotations
@@ -28,7 +31,7 @@ from uuid import UUID
 
 import psycopg
 
-from ..db.locks import with_writer_lock
+from ..db.locks import with_writer_lock, writer_lock_held
 
 
 def _field(row: Any, name: str, index: int) -> Any:
@@ -39,6 +42,14 @@ def _field(row: Any, name: str, index: int) -> Any:
     """
 
     return row[name] if isinstance(row, dict) else row[index]
+
+
+def _require_row(row: Any, what: str) -> Any:
+    """Turn a row that the schema guarantees into a loud failure if absent."""
+
+    if row is None:
+        raise RuntimeError(f"expected row missing from database: {what}")
+    return row
 
 
 def render_node_text(
@@ -78,12 +89,13 @@ def node_claim_texts(
                 JOIN edges e ON e.id = es.edge_id
                 WHERE es.claim_id = c.id
                   AND es.project_id = %s
+                  AND e.project_id = %s
                   AND (e.src_node = %s OR e.dst_node = %s)
             )
           )
         ORDER BY c.id
         """,
-        (project_id, node_id, project_id, node_id, node_id),
+        (project_id, node_id, project_id, project_id, node_id, node_id),
     ).fetchall()
     return [(_field(row, "id", 0), _field(row, "text", 1)) for row in rows]
 
@@ -114,8 +126,16 @@ def materialize_version(
     version n+1 is appended and ``current_version_id`` advances.
     ``"unchanged"`` — the current version already matches; nothing is written.
 
-    The caller must hold the project writer lock.
+    The caller must hold the project writer lock; this is verified against
+    ``pg_locks`` and a violation fails loudly rather than silently racing a
+    concurrent writer.
     """
+
+    if not writer_lock_held(conn, project_id):
+        raise RuntimeError(
+            f"materialize_version requires the project writer lock for {project_id}; "
+            "wrap the call in wikimind.db.with_writer_lock"
+        )
 
     rendered = render_node(conn, project_id, node_id)
     current = conn.execute(
@@ -134,25 +154,29 @@ def materialize_version(
     if current_text == rendered:
         return "unchanged"
 
-    next_version = conn.execute(
-        """
-        SELECT coalesce(max(version), 0) + 1 AS next_version
-        FROM node_versions
-        WHERE node_id = %s
-        """,
-        (node_id,),
-    ).fetchone()
-    assert next_version is not None
+    next_version = _require_row(
+        conn.execute(
+            """
+            SELECT coalesce(max(version), 0) + 1 AS next_version
+            FROM node_versions
+            WHERE node_id = %s
+            """,
+            (node_id,),
+        ).fetchone(),
+        f"next node_version number for node {node_id}",
+    )
 
-    version_id = conn.execute(
-        """
-        INSERT INTO node_versions (project_id, node_id, version, rendered_text)
-        VALUES (%s, %s, %s, %s)
-        RETURNING id
-        """,
-        (project_id, node_id, _field(next_version, "next_version", 0), rendered),
-    ).fetchone()
-    assert version_id is not None
+    version_id = _require_row(
+        conn.execute(
+            """
+            INSERT INTO node_versions (project_id, node_id, version, rendered_text)
+            VALUES (%s, %s, %s, %s)
+            RETURNING id
+            """,
+            (project_id, node_id, _field(next_version, "next_version", 0), rendered),
+        ).fetchone(),
+        f"inserted node_version row for node {node_id}",
+    )
     conn.execute(
         "UPDATE nodes SET current_version_id = %s WHERE id = %s AND project_id = %s",
         (_field(version_id, "id", 0), node_id, project_id),
@@ -167,6 +191,7 @@ class BackfillResult:
     nodes_total: int
     versioned: int
     already_versioned: int
+    repaired: int = 0
 
 
 def backfill_project(conn: psycopg.Connection, project_id: UUID) -> BackfillResult:
@@ -181,15 +206,21 @@ def backfill_project(conn: psycopg.Connection, project_id: UUID) -> BackfillResu
     the embedding path needs, and it is idempotent.
 
     Nodes that already have versions are left untouched: their history is
-    authoritative and was written by the compile path.  Runs under the
-    project writer lock; a second run writes nothing.
+    authoritative and was written by the compile path.  The one exception is
+    a node whose history exists but whose ``current_version_id`` is NULL (a
+    pre-Ruling-14 artifact): backfill repairs it to point at its latest
+    version without writing any new version row, and counts it in
+    ``repaired``.  Runs under the project writer lock; a second run writes
+    nothing.
     """
 
     with with_writer_lock(project_id, conn):
-        total = conn.execute(
-            "SELECT count(*) AS n FROM nodes WHERE project_id = %s", (project_id,)
-        ).fetchone()
-        assert total is not None
+        total = _require_row(
+            conn.execute(
+                "SELECT count(*) AS n FROM nodes WHERE project_id = %s", (project_id,)
+            ).fetchone(),
+            f"node count for project {project_id}",
+        )
         rows = conn.execute(
             """
             SELECT n.id
@@ -205,9 +236,39 @@ def backfill_project(conn: psycopg.Connection, project_id: UUID) -> BackfillResu
             if materialize_version(conn, project_id, _field(row, "id", 0)) == "created":
                 versioned += 1
 
+        repaired = 0
+        null_rows = conn.execute(
+            """
+            SELECT n.id
+            FROM nodes n
+            WHERE n.project_id = %s
+              AND n.current_version_id IS NULL
+              AND EXISTS (SELECT 1 FROM node_versions v WHERE v.node_id = n.id)
+            ORDER BY n.id
+            """,
+            (project_id,),
+        ).fetchall()
+        for row in null_rows:
+            node_id = _field(row, "id", 0)
+            conn.execute(
+                """
+                UPDATE nodes
+                SET current_version_id = (
+                    SELECT v.id FROM node_versions v
+                    WHERE v.node_id = %s
+                    ORDER BY v.version DESC, v.id DESC
+                    LIMIT 1
+                )
+                WHERE id = %s AND project_id = %s
+                """,
+                (node_id, node_id, project_id),
+            )
+            repaired += 1
+
     nodes_total = _field(total, "n", 0)
     return BackfillResult(
         nodes_total=nodes_total,
         versioned=versioned,
-        already_versioned=nodes_total - versioned,
+        already_versioned=nodes_total - versioned - repaired,
+        repaired=repaired,
     )

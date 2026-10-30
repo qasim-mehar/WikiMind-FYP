@@ -36,11 +36,33 @@ def index_conn(test_dsn: str) -> Iterator[psycopg.Connection]:
 
 
 def _seed_two_versions(conn: psycopg.Connection, name: str):
+    """One node with a superseded v1 and a current v2 (H1 scoping fixture)."""
+
     project_id = seed_project(conn, name)
     node_id = seed_node(conn, project_id, "alpha")
-    version_a = seed_node_version(conn, project_id, node_id, "alpha page one")
+    version_a = seed_node_version(
+        conn, project_id, node_id, "alpha page one", version=1, set_current=False
+    )
     version_b = seed_node_version(conn, project_id, node_id, "alpha page two", version=2)
     return project_id, version_a, version_b
+
+
+def test_index_embeds_only_the_current_version(index_conn) -> None:
+    """A node with v1 and v2: the indexer embeds v2 only; v1 is never touched."""
+
+    meter = CostMeter(InMemorySink())
+    embedder = FakeEmbedder(meter=meter, call_site=INDEX_CALL_SITE)
+    project_id, _version_a, version_b = _seed_two_versions(index_conn, uuid4().hex)
+
+    result = index_project(index_conn, project_id, embedder, model=FAKE_EMBED_MODEL)
+
+    assert result == IndexResult(
+        project_id=project_id, model=FAKE_EMBED_MODEL, total=1, embedded=1, skipped=0
+    )
+    assert stored_version_ids(index_conn, project_id, FAKE_EMBED_MODEL) == {version_b}
+    # v1's text never reached the embedder.
+    for event in meter.events:
+        assert "alpha page one" not in str(event.meta)
 
 
 def test_index_embeds_all_versions_and_meters_the_ledger(index_conn, tmp_path) -> None:
@@ -48,23 +70,20 @@ def test_index_embeds_all_versions_and_meters_the_ledger(index_conn, tmp_path) -
     sink = InMemorySink()
     meter = CostMeter(sink)
     embedder = FakeEmbedder(meter=meter, call_site=INDEX_CALL_SITE)
-    project_id, version_a, version_b = _seed_two_versions(index_conn, uuid4().hex)
+    project_id, _, version_b = _seed_two_versions(index_conn, uuid4().hex)
 
     result = index_project(index_conn, project_id, embedder, model=FAKE_EMBED_MODEL)
 
     assert result == IndexResult(
-        project_id=project_id, model=FAKE_EMBED_MODEL, total=2, embedded=2, skipped=0
+        project_id=project_id, model=FAKE_EMBED_MODEL, total=1, embedded=1, skipped=0
     )
-    assert stored_version_ids(index_conn, project_id, FAKE_EMBED_MODEL) == {
-        version_a,
-        version_b,
-    }
+    assert stored_version_ids(index_conn, project_id, FAKE_EMBED_MODEL) == {version_b}
 
     event = meter.events[0]
     assert event.call_site == INDEX_CALL_SITE
     assert event.model == FAKE_EMBED_MODEL
     assert event.shadow_cost_usd == 0.0
-    assert event.meta["texts"] == 2
+    assert event.meta["texts"] == 1
     assert event.meta["dim"] == EMBED_DIM
     assert sink.events == meter.events
     # The same events must reach a real JSONL ledger, not just memory.
@@ -94,9 +113,9 @@ def test_index_rerun_is_idempotent(index_conn) -> None:
     first = index_project(index_conn, project_id, embedder, model=FAKE_EMBED_MODEL)
     second = index_project(index_conn, project_id, embedder, model=FAKE_EMBED_MODEL)
 
-    assert first.embedded == 2
+    assert first.embedded == 1
     assert second == IndexResult(
-        project_id=project_id, model=FAKE_EMBED_MODEL, total=2, embedded=0, skipped=2
+        project_id=project_id, model=FAKE_EMBED_MODEL, total=1, embedded=0, skipped=1
     )
     # Nothing was re-embedded: the embedder was never called a second time.
     assert len(meter.events) == 1
@@ -105,7 +124,7 @@ def test_index_rerun_is_idempotent(index_conn) -> None:
 def test_index_is_incremental_over_new_versions(index_conn) -> None:
     meter = CostMeter(InMemorySink())
     embedder = FakeEmbedder(meter=meter, call_site=INDEX_CALL_SITE)
-    project_id, version_a, version_b = _seed_two_versions(index_conn, uuid4().hex)
+    project_id, _, version_b = _seed_two_versions(index_conn, uuid4().hex)
     index_project(index_conn, project_id, embedder, model=FAKE_EMBED_MODEL)
 
     node_id = seed_node(index_conn, project_id, "beta")
@@ -113,10 +132,9 @@ def test_index_is_incremental_over_new_versions(index_conn) -> None:
     third = index_project(index_conn, project_id, embedder, model=FAKE_EMBED_MODEL)
 
     assert third == IndexResult(
-        project_id=project_id, model=FAKE_EMBED_MODEL, total=3, embedded=1, skipped=2
+        project_id=project_id, model=FAKE_EMBED_MODEL, total=2, embedded=1, skipped=1
     )
     assert stored_version_ids(index_conn, project_id, FAKE_EMBED_MODEL) == {
-        version_a,
         version_b,
         version_c,
     }
@@ -127,9 +145,13 @@ def test_index_batches_embedder_calls_deterministically(index_conn) -> None:
     meter = CostMeter(InMemorySink())
     embedder = FakeEmbedder(meter=meter, call_site=INDEX_CALL_SITE)
     project_id = seed_project(index_conn, uuid4().hex)
-    node_id = seed_node(index_conn, project_id, "alpha")
     for number in range(1, 4):
-        seed_node_version(index_conn, project_id, node_id, f"text {number}", version=number)
+        seed_node_version(
+            index_conn,
+            project_id,
+            seed_node(index_conn, project_id, f"node-{number}"),
+            f"text {number}",
+        )
 
     result = index_project(index_conn, project_id, embedder, model=FAKE_EMBED_MODEL, batch_size=2)
 
@@ -163,19 +185,13 @@ def test_index_scopes_to_one_project(index_conn) -> None:
 
 def test_index_tracks_models_separately(index_conn) -> None:
     embedder = FakeEmbedder(call_site=INDEX_CALL_SITE)
-    project_id, version_a, version_b = _seed_two_versions(index_conn, uuid4().hex)
+    project_id, _, version_b = _seed_two_versions(index_conn, uuid4().hex)
 
     index_project(index_conn, project_id, embedder, model="model-one")
     index_project(index_conn, project_id, embedder, model="model-two")
 
-    assert stored_version_ids(index_conn, project_id, "model-one") == {
-        version_a,
-        version_b,
-    }
-    assert stored_version_ids(index_conn, project_id, "model-two") == {
-        version_a,
-        version_b,
-    }
+    assert stored_version_ids(index_conn, project_id, "model-one") == {version_b}
+    assert stored_version_ids(index_conn, project_id, "model-two") == {version_b}
 
 
 def test_index_rejects_wrong_dimension_before_writing(index_conn) -> None:

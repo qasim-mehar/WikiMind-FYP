@@ -58,10 +58,12 @@ def test_format_vector_literal_and_guards() -> None:
 
 def test_ann_search_orders_by_cosine_similarity(index_conn) -> None:
     project_id = seed_project(index_conn, uuid4().hex)
-    node_id = seed_node(index_conn, project_id, "alpha")
-    version_same = seed_node_version(index_conn, project_id, node_id, "same direction")
-    version_ortho = seed_node_version(index_conn, project_id, node_id, "orthogonal", version=2)
-    version_opposed = seed_node_version(index_conn, project_id, node_id, "opposed", version=3)
+    node_same = seed_node(index_conn, project_id, "same")
+    node_ortho = seed_node(index_conn, project_id, "ortho")
+    node_opposed = seed_node(index_conn, project_id, "opposed")
+    version_same = seed_node_version(index_conn, project_id, node_same, "same direction")
+    version_ortho = seed_node_version(index_conn, project_id, node_ortho, "orthogonal")
+    version_opposed = seed_node_version(index_conn, project_id, node_opposed, "opposed")
     seed_embedding(index_conn, project_id, version_same, Model.A, basis_vector(0))
     seed_embedding(index_conn, project_id, version_ortho, Model.A, basis_vector(1))
     seed_embedding(
@@ -80,7 +82,7 @@ def test_ann_search_orders_by_cosine_similarity(index_conn) -> None:
         version_opposed,
     ]
     assert [round(hit.similarity, 6) for hit in hits] == [1.0, 0.0, -1.0]
-    assert all(hit.node_id == node_id for hit in hits)
+    assert [hit.node_id for hit in hits] == [node_same, node_ortho, node_opposed]
 
 
 def test_ann_search_limits_filters_model_and_project(index_conn) -> None:
@@ -115,6 +117,72 @@ def test_ann_search_rejects_non_finite_query(index_conn) -> None:
     query[0] = float("nan")
     with pytest.raises(ValueError, match="finite"):
         ann_search(index_conn, project_id, query, model=Model.A)
+
+
+def test_retrieval_surfaces_only_current_versions(index_conn) -> None:
+    """H1: a node with v1 and v2 — every version-bearing path returns only v2.
+
+    The superseded v1 keeps its embedding row (append-only store), but no
+    retrieval path may surface it.
+    """
+
+    project_id = seed_project(index_conn, uuid4().hex)
+    node_id = seed_node(index_conn, project_id, "alpha")
+    version_old = seed_node_version(
+        index_conn,
+        project_id,
+        node_id,
+        "the superseded ferret history",
+        version=1,
+        set_current=False,
+    )
+    version_new = seed_node_version(
+        index_conn, project_id, node_id, "the current ferret page", version=2
+    )
+    seed_embedding(index_conn, project_id, version_old, Model.A, basis_vector(0))
+    seed_embedding(index_conn, project_id, version_new, Model.A, basis_vector(0))
+
+    ann = ann_search(index_conn, project_id, basis_vector(0), k=10, model=Model.A)
+    assert [hit.node_version_id for hit in ann] == [version_new]
+
+    fts = fulltext_search(index_conn, project_id, "ferret")
+    assert [hit.node_version_id for hit in fts] == [version_new]
+
+    hybrid = hybrid_fetch(
+        index_conn,
+        project_id,
+        query_vector=basis_vector(0),
+        query_text="ferret",
+        model=Model.A,
+    )
+    assert [hit.node_version_id for hit in hybrid.ann] == [version_new]
+    assert [hit.node_version_id for hit in hybrid.fts] == [version_new]
+    # The node itself still surfaces (at its current version).
+    assert hybrid.node_ids == [node_id]
+
+
+def test_null_current_version_node_is_absent_from_retrieval(index_conn) -> None:
+    """X4: a node WITH versions but NULL current_version_id never surfaces.
+
+    Its version even has an embedding row, but until ``wikimind render
+    backfill`` repairs the pointer the node is invisible to every
+    version-bearing retrieval path.
+    """
+
+    project_id = seed_project(index_conn, uuid4().hex)
+    node_id = seed_node(index_conn, project_id, "ghost")
+    version_id = seed_node_version(
+        index_conn,
+        project_id,
+        node_id,
+        "the unrepaired ferret page",
+        version=1,
+        set_current=False,
+    )
+    seed_embedding(index_conn, project_id, version_id, Model.A, basis_vector(0))
+
+    assert ann_search(index_conn, project_id, basis_vector(0), k=10, model=Model.A) == []
+    assert fulltext_search(index_conn, project_id, "ferret") == []
 
 
 def test_k_hop_expansion_depths_and_determinism(index_conn) -> None:

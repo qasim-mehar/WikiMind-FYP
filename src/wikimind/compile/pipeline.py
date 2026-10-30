@@ -162,7 +162,9 @@ def _process_unit(
     if analyzed.schema_rejected:
         stats.schema_rejects += 1
         stats.errors.append(f"analyze schema_reject unit={unit.channel_id[:12]}")
-        graph.commit_unit(
+        # The commit still runs (the citation node gets a version, Ruling 14),
+        # so its counts feed the run stats like any other unit.
+        counts = graph.commit_unit(
             conn,
             project_id=project_id,
             unit=unit,
@@ -170,6 +172,10 @@ def _process_unit(
             compile_version=compile_version,
             run_id=run_id,
         )
+        stats.claims_committed += counts.claims
+        stats.nodes_created += counts.nodes_created
+        stats.edges_created += counts.edges_created
+        stats.node_versions += counts.node_versions
         return
     assert analyzed.value is not None
 
