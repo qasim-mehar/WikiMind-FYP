@@ -202,3 +202,4 @@ by any QA answer path must be cross-checked against the claim refs
 actually provided to the model, before display. Model-claimed citations
 are never authoritative. Canonical document citation form: slugified
 filename stem (attention.pdf -> attention).
+Ruling 20 addendum (2026-11-18): the interpreter bound (>=3.11,<3.12) is now enforced in requires-python; lifting it requires governed digest regeneration.
