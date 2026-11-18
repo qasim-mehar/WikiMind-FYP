@@ -5,9 +5,11 @@ untouched, and this package never rewrites a ledger line).  Every emitted
 event is additionally mirrored into the frozen ``cost_events`` table when a
 DSN is configured, and :func:`import_costs` backfills an existing JSONL file.
 
-Both writers derive the row id from the exact JSON line via
-:func:`wikimind.integrity.ids.cost_event_uuid`, so re-importing or re-mirroring
-the same event is a no-op (``ON CONFLICT (id) DO NOTHING``).  The nested
+Both writers derive the row id from the **redacted JSON line exactly as
+written to disk** (``JsonlCostSink`` applies ``redact()``), via
+:func:`wikimind.integrity.ids.cost_event_uuid`, so mirroring an event and
+later importing its JSONL file produce the same id and re-importing is a
+no-op (``ON CONFLICT (id) DO NOTHING``).  The nested
 ``unit_price`` object from the JSONL is preserved losslessly in ``meta``; the
 scalar ``unit_price`` column holds its ``input_per_mtok`` component because
 the frozen column is NUMERIC, not JSONB.  NUMERIC(20,10) cannot represent the
@@ -31,8 +33,9 @@ from wikimind.db.connection import connect
 from wikimind.db.locks import with_writer_lock
 from wikimind.llm.cost import CostEvent, CostMeter, CostSink, JsonlCostSink, read_cost_events
 from wikimind.llm.errors import CostSinkError
+from wikimind.llm.secrets import redact
 
-from .ids import ZERO_UUID, cost_event_uuid
+from .ids import cost_event_uuid
 from .model import IntegrityReport
 
 MIRROR_ENV_VAR = "WIKIMIND_COST_DB_MIRROR"
@@ -48,9 +51,9 @@ INSERT_COST_EVENT = """
 
 
 def canonical_event_json(event: CostEvent) -> str:
-    """The exact JSON line that :class:`JsonlCostSink` appends."""
+    """The exact (redacted) JSON line that :class:`JsonlCostSink` appends."""
 
-    return event.model_dump_json()
+    return redact(event.model_dump_json())
 
 
 def resolve_project_id(
@@ -157,18 +160,17 @@ class MirroringCostSink:
         self.primary.emit(event)
         if not self.dsn:
             return
-        key = self.project_id or ZERO_UUID
         try:
-            with (
-                connect(self.dsn, row_factory=dict_row, autocommit=True) as conn,
-                with_writer_lock(key, conn),
-            ):
+            with connect(self.dsn, row_factory=dict_row, autocommit=True) as conn:
+                # Resolve first: the advisory lock key must be this event's
+                # project, never a global dummy key (M1/G2).
                 project_id = self.project_id or resolve_project_id(conn, event)
                 if project_id is None:
                     self.skipped += 1
                     return
-                if insert_cost_event(conn, event, project_id):
-                    self.mirrored += 1
+                with with_writer_lock(project_id, conn):
+                    if insert_cost_event(conn, event, project_id):
+                        self.mirrored += 1
         except Exception:  # noqa: BLE001 - mirroring must not mask the JSONL write
             self.failures += 1
 
