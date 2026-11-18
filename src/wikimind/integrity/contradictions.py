@@ -18,6 +18,7 @@ CONTRADICTIONS_SQL = """
            src.slug AS src_slug,
            dst.slug AS dst_slug,
            c.id AS claim_id,
+           d.id AS document_id,
            d.sha256 AS document_sha256,
            d.source_uri AS source_uri,
            u.channel_id AS channel_id,
@@ -70,7 +71,9 @@ def list_contradictions(conn: psycopg.Connection, project_id: UUID | str) -> Int
     rows = conn.execute(CONTRADICTIONS_SQL, (pid,)).fetchall()
     claims: set[str] = set()
     documents: set[str] = set()
-    units: set[tuple[str, str]] = set()
+    # G12: key on the full compile_units PK (plus project) so the same
+    # channel id compiled under two documents counts as two units.
+    units: set[tuple[str, str, str, str]] = set()
     for row in rows:
         claim_id = str(row["claim_id"])
         document = None if row["document_sha256"] is None else str(row["document_sha256"])
@@ -78,7 +81,14 @@ def list_contradictions(conn: psycopg.Connection, project_id: UUID | str) -> Int
         if document:
             documents.add(document)
         if row["channel_id"]:
-            units.add((str(row["channel_id"]), str(row["compile_version"])))
+            units.add(
+                (
+                    pid,
+                    str(row["document_id"]),
+                    str(row["channel_id"]),
+                    str(row["compile_version"]),
+                )
+            )
         record = {
             "edge_id": str(row["edge_id"]),
             "src_node": row["src_slug"],

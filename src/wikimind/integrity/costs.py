@@ -7,9 +7,10 @@ DSN is configured, and :func:`import_costs` backfills an existing JSONL file.
 
 Both writers derive the row id from the **redacted JSON line exactly as
 written to disk** (``JsonlCostSink`` applies ``redact()``), via
-:func:`wikimind.integrity.ids.cost_event_uuid`, so mirroring an event and
-later importing its JSONL file produce the same id and re-importing is a
-no-op (``ON CONFLICT (id) DO NOTHING``).  The nested
+:func:`wikimind.integrity.ids.cost_event_uuid`: the mirror hashes the string
+it just appended, and the importer hashes the literal line it reads.  So
+mirroring an event and later importing its JSONL file produce the same id
+and re-importing is a no-op (``ON CONFLICT (id) DO NOTHING``).  The nested
 ``unit_price`` object from the JSONL is preserved losslessly in ``meta``; the
 scalar ``unit_price`` column holds its ``input_per_mtok`` component because
 the frozen column is NUMERIC, not JSONB.  NUMERIC(20,10) cannot represent the
@@ -20,6 +21,7 @@ decimals on write; the full-precision value stays in ``meta``.
 from __future__ import annotations
 
 import os
+import sys
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -31,7 +33,7 @@ from psycopg.types.json import Jsonb
 
 from wikimind.db.connection import connect
 from wikimind.db.locks import with_writer_lock
-from wikimind.llm.cost import CostEvent, CostMeter, CostSink, JsonlCostSink, read_cost_events
+from wikimind.llm.cost import CostEvent, CostMeter, CostSink, JsonlCostSink
 from wikimind.llm.errors import CostSinkError
 from wikimind.llm.secrets import redact
 
@@ -54,6 +56,35 @@ def canonical_event_json(event: CostEvent) -> str:
     """The exact (redacted) JSON line that :class:`JsonlCostSink` appends."""
 
     return redact(event.model_dump_json())
+
+
+def read_cost_lines(path: str | Path) -> list[tuple[CostEvent, str]]:
+    """Parse a JSONL ledger while retaining each literal on-disk line.
+
+    G13c: the importer must hash the exact string found on disk, not a
+    re-serialization, so its id is structurally identical to the one the
+    mirror produced when it wrote that line.
+    """
+
+    costs_path = Path(path)
+    try:
+        text = costs_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise CostSinkError(f"could not read cost ledger {costs_path}: {exc}") from exc
+    lines = text.splitlines()
+    pairs: list[tuple[CostEvent, str]] = []
+    for number, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        try:
+            event = CostEvent.model_validate_json(stripped, context={"historical": True})
+        except ValueError as exc:
+            if number == len(lines) and not text.endswith(("\n", "\r")):
+                continue  # tolerate a truncated final line
+            raise CostSinkError(f"invalid cost event at {costs_path}:{number}: {exc}") from exc
+        pairs.append((event, stripped))
+    return pairs
 
 
 def resolve_project_id(
@@ -79,10 +110,21 @@ def resolve_project_id(
     return None if row is None else UUID(str(row["project_id"]))
 
 
-def cost_event_values(event: CostEvent, project_id: UUID | str) -> dict[str, Any]:
-    """Map one cost event onto the frozen ``cost_events`` columns."""
+def cost_event_values(
+    event: CostEvent,
+    project_id: UUID | str,
+    *,
+    source_line: str | None = None,
+) -> dict[str, Any]:
+    """Map one cost event onto the frozen ``cost_events`` columns.
 
-    identity = str(cost_event_uuid(canonical_event_json(event)))
+    ``source_line`` is the literal JSONL line for imports; the mirror uses
+    :func:`canonical_event_json`, the exact string it just wrote.
+    """
+
+    identity = str(
+        cost_event_uuid(source_line if source_line is not None else canonical_event_json(event))
+    )
     meta = dict(event.meta)
     meta.update(
         {
@@ -107,10 +149,16 @@ def cost_event_values(event: CostEvent, project_id: UUID | str) -> dict[str, Any
     }
 
 
-def insert_cost_event(conn: psycopg.Connection, event: CostEvent, project_id: UUID | str) -> bool:
+def insert_cost_event(
+    conn: psycopg.Connection,
+    event: CostEvent,
+    project_id: UUID | str,
+    *,
+    source_line: str | None = None,
+) -> bool:
     """Insert one mirrored cost row.  Returns True only when it was new."""
 
-    values = cost_event_values(event, project_id)
+    values = cost_event_values(event, project_id, source_line=source_line)
     params = tuple(
         values[key]
         for key in (
@@ -171,8 +219,15 @@ class MirroringCostSink:
                 with with_writer_lock(project_id, conn):
                     if insert_cost_event(conn, event, project_id):
                         self.mirrored += 1
-        except Exception:  # noqa: BLE001 - mirroring must not mask the JSONL write
+        except Exception as exc:  # noqa: BLE001 - never mask the JSONL write
+            # G13a: keep the append-of-record safe, but surface the failure so
+            # an operator can see that the DB mirror is degraded.
             self.failures += 1
+            print(
+                f"warning: cost_events mirror failed ({redact(str(exc))}); "
+                "costs.jsonl remains the record",
+                file=sys.stderr,
+            )
 
 
 def build_meter(
@@ -208,16 +263,16 @@ def import_costs(
         report.finding(f"cost ledger not found: {path}")
         return report
     try:
-        events = read_cost_events(path)
+        lines = read_cost_lines(path)
     except (CostSinkError, OSError, ValueError) as exc:
         report.finding(f"could not read cost ledger: {exc}")
         return report
 
-    report.set_count("events_read", len(events))
+    report.set_count("events_read", len(lines))
     owns = conn is None
     active = conn if conn is not None else connect(dsn, row_factory=dict_row, autocommit=True)
     try:
-        for event in events:
+        for event, source_line in lines:
             try:
                 resolved = resolve_project_id(active, event, project_id)
             except (ValueError, psycopg.Error) as exc:
@@ -228,7 +283,7 @@ def import_costs(
                 report.count("skipped_no_project", 1)
                 continue
             with with_writer_lock(resolved, active):
-                if insert_cost_event(active, event, resolved):
+                if insert_cost_event(active, event, resolved, source_line=source_line):
                     report.count("inserted", 1)
                 else:
                     report.count("already_present", 1)
