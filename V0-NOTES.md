@@ -171,3 +171,34 @@ required so long as the model id and pinned rates are unchanged — record
 a one-line dated incident note in V0-NOTES; the ledger is unaffected
 either way.
 Authorized by Qasim, 2026-10-27.
+
+## Rulings 14-21 (2026-10-29 .. 2026-11-18)
+
+Ruling 14 (2026-10-29) — Compile must materialize node versions: every
+WRITE-created node gets version 1 in the same transaction; content
+changes append version n+1 and advance current_version_id; never NULL
+after commit; rendering is a pure deterministic function of stored rows;
+backfill is one-time, idempotent, zero-LLM.
+Ruling 15 (2026-10-29) — The corpus database is wikimind_live_l3. db reset
+--confirm is forbidden against it; .env stays pointed at wikimind_l0
+(safe-empty default); the DSN override is the sanctioned targeting method.
+Ruling 16 (2026-10-30) — Every major governance prompt ends with the
+quality-pass subagent section; the subagent reports findings with severity
+and fixes nothing.
+Ruling 17 (2026-11-18) — ledger_blocks/events/jobs/cost_events are
+expected-empty until the integrity lane activates their write paths; gates
+record them as baseline zero, not defects.
+Ruling 18 (2026-11-18) — Runtime evidence (costs.jsonl, run logs) stays
+untracked; gates pin SHA-256 manifests in their reports; archiving into
+the repo is a Gate C decision.
+Ruling 19 (2026-11-18) — Stale CI at a pinned hash is cured inside the
+gate itself: doc-only commit, push, fresh green run.
+Ruling 20 (2026-11-18) — Digest-stable dependencies: any dependency under
+digest-pinned golden tests must be version-bounded. pypdf pinned
+>=6.21.2,<7. Digest-sensitive assets: the three verbatim compile prompts,
+the QA answer prompt, FakeEmbedder digests (Python 3.11.x), parse goldens.
+Ruling 21 (2026-11-18) — Machine-verified citations: citations displayed
+by any QA answer path must be cross-checked against the claim refs
+actually provided to the model, before display. Model-claimed citations
+are never authoritative. Canonical document citation form: slugified
+filename stem (attention.pdf -> attention).
