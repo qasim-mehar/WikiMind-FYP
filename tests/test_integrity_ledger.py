@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import replace
 from uuid import UUID, uuid4
 
-from tests.integrity_seed import (
+from integrity_seed import (
     connect_db,
     seed_channel,
     seed_claim,

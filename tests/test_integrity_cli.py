@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import json
 
+from integrity_seed import connect_db, seed_project
 from typer.testing import CliRunner
 
-from tests.integrity_seed import connect_db, seed_project
 from wikimind.cli import app
 
 runner = CliRunner()

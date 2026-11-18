@@ -5,10 +5,10 @@ from __future__ import annotations
 from uuid import UUID, uuid4
 
 import pytest
+from integrity_seed import connect_db, seed_project
 from psycopg.types.json import Jsonb
+from test_compile_pipeline import PASSAGE, ScriptedLLM, _happy_script, _register
 
-from tests.integrity_seed import connect_db, seed_project
-from tests.test_compile_pipeline import PASSAGE, ScriptedLLM, _happy_script, _register
 from wikimind.compile import compile_project, resolve_project
 from wikimind.compile.graph import create_project
 from wikimind.integrity.events import (

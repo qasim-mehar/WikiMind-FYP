@@ -6,8 +6,7 @@ import json
 from uuid import uuid4
 
 import pytest
-
-from tests.integrity_seed import (
+from integrity_seed import (
     connect_db,
     seed_channel,
     seed_claim,
@@ -16,6 +15,7 @@ from tests.integrity_seed import (
     seed_node,
     seed_project,
 )
+
 from wikimind.integrity.answers import (
     AnswerDocument,
     Citation,

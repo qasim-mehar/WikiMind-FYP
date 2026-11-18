@@ -5,7 +5,8 @@ from __future__ import annotations
 from decimal import Decimal
 from uuid import uuid4
 
-from tests.integrity_seed import connect_db, seed_project, seed_run
+from integrity_seed import connect_db, seed_project, seed_run
+
 from wikimind.integrity.costs import (
     MIRROR_ENV_VAR,
     MirroringCostSink,
