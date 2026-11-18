@@ -17,6 +17,7 @@ from integrity_seed import (
 )
 
 from wikimind.integrity.answers import (
+    MIN_DOCUMENT_SLUG_HEX,
     AnswerDocument,
     Citation,
     document_identifiers,
@@ -70,20 +71,21 @@ def test_document_identifiers_accept_stable_derivations() -> None:
         sha256=digest,
         source_uri="memo://attention-1706.03762.txt",
         node_slug=f"source:{digest}",
-        document_id=str(uuid4()),
     )
     for candidate in (
         digest,
-        digest[:12],
+        digest[:MIN_DOCUMENT_SLUG_HEX],  # shortest accepted prefix
         digest[:16],
         f"source:{digest}",
         "attention-1706-03762",  # Ruling 21: canonical slugified stem
         "memo://attention-1706.03762.txt",
     ):
         assert candidate in ids
-    # N8: 8-hex prefixes are deliberately too loose.
-    assert digest[:8] not in ids
-    assert f"source:{digest[:8]}" not in ids
+    # N8: prefixes shorter than the shared minimum are too loose.
+    assert digest[: MIN_DOCUMENT_SLUG_HEX - 2] not in ids
+    assert f"source:{digest[: MIN_DOCUMENT_SLUG_HEX - 2]}" not in ids
+    # G13e: a raw document UUID is not a citation slug.
+    assert str(uuid4()) not in ids
     assert "not-the-document" not in ids
 
 
@@ -111,6 +113,12 @@ def test_verify_answer_supported_and_unsupported(test_dsn: str) -> None:
         assert not report.ok
         assert report.counts["citations.unsupported"] == 1
         assert any("unsupported citation" in finding for finding in report.findings)
+
+        # G13e: the raw document UUID is not a tolerated citation form.
+        uuid_slug = AnswerDocument("x", True, (Citation(str(claim), str(document)),))
+        report = verify_answer(conn, uuid_slug, project_id=project)
+        assert not report.ok
+        assert report.counts["citations.unsupported"] == 1
 
         unknown = AnswerDocument("x", True, (Citation(str(uuid4()), "paper-one"),))
         report = verify_answer(conn, unknown, project_id=project)

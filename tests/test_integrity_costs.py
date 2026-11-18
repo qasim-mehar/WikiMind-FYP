@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from contextlib import contextmanager
 from decimal import Decimal
 from uuid import uuid4
@@ -171,6 +172,61 @@ def test_mirror_takes_the_project_lock_key(test_dsn: str, monkeypatch) -> None:
     mirror.emit(_event(meta={"run": str(run)}))
     assert keys == [str(project)]
     assert mirror.failures == 0
+
+
+def test_mirror_failure_surfaces_on_stderr(capsys) -> None:
+    """G13a: mirror errors are counted on the sink and warned about, never raised."""
+
+    mirror = MirroringCostSink(InMemorySink(), dsn="not-a-dsn", project_id=uuid4())
+    mirror.emit(_event())
+    assert mirror.failures == 1
+    assert "warning: cost_events mirror failed" in capsys.readouterr().err
+
+
+def test_import_hashes_the_literal_line(test_dsn: str, tmp_path) -> None:
+    """G13c: import ids come from the exact on-disk string, not a re-serialization."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        run = seed_run(conn, project)
+    finally:
+        conn.close()
+
+    event = _event(meta={"run": str(run)})
+    canonical = canonical_event_json(event)
+    raw = json.loads(canonical)
+    reordered = json.dumps(
+        {
+            "meta": raw["meta"],
+            "call_site": raw["call_site"],
+            "model": raw["model"],
+            "in_tokens": raw["in_tokens"],
+            "out_tokens": raw["out_tokens"],
+            "unit_price": raw["unit_price"],
+            "shadow_cost_usd": raw["shadow_cost_usd"],
+            "timestamp": raw["timestamp"],
+        },
+        separators=(",", ":"),
+    )
+    ledger = tmp_path / "literal.jsonl"
+    ledger.write_text(f"{reordered}\n{canonical}\n", encoding="utf-8")
+
+    first = import_costs(ledger, dsn=test_dsn)
+    assert first.counts["inserted"] >= 2
+    second = import_costs(ledger, dsn=test_dsn)
+    assert second.counts.get("inserted", 0) == 0
+
+    conn = connect_db(test_dsn)
+    try:
+        for line in (reordered, canonical):
+            rows = conn.execute(
+                "SELECT count(*) AS n FROM cost_events WHERE id = %s",
+                (str(cost_event_uuid(line)),),
+            ).fetchone()["n"]
+            assert rows == 1
+    finally:
+        conn.close()
 
 
 def test_mirror_and_import_share_the_redacted_hash(test_dsn: str, tmp_path) -> None:

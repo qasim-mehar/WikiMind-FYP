@@ -124,7 +124,7 @@ def test_multiple_batches_chain_end_to_end() -> None:
     assert report.counts["valid_chains"] == 1
 
 
-def test_tampered_claim_is_detected_at_the_right_block() -> None:
+def test_tampered_membership_is_detected_at_anchor() -> None:
     project, anchor, claim = uuid4(), uuid4(), uuid4()
     conn = FakeConn()
     append_ledger_batch(conn, project, anchor, [(uuid4(), claim)])
@@ -283,5 +283,88 @@ def test_batch_retry_is_a_noop_without_phantom_anchors(test_dsn: str) -> None:
         ).fetchone()["n"]
         assert derived == 1
         assert verify_ledger(conn, project).ok
+    finally:
+        conn.close()
+
+
+def test_empty_batch_retry_after_chain_advancement_is_a_noop(test_dsn: str) -> None:
+    """G9: an empty batch stays idempotent after another batch advanced the chain."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        anchor = seed_node(conn, project, "source:empty-retry")
+        empty = append_ledger_batch(
+            conn, project, anchor, [], channel_id="empty-channel", compile_version="v1"
+        )
+        assert len(empty) == 1
+        emit_event(
+            conn,
+            project,
+            UNIT_COMMITTED,
+            {
+                "channel_id": "empty-channel",
+                "compile_version": "v1",
+                "ledger_block_ids": [str(empty[0])],
+            },
+        )
+        claim = _real_claims(conn, project, 1)[0]
+        later = append_ledger_batch(
+            conn,
+            project,
+            anchor,
+            [(anchor, claim)],
+            channel_id="other-channel",
+            compile_version="v1",
+        )
+        assert len(later) == 2
+
+        assert batch_already_committed(
+            conn, project, anchor, [], channel_id="empty-channel", compile_version="v1"
+        )
+        assert (
+            append_ledger_batch(
+                conn, project, anchor, [], channel_id="empty-channel", compile_version="v1"
+            )
+            == []
+        )
+        derived = conn.execute(
+            "SELECT count(*) AS n FROM ledger_blocks "
+            "WHERE project_id = %s AND block_type = 'derived'",
+            (str(project),),
+        ).fetchone()["n"]
+        unit_events = conn.execute(
+            "SELECT count(*) AS n FROM events WHERE project_id = %s AND kind = %s "
+            "AND data->>'channel_id' = %s",
+            (str(project), UNIT_COMMITTED, "empty-channel"),
+        ).fetchone()["n"]
+        assert derived == 2
+        assert unit_events == 1
+        assert verify_ledger(conn, project).ok
+    finally:
+        conn.close()
+
+
+def test_standalone_tail_without_event_is_a_warning(test_dsn: str) -> None:
+    """G10: no event for the terminal block warns but does not break the chain."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        anchor = seed_node(conn, project, "source:standalone-tail")
+        claim = _real_claims(conn, project, 1)[0]
+        committed = append_ledger_batch(conn, project, anchor, [(anchor, claim)])
+        emit_event(
+            conn,
+            project,
+            UNIT_COMMITTED,
+            {"ledger_block_ids": [str(block) for block in committed]},
+        )
+        tail = append_ledger_batch_locked(project, anchor, [], dsn=test_dsn)
+        assert len(tail) == 1
+        report = verify_ledger(conn, project)
+        assert report.ok
+        assert report.counts["event_references.terminal_without_event"] == 1
+        assert any("terminal block" in w and "no commit event" in w for w in report.warnings)
     finally:
         conn.close()

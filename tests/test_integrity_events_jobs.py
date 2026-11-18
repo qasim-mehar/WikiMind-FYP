@@ -224,6 +224,13 @@ def test_finish_failure_still_terminalizes_the_job(test_dsn: str, monkeypatch) -
         jobs = list_jobs(check, project.id)
         assert len(jobs) == 1
         assert jobs[0]["state"] == "failed"
+        # G11: the fallback must also terminalize the authoritative run row.
+        run = check.execute(
+            "SELECT status, finished_at FROM compile_runs WHERE project_id = %s",
+            (str(project.id),),
+        ).fetchone()
+        assert run["status"] == "failed"
+        assert run["finished_at"] is not None
         kinds = [
             row["kind"]
             for row in check.execute(

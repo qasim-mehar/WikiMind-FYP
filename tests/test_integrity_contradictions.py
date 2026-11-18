@@ -92,6 +92,43 @@ def test_two_compile_versions_yield_one_row(test_dsn: str) -> None:
         conn.close()
 
 
+def test_same_channel_under_two_documents_counts_two_units(test_dsn: str) -> None:
+    """G12: units.recorded keys on the full PK, not just channel+version."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        channel_id = "shared-channel-id"
+        for index in range(2):
+            document = seed_document(conn, project)
+            seed_channel(conn, project, document, channel_id=channel_id)
+            citation = seed_node(conn, project, f"source:shared-{index}", node_type="citation")
+            seed_node(conn, project, f"alpha-{index}")
+            claim = seed_claim(
+                conn,
+                project,
+                citation,
+                channel_id,
+                document,
+                text=f"Claim {index} contradicts another claim.",
+            )
+            seed_edge(
+                conn,
+                project,
+                citation,
+                citation,
+                edge_type="contradicts",
+                claims=(claim,),
+            )
+            seed_compile_unit(conn, project, document, channel_id)
+        report = list_contradictions(conn, project)
+        assert report.ok
+        assert report.counts["edges.contradicts"] == 2
+        assert report.counts["units.recorded"] == 2
+    finally:
+        conn.close()
+
+
 def test_project_isolation(test_dsn: str) -> None:
     conn = connect_db(test_dsn)
     try:
