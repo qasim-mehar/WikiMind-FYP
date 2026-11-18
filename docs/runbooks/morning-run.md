@@ -1,5 +1,7 @@
 # Standing Order — "MORNING RUN"
 
+> **RETIRED 2026-11-18: corpus complete at 229/229; trigger no longer active.**
+
 ## Definition
 
 **MORNING RUN** is a trigger word. When the user sends a message that is
