@@ -11,9 +11,9 @@ document.  Ruling 21 makes the **slugified filename stem the canonical
 document citation**.  Because the frozen ``documents`` table has no slug
 column, the resolver accepts that canonical stem plus other unambiguous
 derivations: the citation node's slug (``source:<sha256>``), the full SHA-256,
-SHA-256 prefixes of at least 12 hex characters, and the ``source_uri``.  An
-8-hex prefix is deliberately not accepted.  A value matching none of them is
-reported as unsupported.
+SHA-256 prefixes of at least :data:`MIN_DOCUMENT_SLUG_HEX` characters, and the
+``source_uri``.  A raw document UUID is deliberately not accepted.  A value
+matching none of them is reported as unsupported.
 """
 
 from __future__ import annotations
@@ -27,6 +27,9 @@ from uuid import UUID
 import psycopg
 
 from .model import IntegrityReport
+
+# G13f: the single authority for the shortest tolerated SHA-256 prefix.
+MIN_DOCUMENT_SLUG_HEX = 12
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,14 +98,18 @@ def document_identifiers(
     sha256: str | None,
     source_uri: str | None,
     node_slug: str | None,
-    document_id: str | None,
 ) -> set[str]:
-    """All stable identifiers a citation may use for one document."""
+    """All stable identifiers a citation may use for one document.
+
+    Ruling 21 canonical form is the slugified filename stem.  A raw document
+    UUID is not a citation slug and is deliberately excluded (G13e).
+    """
 
     values: set[str] = set()
     if sha256:
         digest = str(sha256).lower()
-        for length in (12, 16, len(digest)):
+        lengths = sorted({MIN_DOCUMENT_SLUG_HEX, MIN_DOCUMENT_SLUG_HEX + 4, len(digest)})
+        for length in lengths:
             values.add(digest[:length])
             values.add(f"source:{digest[:length]}")
     if node_slug:
@@ -110,8 +117,6 @@ def document_identifiers(
     if source_uri:
         values.add(str(source_uri).lower())
         values.add(_slugify_stem(str(source_uri)).lower())
-    if document_id:
-        values.add(str(document_id).lower())
     return values
 
 
@@ -152,7 +157,6 @@ def verify_answer(
             sha256=None if row["sha256"] is None else str(row["sha256"]),
             source_uri=None if row["source_uri"] is None else str(row["source_uri"]),
             node_slug=None if row["node_slug"] is None else str(row["node_slug"]),
-            document_id=None if row["document_id"] is None else str(row["document_id"]),
         )
         if citation.document_slug.strip().lower() in identifiers:
             report.count("citations.supported", 1)

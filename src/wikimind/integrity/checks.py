@@ -134,7 +134,7 @@ def check_provenance(conn: psycopg.Connection, project_id: UUID | str) -> Integr
             "edge",
             _examples(
                 conn,
-                "SELECT e.id AS id FROM edges e WHERE e.project_id = %s AND NOT EXISTS (SELECT 1 FROM edge_sources s WHERE s.edge_id = e.id)",
+                "SELECT e.id AS id FROM edges e WHERE e.project_id = %s AND NOT EXISTS (SELECT 1 FROM edge_sources s WHERE s.edge_id = e.id AND s.project_id = e.project_id)",
                 (pid,),
                 "id",
             ),
@@ -180,7 +180,7 @@ def check_provenance(conn: psycopg.Connection, project_id: UUID | str) -> Integr
             "node",
             _examples(
                 conn,
-                "SELECT n.slug AS id FROM nodes n WHERE n.project_id = %s AND n.node_type <> 'memory' AND NOT EXISTS (SELECT 1 FROM node_sources s WHERE s.node_id = n.id)",
+                "SELECT n.slug AS id FROM nodes n WHERE n.project_id = %s AND n.node_type <> 'memory' AND NOT EXISTS (SELECT 1 FROM node_sources s WHERE s.node_id = n.id AND s.project_id = n.project_id)",
                 (pid,),
                 "id",
             ),
@@ -192,7 +192,7 @@ def check_provenance(conn: psycopg.Connection, project_id: UUID | str) -> Integr
             "node",
             _examples(
                 conn,
-                "SELECT n.slug AS id FROM nodes n WHERE n.project_id = %s AND NOT EXISTS (SELECT 1 FROM node_versions v WHERE v.node_id = n.id)",
+                "SELECT n.slug AS id FROM nodes n WHERE n.project_id = %s AND NOT EXISTS (SELECT 1 FROM node_versions v WHERE v.node_id = n.id AND v.project_id = n.project_id)",
                 (pid,),
                 "id",
             ),
@@ -204,7 +204,7 @@ def check_provenance(conn: psycopg.Connection, project_id: UUID | str) -> Integr
             "node",
             _examples(
                 conn,
-                "SELECT n.slug AS id FROM nodes n WHERE n.project_id = %s AND (n.current_version_id IS NULL OR NOT EXISTS (SELECT 1 FROM node_versions v WHERE v.id = n.current_version_id AND v.node_id = n.id))",
+                "SELECT n.slug AS id FROM nodes n WHERE n.project_id = %s AND (n.current_version_id IS NULL OR NOT EXISTS (SELECT 1 FROM node_versions v WHERE v.id = n.current_version_id AND v.node_id = n.id AND v.project_id = n.project_id))",
                 (pid,),
                 "id",
             ),
@@ -226,7 +226,7 @@ def check_provenance(conn: psycopg.Connection, project_id: UUID | str) -> Integr
     )
     pending_channels = _scalar(
         conn,
-        "SELECT count(*) AS n FROM channels ch WHERE ch.project_id = %s AND NOT EXISTS (SELECT 1 FROM compile_units u WHERE u.channel_id = ch.id AND u.document_id = ch.document_id)",
+        "SELECT count(*) AS n FROM channels ch WHERE ch.project_id = %s AND NOT EXISTS (SELECT 1 FROM compile_units u WHERE u.channel_id = ch.id AND u.document_id = ch.document_id AND u.project_id = ch.project_id)",
         (pid,),
     )
     report.set_count("compile_units.orphan", orphan_units)
@@ -242,7 +242,7 @@ def check_provenance(conn: psycopg.Connection, project_id: UUID | str) -> Integr
             "compile unit",
             _examples(
                 conn,
-                "SELECT u.channel_id AS id FROM compile_units u WHERE u.project_id = %s AND NOT EXISTS (SELECT 1 FROM channels ch WHERE ch.id = u.channel_id AND ch.document_id = u.document_id)",
+                "SELECT u.channel_id AS id FROM compile_units u WHERE u.project_id = %s AND NOT EXISTS (SELECT 1 FROM channels ch WHERE ch.id = u.channel_id AND ch.document_id = u.document_id AND ch.project_id = u.project_id)",
                 (pid,),
                 "id",
             ),
