@@ -160,9 +160,10 @@ def _gather_claims_page(
 
     ``depths`` maps visited node ids to their hop distance from a seed; seeds
     are 0. A claim's rank is the shallowest visited node that connects to it
-    (F2/M1), so genuinely seed-adjacent claims sort before deeper ones. Rows
-    whose citation node or connecting provenance node is archived/retracted
-    are excluded (F3). Fetching ``cap + 1`` rows makes ``truncated`` exact.
+    (F2/M1), so genuinely seed-adjacent claims sort before deeper ones. A
+    claim survives only through an all-active path (F3/F8): its citation node,
+    or a provenance edge whose endpoints are both active. Fetching ``cap + 1``
+    rows makes ``truncated`` exact.
     """
 
     if cap < 1:
@@ -193,6 +194,14 @@ def _gather_claims_page(
                   WHERE es.project_id = c.project_id
                     AND es.claim_id = c.id
                     AND (e.src_node = dm.node_id OR e.dst_node = dm.node_id)
+                    -- F8: every node on the provenance path must be active;
+                    -- the visited endpoint is already active via depth_map.
+                    AND NOT EXISTS (
+                        SELECT 1 FROM nodes en
+                        WHERE en.project_id = c.project_id
+                          AND en.id IN (e.src_node, e.dst_node)
+                          AND en.status = ANY(%s::text[])
+                    )
               )
             WHERE c.project_id = %s
             GROUP BY c.id
@@ -210,6 +219,7 @@ def _gather_claims_page(
             node_ids,
             depth_values,
             project_id,
+            list(EXCLUDED_NODE_STATUSES),
             list(EXCLUDED_NODE_STATUSES),
             project_id,
             project_id,

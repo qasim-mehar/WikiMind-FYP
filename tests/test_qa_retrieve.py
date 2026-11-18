@@ -211,6 +211,36 @@ def test_retracted_and_archived_provenance_is_excluded(db_conn) -> None:
     assert by_id[stale_claim].node_status == "stale"
 
 
+def test_claim_connected_only_through_retracted_node_is_excluded(db_conn) -> None:
+    """F8: every node on an edge provenance path must be active."""
+
+    conn = db_conn
+    project_id = _project(conn)
+    document_id, _, _ = _document(conn, project_id, "edgestatus")
+    citation = seed_node(conn, project_id, "source:active-page", node_type="citation")
+    seed = seed_node(conn, project_id, "edge-seed", node_type="concept")
+    retracted = seed_node(
+        conn, project_id, "edge-retracted", node_type="concept", status="retracted"
+    )
+    active_peer = seed_node(conn, project_id, "edge-active", node_type="concept")
+
+    bad_claim = _claim(conn, project_id, document_id, citation, "only a retracted path")
+    good_claim = _claim(conn, project_id, document_id, citation, "an all-active path")
+    bad_edge = seed_edge(conn, project_id, seed, retracted)
+    good_edge = seed_edge(conn, project_id, seed, active_peer)
+    for edge, claim_id in ((bad_edge, bad_claim), (good_edge, good_claim)):
+        conn.execute(
+            "INSERT INTO edge_sources (project_id, edge_id, claim_id) VALUES (%s, %s, %s)",
+            (project_id, edge, claim_id),
+        )
+
+    claims = gather_claims(conn, project_id, [seed], cap=10)
+    ids = {claim.claim_id for claim in claims}
+
+    assert good_claim in ids
+    assert bad_claim not in ids
+
+
 def test_truncated_flag_only_when_rows_were_dropped(db_conn) -> None:
     """F5c: exactly cap rows is not a truncation."""
 

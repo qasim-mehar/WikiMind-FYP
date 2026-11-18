@@ -8,8 +8,8 @@ from wikimind.qa.verify import extract_cited_ids, map_cited_id, verify_citations
 REAL = PromptClaim(ref="c-aaaa11112222", text="real claim", document_slug="attention-paper")
 OTHER = PromptClaim(ref="c-bbbb33334444", text="other claim", document_slug="gan-paper")
 AMBIGUOUS = [
-    PromptClaim(ref="c-ab1111111111", text="a", document_slug="x"),
-    PromptClaim(ref="c-ab2222222222", text="b", document_slug="y"),
+    PromptClaim(ref="c-ab1211111111", text="a", document_slug="x"),
+    PromptClaim(ref="c-ab1222222222", text="b", document_slug="y"),
 ]
 
 
@@ -54,13 +54,79 @@ def test_text_only_citation_is_synthesized_from_the_claim() -> None:
     assert result.unverified_removed == 0
 
 
-def test_ambiguous_prefix_is_removed() -> None:
-    payload = _payload("Something [c-ab].", [AnswerCitation(claim_id="c-ab", document_slug="x")])
+def test_ambiguous_shaped_prefix_is_removed() -> None:
+    payload = _payload(
+        "Something [c-ab12].", [AnswerCitation(claim_id="c-ab12", document_slug="x")]
+    )
 
     result = verify_citations(payload, AMBIGUOUS)
 
     assert result.citations == ()
     assert result.unverified_removed == 1
+
+
+def test_unshaped_bracket_prose_is_ignored_entirely() -> None:
+    """F7: [1] and [Table 1] are not citations, verified or otherwise."""
+
+    payload = _payload(
+        "See [1] and [Table 1]; the result [c-aaaa1] is real.",
+        [],
+    )
+
+    result = verify_citations(payload, [REAL])
+
+    assert [citation.claim_id for citation in result.citations] == [REAL.ref]
+    assert result.unverified_removed == 0
+
+
+def test_short_shaped_bracket_is_ignored_not_counted() -> None:
+    """F7: [c-1] has too few hex chars and is ignored, not unverified."""
+
+    result = verify_citations(_payload("Claim [c-1].", []), [REAL])
+
+    assert result.citations == ()
+    assert result.unverified_removed == 0
+
+
+def test_shaped_but_unresolvable_id_is_counted() -> None:
+    """F7: a claim-ref-shaped id that maps to nothing is unverified."""
+
+    result = verify_citations(_payload("Claim [c-deadbeef].", []), [REAL])
+
+    assert result.citations == ()
+    assert result.unverified_removed == 1
+
+
+def test_disagreeing_duplicate_array_entries_are_unverified() -> None:
+    """F10a: duplicate normalized keys must not shadow; disagreement is fatal."""
+
+    payload = _payload(
+        "A claim [c-aaaa1].",
+        [
+            AnswerCitation(claim_id="c-aaaa1", document_slug="attention-paper"),
+            AnswerCitation(claim_id="AAAA1", document_slug="wrong-document"),
+        ],
+    )
+
+    result = verify_citations(payload, [REAL])
+
+    assert result.citations == ()
+    assert result.unverified_removed == 1
+
+
+def test_agreeing_duplicate_array_entries_dedupe() -> None:
+    payload = _payload(
+        "A claim [c-aaaa1].",
+        [
+            AnswerCitation(claim_id="c-aaaa1", document_slug="attention-paper"),
+            AnswerCitation(claim_id="AAAA1", document_slug="attention-paper"),
+        ],
+    )
+
+    result = verify_citations(payload, [REAL])
+
+    assert [citation.claim_id for citation in result.citations] == [REAL.ref]
+    assert result.unverified_removed == 0
 
 
 def test_exact_match_wins_over_prefix_matching() -> None:

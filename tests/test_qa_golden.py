@@ -163,6 +163,7 @@ def test_every_golden_question_answers_with_expected_sources(db_conn) -> None:
         assert distractor_slug not in retrieved_slugs, entry["id"]
         assert all(claim.claim_id != distractor_claim for claim in result.claims), entry["id"]
         assert all(claim.text in fake.calls[0].user for claim in result.claims), entry["id"]
+        assert {c.document_slug for c in result.citations} == expected_slugs, entry["id"]
         assert result.sufficient is True, entry["id"]
         assert result.unverified_removed == 0, entry["id"]
         assert len(fake.calls) == 1, entry["id"]

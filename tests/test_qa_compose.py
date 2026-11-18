@@ -18,6 +18,7 @@ from wikimind.qa.pipeline import (
     QA_MAX_ATTEMPTS,
     VALIDATION_RETRIES,
     _compose_answer,
+    document_slug,
 )
 from wikimind.qa.prompts import (
     CALL_SITE_ANSWER,
@@ -80,6 +81,23 @@ def test_compose_retries_the_production_response_format_error_once() -> None:
     assert payload.sufficient is True
     assert len(fake.calls) == VALIDATION_RETRIES + 1
     assert "did not match the required JSON shape" in fake.calls[1].user
+
+
+def test_two_production_format_errors_give_one_clean_failure() -> None:
+    """F9: exhaustion on the ResponseFormatError path stays a clean QA error."""
+
+    fake = FakeLLM([ResponseFormatError("bad shape"), ResponseFormatError("still bad shape")])
+
+    with pytest.raises(AnswerFormatError, match="valid answer after one retry"):
+        _compose_answer(fake, "user message")
+    assert len(fake.calls) == VALIDATION_RETRIES + 1
+
+
+def test_canonical_document_slug_uses_the_filename_stem() -> None:
+    """F10b/Ruling 21: attention.pdf -> attention."""
+
+    assert document_slug("attention.pdf") == "attention"
+    assert document_slug("file:///papers/1706.03762-attention.pdf") == "1706-03762-attention"
 
 
 def test_compose_wraps_provider_failure_and_prints_its_cause() -> None:
