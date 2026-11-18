@@ -1,0 +1,148 @@
+{
+  "schema_version": "qa-golden-v1",
+  "derived_from": [
+    "tests/fixtures/papers/1706.03762-attention.pdf",
+    "tests/fixtures/papers/1406.2661-gan.pdf",
+    "tests/fixtures/papers/2005.11401-retro.pdf",
+    "tests/fixtures/papers/contradiction-note.txt"
+  ],
+  "note": "Questions derived from the locked parse-fixture corpus. expected_answer_elements are substrings expected in a correct answer; expected_source_documents are fixture filenames. seed_claims are claim texts (verbatim or lightly cleaned from the fixture text) used to seed template DBs in the acceptance tests. The contradiction case deliberately carries a false claim and a true claim from different documents.",
+  "questions": [
+    {
+      "id": "attn-arch",
+      "question": "What network architecture does Attention Is All You Need propose, and what does it dispense with?",
+      "expected_answer_elements": ["Transformer", "attention", "recurrence", "convolutions"],
+      "expected_source_documents": ["1706.03762-attention.pdf"],
+      "seed_claims": [
+        {"text": "Attention Is All You Need proposes the Transformer, a new simple network architecture based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.", "document": "1706.03762-attention.pdf"}
+      ]
+    },
+    {
+      "id": "attn-bleu-ende",
+      "question": "What BLEU score does the Transformer achieve on the WMT 2014 English-to-German translation task, and how does it compare with prior results?",
+      "expected_answer_elements": ["28.4 BLEU", "WMT 2014 English-to-German", "ensembles", "2 BLEU"],
+      "expected_source_documents": ["1706.03762-attention.pdf"],
+      "seed_claims": [
+        {"text": "The Transformer model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles, by over 2 BLEU.", "document": "1706.03762-attention.pdf"}
+      ]
+    },
+    {
+      "id": "attn-bleu-enfr",
+      "question": "What BLEU score does the Transformer establish on WMT 2014 English-to-French, and how long did that model train?",
+      "expected_answer_elements": ["41.8", "English-to-French", "3.5 days", "eight GPUs"],
+      "expected_source_documents": ["1706.03762-attention.pdf"],
+      "seed_claims": [
+        {"text": "On the WMT 2014 English-to-French translation task, the Transformer establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs.", "document": "1706.03762-attention.pdf"}
+      ]
+    },
+    {
+      "id": "attn-train-time",
+      "question": "How quickly can the Transformer reach state-of-the-art translation quality, and on what hardware?",
+      "expected_answer_elements": ["twelve hours", "eight P100 GPUs"],
+      "expected_source_documents": ["1706.03762-attention.pdf"],
+      "seed_claims": [
+        {"text": "The Transformer can reach a new state of the art in translation quality after being trained for as little as twelve hours on eight P100 GPUs.", "document": "1706.03762-attention.pdf"}
+      ]
+    },
+    {
+      "id": "attn-multihead",
+      "question": "Which mechanism counteracts the reduced effective resolution caused by averaging attention-weighted positions?",
+      "expected_answer_elements": ["Multi-Head Attention"],
+      "expected_source_documents": ["1706.03762-attention.pdf"],
+      "seed_claims": [
+        {"text": "In the Transformer, reducing signal-comparison operations to a constant number comes at the cost of reduced effective resolution from averaging attention-weighted positions, an effect counteracted with Multi-Head Attention.", "document": "1706.03762-attention.pdf"}
+      ]
+    },
+    {
+      "id": "gan-models",
+      "question": "Which two models are trained simultaneously in the generative adversarial nets framework, and what does each do?",
+      "expected_answer_elements": ["generative model G", "discriminative model D", "data distribution", "training data"],
+      "expected_source_documents": ["1406.2661-gan.pdf"],
+      "seed_claims": [
+        {"text": "Generative Adversarial Nets simultaneously train two models: a generative model G that captures the data distribution, and a discriminative model D that estimates the probability that a sample came from the training data rather than G.", "document": "1406.2661-gan.pdf"}
+      ]
+    },
+    {
+      "id": "gan-solution",
+      "question": "What is the unique solution of the adversarial nets minimax game in the space of arbitrary functions G and D?",
+      "expected_answer_elements": ["unique solution", "recovering the training data distribution", "1/2"],
+      "expected_source_documents": ["1406.2661-gan.pdf"],
+      "seed_claims": [
+        {"text": "In the space of arbitrary functions G and D, the adversarial nets minimax two-player game has a unique solution, with G recovering the training data distribution and D equal to 1/2 everywhere.", "document": "1406.2661-gan.pdf"}
+      ]
+    },
+    {
+      "id": "gan-no-mcmc",
+      "question": "Does training and sampling with generative adversarial nets require Markov chains or unrolled approximate inference?",
+      "expected_answer_elements": ["no Markov chains", "no unrolled approximate inference"],
+      "expected_source_documents": ["1406.2661-gan.pdf"],
+      "seed_claims": [
+        {"text": "Generative adversarial nets require no Markov chains or unrolled approximate inference networks during either training or generation of samples.", "document": "1406.2661-gan.pdf"}
+      ]
+    },
+    {
+      "id": "gan-analogy",
+      "question": "What real-world analogy does the GAN paper use to explain the generative and discriminative models?",
+      "expected_answer_elements": ["counterfeiters", "police"],
+      "expected_source_documents": ["1406.2661-gan.pdf"],
+      "seed_claims": [
+        {"text": "In the GAN analogy, the generative model is like a team of counterfeiters trying to produce fake currency without detection, while the discriminative model is like the police trying to detect the counterfeit currency.", "document": "1406.2661-gan.pdf"}
+      ]
+    },
+    {
+      "id": "gan-backprop",
+      "question": "When G and D are multilayer perceptrons, how can the entire adversarial nets system be trained?",
+      "expected_answer_elements": ["backpropagation", "multilayer perceptrons"],
+      "expected_source_documents": ["1406.2661-gan.pdf"],
+      "seed_claims": [
+        {"text": "When G and D are defined by multilayer perceptrons, the entire generative adversarial nets system can be trained with backpropagation.", "document": "1406.2661-gan.pdf"}
+      ]
+    },
+    {
+      "id": "rag-memories",
+      "question": "What two kinds of memory do RAG models combine for language generation?",
+      "expected_answer_elements": ["parametric", "non-parametric", "seq2seq", "Wikipedia", "dense vector index", "retriever"],
+      "expected_source_documents": ["2005.11401-retro.pdf"],
+      "seed_claims": [
+        {"text": "RAG models combine a parametric memory, a pre-trained seq2seq model, with a non-parametric memory, a dense vector index of Wikipedia accessed with a pre-trained neural retriever.", "document": "2005.11401-retro.pdf"}
+      ]
+    },
+    {
+      "id": "rag-formulations",
+      "question": "What are the two RAG formulations compared in the paper?",
+      "expected_answer_elements": ["same retrieved passages", "whole generated sequence", "different passages per token"],
+      "expected_source_documents": ["2005.11401-retro.pdf"],
+      "seed_claims": [
+        {"text": "The paper compares two RAG formulations: one conditions on the same retrieved passages across the whole generated sequence, and another can use different passages per token.", "document": "2005.11401-retro.pdf"}
+      ]
+    },
+    {
+      "id": "rag-sota",
+      "question": "On how many open-domain QA tasks does RAG set the state of the art, and what does it outperform?",
+      "expected_answer_elements": ["three open domain QA tasks", "parametric seq2seq", "retrieve-and-extract"],
+      "expected_source_documents": ["2005.11401-retro.pdf"],
+      "seed_claims": [
+        {"text": "RAG fine-tuned and evaluated on knowledge-intensive NLP tasks sets the state of the art on three open domain QA tasks, outperforming parametric seq2seq models and task-specific retrieve-and-extract architectures.", "document": "2005.11401-retro.pdf"}
+      ]
+    },
+    {
+      "id": "rag-downsides",
+      "question": "Which downsides of large pre-trained language models motivate the RAG approach?",
+      "expected_answer_elements": ["expand or revise", "memory", "provenance", "hallucinations"],
+      "expected_source_documents": ["2005.11401-retro.pdf"],
+      "seed_claims": [
+        {"text": "Large pre-trained language models cannot easily expand or revise their memory, cannot straightforwardly provide insight into their predictions, and may produce hallucinations; hybrid parametric and non-parametric memory addresses these issues.", "document": "2005.11401-retro.pdf"}
+      ]
+    },
+    {
+      "id": "contradiction-bleu",
+      "question": "What does each source say about the Transformer's BLEU score on WMT 2014 English-to-German, and do they agree?",
+      "expected_answer_elements": ["28.4 BLEU", "18.4 BLEU", "conflict", "synthetic"],
+      "expected_source_documents": ["1706.03762-attention.pdf", "contradiction-note.txt"],
+      "seed_claims": [
+        {"text": "Attention Is All You Need reports that the Transformer achieves 28.4 BLEU on the WMT 2014 English-to-German translation task.", "document": "1706.03762-attention.pdf"},
+        {"text": "The synthetic test fixture claims that the Transformer reached only 18.4 BLEU on the WMT 2014 English-to-German translation task, a full 10 BLEU below the paper's reported 28.4, and it did not improve on the best ensembles.", "document": "contradiction-note.txt"}
+      ]
+    }
+  ]
+}

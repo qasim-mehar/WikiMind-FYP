@@ -71,6 +71,7 @@ def ann_search(
     *,
     k: int = 10,
     model: str = EMBED_MODEL,
+    exclude_node_types: Sequence[str] = (),
 ) -> list[AnnHit]:
     """Top-k node versions by cosine similarity, served by the HNSW index.
 
@@ -79,8 +80,14 @@ def ann_search(
     embedding row for them still exists. Ordered by similarity descending,
     ties broken by node version id.
 
+    ``exclude_node_types`` is applied in SQL *before* the LIMIT, so a caller
+    that bars citation nodes cannot have its whole result page swallowed by
+    them. An empty sequence is a no-op (``<> ALL('{}')`` is vacuously true).
+    Graph expansion is a separate function and is deliberately unaffected:
+    excluded node types remain traversable.
+
     Planner caveat: the current-version filter is applied at scan time, so
-    on Postgres builds without iterative HNSW scans a corpus with many
+    on pgvector deployments without iterative index scans a corpus with many
     superseded versions can return fewer than ``k`` current hits.
     Correctness is unaffected; completeness at scale is the caveat.
     """
@@ -96,10 +103,11 @@ def ann_search(
         JOIN nodes n ON n.id = nv.node_id
         WHERE e.project_id = %s AND e.model = %s
           AND n.current_version_id = nv.id
+          AND n.node_type <> ALL(%s::text[])
         ORDER BY e.vec <=> %s::vector, e.node_version_id
         LIMIT %s
         """,
-        (literal, project_id, model, literal, k),
+        (literal, project_id, model, list(exclude_node_types), literal, k),
     ).fetchall()
     return [
         AnnHit(node_id=row[0], node_version_id=row[1], similarity=float(row[2])) for row in rows
@@ -167,6 +175,7 @@ def fulltext_search(
     query: str,
     *,
     k: int = 10,
+    exclude_node_types: Sequence[str] = (),
 ) -> list[FtsHit]:
     """Match node version prose with ``websearch_to_tsquery`` over the stored tsvector.
 
@@ -174,6 +183,9 @@ def fulltext_search(
     phrases); it never raises on odd input, it just matches nothing.  Only a
     node's CURRENT version is searched: superseded versions never surface.
     Ordered by ``ts_rank`` descending, ties broken by node version id.
+
+    ``exclude_node_types`` is applied in SQL before the LIMIT (empty = no-op),
+    exactly as in :func:`ann_search`.
     """
 
     if k < 1:
@@ -186,11 +198,12 @@ def fulltext_search(
         JOIN nodes n ON n.id = nv.node_id
         WHERE nv.project_id = %s
           AND n.current_version_id = nv.id
+          AND n.node_type <> ALL(%s::text[])
           AND nv.fts @@ websearch_to_tsquery('english', %s)
         ORDER BY score DESC, nv.id
         LIMIT %s
         """,
-        (query, project_id, query, k),
+        (query, project_id, list(exclude_node_types), query, k),
     ).fetchall()
     return [
         FtsHit(
@@ -213,6 +226,7 @@ def hybrid_fetch(
     k: int = 10,
     hops: int = 1,
     model: str = EMBED_MODEL,
+    exclude_node_types: Sequence[str] = (),
 ) -> HybridHits:
     """Run the retrieval substrates and union their results by node id.
 
@@ -221,17 +235,31 @@ def hybrid_fetch(
     plus whatever the first two returned. Each result list keeps its own
     ordering; the union in ``node_ids`` is first-seen order across the three
     lists. No scoring or fusion policy is applied here.
+
+    ``exclude_node_types`` filters the ANN/FTS seed searches only (before
+    their LIMIT); k-hop traversal is unaffected.
     """
 
     if query_vector is None and query_text is None and not seed_node_ids:
         raise ValueError("hybrid_fetch needs a query_vector, query_text, or seed_node_ids")
 
     ann_hits = (
-        ann_search(conn, project_id, query_vector, k=k, model=model)
+        ann_search(
+            conn,
+            project_id,
+            query_vector,
+            k=k,
+            model=model,
+            exclude_node_types=exclude_node_types,
+        )
         if query_vector is not None
         else []
     )
-    fts_hits = fulltext_search(conn, project_id, query_text, k=k) if query_text is not None else []
+    fts_hits = (
+        fulltext_search(conn, project_id, query_text, k=k, exclude_node_types=exclude_node_types)
+        if query_text is not None
+        else []
+    )
 
     seeds: set[UUID] = set(seed_node_ids)
     seeds.update(hit.node_id for hit in ann_hits)
