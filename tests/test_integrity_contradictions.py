@@ -70,6 +70,28 @@ def test_contradiction_without_provenance_is_a_finding(test_dsn: str) -> None:
         conn.close()
 
 
+def test_two_compile_versions_yield_one_row(test_dsn: str) -> None:
+    """G3: the join uses the full compile_units PK, not just (doc, channel)."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project, document, channel, _claim, _edge = _seed_contradiction(conn)
+        seed_compile_unit(conn, project, document, channel, compile_version="test-v2")
+        conn.execute(
+            "UPDATE compile_units SET compiled_at = now() + interval '1 hour' "
+            "WHERE project_id = %s AND compile_version = %s",
+            (str(project), "test-v2"),
+        )
+        report = list_contradictions(conn, project)
+        assert report.ok
+        assert report.counts["edges.contradicts"] == 1
+        assert len(report.rows) == 1
+        assert report.rows[0]["unit_compile_version"] == "test-v2"
+        assert report.counts["units.recorded"] == 1
+    finally:
+        conn.close()
+
+
 def test_project_isolation(test_dsn: str) -> None:
     conn = connect_db(test_dsn)
     try:

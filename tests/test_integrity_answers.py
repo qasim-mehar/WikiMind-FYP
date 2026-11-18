@@ -74,12 +74,16 @@ def test_document_identifiers_accept_stable_derivations() -> None:
     )
     for candidate in (
         digest,
+        digest[:12],
         digest[:16],
         f"source:{digest}",
-        "attention-1706-03762",
+        "attention-1706-03762",  # Ruling 21: canonical slugified stem
         "memo://attention-1706.03762.txt",
     ):
         assert candidate in ids
+    # N8: 8-hex prefixes are deliberately too loose.
+    assert digest[:8] not in ids
+    assert f"source:{digest[:8]}" not in ids
     assert "not-the-document" not in ids
 
 

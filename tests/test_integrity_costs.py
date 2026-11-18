@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from decimal import Decimal
 from uuid import uuid4
 
@@ -11,6 +12,7 @@ from wikimind.integrity.costs import (
     MIRROR_ENV_VAR,
     MirroringCostSink,
     build_meter,
+    canonical_event_json,
     cost_event_values,
     import_costs,
     insert_cost_event,
@@ -49,7 +51,7 @@ def test_cost_values_keep_ruling_11_shadow_pricing_and_full_precision() -> None:
     assert Decimal(values["unit_price"]) == Decimal(str(price_for(JUDGE_MODEL).input_per_mtok))
     assert price_for(JUDGE_MODEL).input_per_mtok > 0  # Ruling 11: :free priced at paid twin
     assert values["meta"].obj["shadow_cost_usd_full"] == str(event.shadow_cost_usd)
-    assert values["id"] == str(cost_event_uuid(event.model_dump_json()))
+    assert values["id"] == str(cost_event_uuid(canonical_event_json(event)))
 
 
 def test_mirror_is_idempotent_and_resolves_project_from_run(test_dsn: str) -> None:
@@ -67,7 +69,7 @@ def test_mirror_is_idempotent_and_resolves_project_from_run(test_dsn: str) -> No
         assert mirror.failures == 0
         rows = conn.execute(
             "SELECT project_id, call_site, meta FROM cost_events WHERE id = %s",
-            (str(cost_event_uuid(event.model_dump_json())),),
+            (str(cost_event_uuid(canonical_event_json(event))),),
         ).fetchall()
         assert len(rows) == 1
         assert rows[0]["project_id"] == project
@@ -107,8 +109,8 @@ def test_import_is_idempotent_and_skips_runless_events(test_dsn: str, tmp_path) 
         third = import_costs(ledger, dsn=test_dsn, project_id=project)
         assert third.counts["inserted"] == 1
         imported_ids = (
-            str(cost_event_uuid(compile_event.model_dump_json())),
-            str(cost_event_uuid(smoke_event.model_dump_json())),
+            str(cost_event_uuid(canonical_event_json(compile_event))),
+            str(cost_event_uuid(canonical_event_json(smoke_event))),
         )
         assert (
             conn.execute(
@@ -139,5 +141,67 @@ def test_resolve_project_and_insert_use_frozen_columns(test_dsn: str) -> None:
         assert row["in_tokens"] == 100
         assert row["out_tokens"] == 50
         assert row["created_at"] is not None
+    finally:
+        conn.close()
+
+
+def test_mirror_takes_the_project_lock_key(test_dsn: str, monkeypatch) -> None:
+    """G2: the advisory key is the resolved project, never the zero UUID."""
+
+    import wikimind.integrity.costs as costs_module
+
+    real_lock = costs_module.with_writer_lock
+    keys: list[str] = []
+
+    @contextmanager
+    def spy_lock(project_id, conn=None):
+        keys.append(str(project_id))
+        with real_lock(project_id, conn) as active:
+            yield active
+
+    monkeypatch.setattr(costs_module, "with_writer_lock", spy_lock)
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        run = seed_run(conn, project)
+    finally:
+        conn.close()
+
+    mirror = MirroringCostSink(InMemorySink(), dsn=test_dsn)
+    mirror.emit(_event(meta={"run": str(run)}))
+    assert keys == [str(project)]
+    assert mirror.failures == 0
+
+
+def test_mirror_and_import_share_the_redacted_hash(test_dsn: str, tmp_path) -> None:
+    """G4: both writers hash the redacted JSONL line, so import adds no row."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        run = seed_run(conn, project)
+    finally:
+        conn.close()
+
+    ledger = tmp_path / "costs.jsonl"
+    event = _event(meta={"run": str(run), "api_key": "sk-or-v1-" + "A" * 24})
+    mirror = MirroringCostSink(JsonlCostSink(ledger), dsn=test_dsn)
+    mirror.emit(event)
+    assert mirror.mirrored == 1
+
+    line = ledger.read_text(encoding="utf-8").strip()
+    assert "[REDACTED]" in line
+    assert "sk-or-v1-" not in line
+    identity = str(cost_event_uuid(line))
+
+    result = import_costs(ledger, dsn=test_dsn)
+    assert result.counts.get("inserted", 0) == 0
+    assert result.counts["already_present"] >= 1
+    conn = connect_db(test_dsn)
+    try:
+        rows = conn.execute(
+            "SELECT count(*) AS n FROM cost_events WHERE id = %s", (identity,)
+        ).fetchone()["n"]
+        assert rows == 1
     finally:
         conn.close()

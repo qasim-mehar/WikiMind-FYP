@@ -77,6 +77,23 @@ def test_findings_are_counted_and_reported(test_dsn: str) -> None:
         conn.close()
 
 
+def test_claim_citation_node_provenance_matches_db_check(test_dsn: str) -> None:
+    """L4: a citation node must be sourced from the claim's own document."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project, document, _channel, citation, _entity, _claim, _edge = _well_formed(conn)
+        conn.execute(
+            "DELETE FROM node_sources WHERE node_id = %s AND document_id = %s",
+            (str(citation), str(document)),
+        )
+        report = check_provenance(conn, project)
+        assert not report.ok
+        assert report.counts["claims.citation_node_unsourced"] == 1
+    finally:
+        conn.close()
+
+
 def test_checks_are_project_scoped(test_dsn: str) -> None:
     conn = connect_db(test_dsn)
     try:

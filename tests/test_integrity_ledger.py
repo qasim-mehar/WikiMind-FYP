@@ -27,11 +27,13 @@ def _real_claims(conn, project, count: int) -> list[UUID]:
     ]
 
 
-from wikimind.integrity.ids import ZERO_UUID, batch_digest, ledger_block_uuid
+from wikimind.integrity.events import UNIT_COMMITTED, emit_event
+from wikimind.integrity.ids import ZERO_UUID, batch_fingerprint, ledger_block_uuid
 from wikimind.integrity.ledger import (
     LedgerBlock,
     append_ledger_batch,
     append_ledger_batch_locked,
+    batch_already_committed,
     verify_chain,
     verify_ledger,
 )
@@ -72,6 +74,10 @@ class FakeConn:
             return _Cursor([{"id": rows[-1]["id"]}] if rows else [])
         if "node_id = ANY" in compact:
             return _Cursor([])
+        if compact.startswith("SELECT 1 FROM ledger_blocks WHERE id"):
+            assert params is not None
+            found = any(b["id"] == str(params[0]) for b in self.blocks)
+            return _Cursor([{"1": 1}] if found else [])
         if "INSERT INTO ledger_blocks" in compact:
             assert params is not None
             block_id, project_id, node_id, claim_id, position, block_type = params
@@ -127,9 +133,9 @@ def test_tampered_claim_is_detected_at_the_right_block() -> None:
     tampered = [original[0], replace(original[1], claim_id=str(uuid4()))]
     report = verify_chain(tampered)
     assert not report.ok
-    # The anchor commits to batch membership, so the membership change is
-    # first detected at the anchor (block 0) as well as at the claim block.
-    assert any("broken at block" in finding for finding in report.findings)
+    # The anchor commits to batch membership, so verification stops at the
+    # first mismatch (the anchor, block 0) and never reaches the claim block.
+    assert any("broken at block 0" in finding for finding in report.findings)
     assert report.counts["broken_chains"] == 1
 
 
@@ -167,7 +173,7 @@ def test_empty_project_is_a_clean_ledger(test_dsn: str) -> None:
         conn.close()
 
 
-def test_db_writer_and_verifier_round_trip_with_fakes(test_dsn: str) -> None:
+def test_db_writer_and_verifier_round_trip(test_dsn: str) -> None:
     conn = connect_db(test_dsn)
     try:
         project = seed_project(conn)
@@ -180,10 +186,9 @@ def test_db_writer_and_verifier_round_trip_with_fakes(test_dsn: str) -> None:
         assert report.ok, report.findings
         assert report.counts["claim_blocks"] == 2
 
-        # Re-sending the same entries appends an anchor but no duplicate claim
-        # blocks, and the chain stays valid.
+        # Re-sending the same entries is a no-op: no phantom empty anchor.
         again = append_ledger_batch(conn, project, anchor, [(anchor, claim) for claim in batch])
-        assert len(again) == 1
+        assert again == []
         assert verify_ledger(conn, project).ok
 
         # A standalone locked append works and keeps the chain intact.
@@ -225,8 +230,58 @@ def test_hash_inputs_use_the_documented_domain() -> None:
         node_id=str(anchor),
         claim_id=None,
         block_type="derived",
-        payload_digest=batch_digest([(str(anchor), str(claim))]),
+        payload_digest=batch_fingerprint(str(project), str(anchor), [(str(anchor), str(claim))]),
     )
     conn = FakeConn()
     append_ledger_batch(conn, project, anchor, [(anchor, claim)])
     assert UUID(conn.blocks[0]["id"]) == expected
+
+
+def test_tail_truncation_is_detected_via_events(test_dsn: str) -> None:
+    """G1: a chain tail deleted from ledger_blocks alone is caught."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        anchor = seed_node(conn, project, "source:tail-truncation")
+        claims = _real_claims(conn, project, 2)
+        first = append_ledger_batch(conn, project, anchor, [(anchor, claims[0])])
+        second = append_ledger_batch(conn, project, anchor, [(anchor, claims[1])])
+        emit_event(conn, project, UNIT_COMMITTED, {"ledger_block_ids": [str(b) for b in first]})
+        emit_event(conn, project, UNIT_COMMITTED, {"ledger_block_ids": [str(b) for b in second]})
+        assert verify_ledger(conn, project).ok
+
+        conn.execute(
+            "DELETE FROM ledger_blocks WHERE id::text = ANY(%s)", ([str(b) for b in second],)
+        )
+        report = verify_ledger(conn, project)
+        assert not report.ok
+        assert report.counts["event_references.missing"] >= 1
+        assert any("tail truncation at position 1" in finding for finding in report.findings)
+        assert any(row["status"] == "broken" for row in report.rows)
+    finally:
+        conn.close()
+
+
+def test_batch_retry_is_a_noop_without_phantom_anchors(test_dsn: str) -> None:
+    """G5: retrying a committed batch writes neither anchor nor event payload."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        anchor = seed_node(conn, project, "source:retry")
+        claims = _real_claims(conn, project, 2)
+        entries = [(anchor, claim) for claim in claims]
+        assert not batch_already_committed(conn, project, anchor, entries)
+        ids = append_ledger_batch(conn, project, anchor, entries)
+        assert len(ids) == 3
+        assert batch_already_committed(conn, project, anchor, entries)
+        assert append_ledger_batch(conn, project, anchor, entries) == []
+        derived = conn.execute(
+            "SELECT count(*) AS n FROM ledger_blocks WHERE project_id = %s AND block_type = 'derived'",
+            (str(project),),
+        ).fetchone()["n"]
+        assert derived == 1
+        assert verify_ledger(conn, project).ok
+    finally:
+        conn.close()

@@ -111,6 +111,13 @@ def seed_claim(
             text,
         ),
     )
+    # Mirror real compile behaviour: the citation node is sourced from the
+    # claim's own document (the canonical `db check` provenance rule).
+    conn.execute(
+        "INSERT INTO node_sources (project_id, node_id, document_id) VALUES (%s, %s, %s) "
+        "ON CONFLICT DO NOTHING",
+        (str(project_id), str(citation_node), str(document_id)),
+    )
     return identity
 
 

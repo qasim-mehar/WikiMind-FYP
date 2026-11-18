@@ -7,6 +7,7 @@ from uuid import UUID, uuid4
 from wikimind.integrity.ids import (
     ZERO_UUID,
     batch_digest,
+    batch_fingerprint,
     cost_event_uuid,
     deterministic_uuid,
     ledger_block_uuid,
@@ -59,4 +60,13 @@ def test_batch_digest_depends_on_order_and_membership() -> None:
     assert batch_digest([(a, b)]) == batch_digest([(a, b)])
     assert batch_digest([(a, b)]) != batch_digest([(b, a)])
     assert batch_digest([(a, b)]) != batch_digest([(a, b), (a, str(uuid4()))])
-    assert batch_digest([]) == batch_digest([])
+    assert batch_digest([]) != batch_digest([(a, b)])
+
+
+def test_batch_fingerprint_binds_project_and_anchor() -> None:
+    project, anchor, claim = uuid4(), uuid4(), uuid4()
+    baseline = batch_fingerprint(project, anchor, [(anchor, claim)])
+    assert baseline == batch_fingerprint(project, anchor, [(anchor, claim)])
+    assert baseline != batch_fingerprint(uuid4(), anchor, [(anchor, claim)])
+    assert baseline != batch_fingerprint(project, uuid4(), [(anchor, claim)])
+    assert baseline != batch_fingerprint(project, anchor, [])

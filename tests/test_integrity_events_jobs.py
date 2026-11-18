@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from uuid import UUID, uuid4
 
+import psycopg
 import pytest
 from integrity_seed import connect_db, seed_project
 from psycopg.types.json import Jsonb
 from test_compile_pipeline import PASSAGE, ScriptedLLM, _happy_script, _register
 
 from wikimind.compile import compile_project, resolve_project
-from wikimind.compile.graph import create_project
+from wikimind.compile.graph import AcceptedClaim, Unit, commit_unit, create_project
+from wikimind.compile.models import ProposedEntity
 from wikimind.integrity.events import (
     RUN_FINISHED,
     RUN_STARTED,
@@ -137,6 +139,100 @@ def test_failed_run_marks_the_job_failed(test_dsn: str) -> None:
         assert kinds == [RUN_STARTED, RUN_FINISHED]
     finally:
         conn.close()
+
+
+def test_compile_retry_skips_duplicate_unit_event_and_anchor(test_dsn: str) -> None:
+    """G5: a repeated commit writes neither a second anchor nor a second event."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = create_project(conn, f"integrity-retry-{uuid4().hex[:8]}")
+        _register(conn, project.id, "doc1.txt", PASSAGE)
+        drafter, judge = ScriptedLLM(), ScriptedLLM()
+        _happy_script(drafter, judge)
+        compile_project(
+            conn, project=resolve_project(conn, str(project.id)), drafter=drafter, judge=judge
+        )
+        document = conn.execute(
+            "SELECT id, sha256 FROM documents WHERE project_id = %s", (str(project.id),)
+        ).fetchone()
+        channel = conn.execute(
+            "SELECT id FROM channels WHERE document_id = %s", (str(document["id"]),)
+        ).fetchone()
+        unit = Unit(
+            document_id=document["id"],
+            document_sha256=document["sha256"],
+            channel_id=channel["id"],
+            kind="section",
+            ordinal=0,
+            raw_text=PASSAGE,
+        )
+        accepted = [
+            AcceptedClaim(
+                text="Alpha joined Beta Labs in 2017.",
+                support_quote="Alpha joined Beta Labs in 2017.",
+                entities=(ProposedEntity(name="Alpha", type="person"),),
+                relations=(),
+                disposition="new",
+                target_claim_id=None,
+            )
+        ]
+        commit_unit(conn, project_id=project.id, unit=unit, accepted=accepted)
+        events = conn.execute(
+            "SELECT count(*) AS n FROM events WHERE project_id = %s AND kind = %s",
+            (str(project.id), UNIT_COMMITTED),
+        ).fetchone()["n"]
+        anchors = conn.execute(
+            "SELECT count(*) AS n FROM ledger_blocks WHERE project_id = %s AND block_type = 'derived'",
+            (str(project.id),),
+        ).fetchone()["n"]
+        assert events == 1
+        assert anchors == 1
+        assert verify_ledger(conn, project.id).ok
+    finally:
+        conn.close()
+
+
+def test_finish_failure_still_terminalizes_the_job(test_dsn: str, monkeypatch) -> None:
+    """G7: a finish-time DB failure never leaves a job running silently."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = create_project(conn, f"integrity-finish-{uuid4().hex[:8]}")
+        _register(conn, project.id, "doc1.txt", PASSAGE)
+        drafter, judge = ScriptedLLM(), ScriptedLLM()
+        _happy_script(drafter, judge)
+        real_execute = conn.execute
+        failed = []
+
+        def flaky_execute(query, params=None, **kwargs):
+            if "UPDATE compile_runs" in str(query) and not failed:
+                failed.append(True)
+                raise psycopg.OperationalError("forced finish failure")
+            return real_execute(query, params, **kwargs)
+
+        monkeypatch.setattr(conn, "execute", flaky_execute)
+        with pytest.raises(psycopg.OperationalError):
+            compile_project(
+                conn, project=resolve_project(conn, str(project.id)), drafter=drafter, judge=judge
+            )
+    finally:
+        conn.close()
+
+    check = connect_db(test_dsn)
+    try:
+        jobs = list_jobs(check, project.id)
+        assert len(jobs) == 1
+        assert jobs[0]["state"] == "failed"
+        kinds = [
+            row["kind"]
+            for row in check.execute(
+                "SELECT kind FROM events WHERE project_id = %s ORDER BY id", (str(project.id),)
+            ).fetchall()
+        ]
+        assert RUN_FINISHED in kinds
+    finally:
+        check.close()
 
 
 def test_event_writer_on_real_db(test_dsn: str) -> None:
