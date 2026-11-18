@@ -368,65 +368,194 @@ def test_empty_batch_retry_after_chain_advancement_is_a_noop(test_dsn: str) -> N
 
 
 def test_marker_does_not_collide_across_documents(test_dsn: str) -> None:
-    """Quality-pass H1: channel ids are not unique across documents (migration 002)."""
+    """HF1: identical channel text in two documents yields the SAME channel_id.
+
+    Both compile units must still get their own anchor, claim block and event.
+    """
+
+    from wikimind.parse.ids import channel_id as derive_channel_id
+    from wikimind.parse.ids import normalize_text
 
     conn = connect_db(test_dsn)
     try:
         project = seed_project(conn)
-        anchor = seed_node(conn, project, "source:shared-channel")
         document_a = seed_document(conn, project)
         document_b = seed_document(conn, project)
-        channel_id, version = "identical-channel-id", "v1"
+        shared_text = "Alpha joined Beta Labs in 2017."
+        # Observed equality: both documents derive the identical 64-hex digest
+        # from (kind, normalized text); migration 002 makes this expected.
+        shared_cid = derive_channel_id("section", normalize_text(shared_text))
+        assert shared_cid == derive_channel_id("section", normalize_text(shared_text))
+        version = "v1"
+
+        anchors: dict[str, UUID] = {}
+        claims: dict[str, UUID] = {}
+        for suffix, document in (("A", document_a), ("B", document_b)):
+            seed_channel(conn, project, document, channel_id=shared_cid, text=shared_text)
+            citation = seed_node(
+                conn, project, f"source:shared-{suffix}-{uuid4().hex[:8]}", node_type="citation"
+            )
+            anchors[suffix] = citation
+            claims[suffix] = seed_claim(
+                conn,
+                project,
+                citation,
+                shared_cid,
+                document,
+                text=f"Claim {suffix}: {shared_text}",
+            )
 
         first = append_ledger_batch(
             conn,
             project,
-            anchor,
-            [],
+            anchors["A"],
+            [(anchors["A"], claims["A"])],
             document_id=str(document_a),
-            channel_id=channel_id,
+            channel_id=shared_cid,
             compile_version=version,
         )
+        assert len(first) == 2  # anchor + claim block
         emit_event(
             conn,
             project,
             UNIT_COMMITTED,
             {
                 "document_id": str(document_a),
-                "channel_id": channel_id,
+                "channel_id": shared_cid,
                 "compile_version": version,
-                "ledger_block_ids": [str(first[0])],
+                "ledger_block_ids": [str(block) for block in first],
             },
         )
 
-        # The second document shares channel id and compile version; it is a
-        # distinct compile unit and must get its own anchor and event.
         assert not batch_already_committed(
             conn,
             project,
-            anchor,
-            [],
+            anchors["B"],
+            [(anchors["B"], claims["B"])],
             document_id=str(document_b),
-            channel_id=channel_id,
+            channel_id=shared_cid,
             compile_version=version,
         )
         second = append_ledger_batch(
             conn,
             project,
-            anchor,
-            [],
+            anchors["B"],
+            [(anchors["B"], claims["B"])],
             document_id=str(document_b),
-            channel_id=channel_id,
+            channel_id=shared_cid,
             compile_version=version,
         )
-        assert len(second) == 1
-        derived = conn.execute(
-            "SELECT count(*) AS n FROM ledger_blocks "
-            "WHERE project_id = %s AND block_type = 'derived'",
-            (str(project),),
+        assert len(second) == 2  # second anchor + second claim block
+        emit_event(
+            conn,
+            project,
+            UNIT_COMMITTED,
+            {
+                "document_id": str(document_b),
+                "channel_id": shared_cid,
+                "compile_version": version,
+                "ledger_block_ids": [str(block) for block in second],
+            },
+        )
+
+        counts = {
+            row["block_type"]: row["n"]
+            for row in conn.execute(
+                "SELECT block_type, count(*) AS n FROM ledger_blocks "
+                "WHERE project_id = %s GROUP BY block_type",
+                (str(project),),
+            ).fetchall()
+        }
+        assert counts["derived"] == 2
+        assert counts["claim"] == 2
+        events = conn.execute(
+            "SELECT count(*) AS n FROM events WHERE project_id = %s AND kind = %s "
+            "AND data->>'channel_id' = %s AND data->>'compile_version' = %s",
+            (str(project), UNIT_COMMITTED, shared_cid, version),
         ).fetchone()["n"]
-        assert derived == 2
+        assert events == 2
+        report = verify_ledger(conn, project)
+        assert report.ok, report.findings
+    finally:
+        conn.close()
+
+
+def test_marker_without_blocks_does_not_suppress_a_commit(test_dsn: str) -> None:
+    """HF2: a UNIT_COMMITTED marker must carry a batch to count as proof."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        document = seed_document(conn, project)
+        channel = "marker-without-blocks-channel"
+        citation = seed_node(
+            conn, project, f"source:no-blocks-{uuid4().hex[:8]}", node_type="citation"
+        )
+        seed_channel(conn, project, document, channel_id=channel)
+        claim = seed_claim(conn, project, citation, channel, document)
+
+        emit_event(
+            conn,
+            project,
+            UNIT_COMMITTED,
+            {
+                "document_id": str(document),
+                "channel_id": channel,
+                "compile_version": "v1",
+                "ledger_block_ids": [],
+            },
+        )
+        assert not batch_already_committed(
+            conn,
+            project,
+            citation,
+            [(citation, claim)],
+            document_id=str(document),
+            channel_id=channel,
+            compile_version="v1",
+        )
+        ids = append_ledger_batch(
+            conn,
+            project,
+            citation,
+            [(citation, claim)],
+            document_id=str(document),
+            channel_id=channel,
+            compile_version="v1",
+        )
+        assert len(ids) == 2
         assert verify_ledger(conn, project).ok
+    finally:
+        conn.close()
+
+
+def test_deleting_all_blocks_is_a_self_consistent_broken_report(test_dsn: str) -> None:
+    """HF3: findings, rows and broken_chains agree when every block is gone."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        anchor = seed_node(conn, project, "source:all-deleted")
+        claim = _real_claims(conn, project, 1)[0]
+        blocks = append_ledger_batch(conn, project, anchor, [(anchor, claim)])
+        emit_event(
+            conn,
+            project,
+            UNIT_COMMITTED,
+            {"ledger_block_ids": [str(block) for block in blocks]},
+        )
+        assert verify_ledger(conn, project).ok
+
+        conn.execute("DELETE FROM ledger_blocks WHERE project_id = %s", (str(project),))
+        report = verify_ledger(conn, project)
+        assert report.ok is False
+        assert report.exit_code == 1
+        assert report.counts["broken_chains"] >= 1
+        assert any("tail truncation" in finding for finding in report.findings)
+        rows = [row for row in report.rows if row["project_id"] == str(project)]
+        assert len(rows) == 1
+        assert rows[0]["status"] == "broken"
+        assert report.to_dict()["ok"] is False
     finally:
         conn.close()
 
