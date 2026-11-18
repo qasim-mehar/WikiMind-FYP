@@ -20,7 +20,9 @@ QA_PROMPT_VERSION = "qa-v0"
 # Canonical call sites. The "qa." prefix already exists in
 # wikimind.llm.cost.CALL_SITE_PREFIXES; cost.py is deliberately not edited.
 CALL_SITE_ANSWER = "qa.answer"
-CALL_SITE_EMBED = "qa.embed"
+# Ruling 21 fix-up: question embedding is a query-time embed call, not QA work.
+# "embed." is already in CALL_SITE_PREFIXES; cost.py stays untouched.
+CALL_SITE_EMBED = "embed.query"
 
 QA_ANSWER_PROMPT = """You are the answer composer for a knowledge-base system.
 You receive one user question and a set of stored claims retrieved from
@@ -72,9 +74,15 @@ def claim_ref(claim_id: UUID) -> str:
 
 
 def _escape(text: str) -> str:
-    """Escape XML-sensitive characters so distilled text cannot break a wrapper tag."""
+    """Escape XML-sensitive characters so distilled text cannot break a wrapper.
 
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    Includes the double quote: refs and document slugs are interpolated into
+    XML *attribute values*, where a raw ``"`` would terminate the attribute.
+    """
+
+    return (
+        text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+    )
 
 
 class PromptClaim(BaseModel):

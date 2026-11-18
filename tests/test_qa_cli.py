@@ -109,7 +109,11 @@ def test_print_result_contains_all_sections(capsys) -> None:
             citations=(AnswerCitation(claim_id="c-1", document_slug="source:abc"),),
             claims=(
                 SimpleNamespace(
-                    ref="c-1", claim_id=claim_id, text="Source claim", document_slug="source:abc"
+                    ref="c-1",
+                    claim_id=claim_id,
+                    text="Source claim",
+                    document_slug="source:abc",
+                    node_status="stale",
                 ),
             ),
             shadow_cost_usd=0.000001,
@@ -118,6 +122,7 @@ def test_print_result_contains_all_sections(capsys) -> None:
             seeds=(),
             claim_cap=40,
             truncated=False,
+            unverified_removed=2,
         ),
         "a question",
     )
@@ -125,6 +130,7 @@ def test_print_result_contains_all_sections(capsys) -> None:
     assert "question: a question" in out
     assert "answer:   Answer text [c-1]." in out
     assert "sufficient: false" in out
-    assert "[c-1] source:abc — Source claim" in out
+    assert "[c-1] source:abc — Source claim [status: stale]" in out
+    assert "2 unverified citation(s) removed" in out
     assert "shadow:" in out
     assert "wall:" in out

@@ -12,6 +12,7 @@ from .pipeline import (
     AnswerResult,
     ClaimRecord,
     answer_question,
+    document_slug,
     gather_claims,
     seed_node_ids,
 )
@@ -25,6 +26,7 @@ from .prompts import (
     build_user_message,
     claim_ref,
 )
+from .verify import VerificationResult, verify_citations
 
 __all__ = [
     "CALL_SITE_ANSWER",
@@ -39,9 +41,12 @@ __all__ = [
     "PromptClaim",
     "QAError",
     "QARetrievalError",
+    "VerificationResult",
     "answer_question",
     "build_user_message",
     "claim_ref",
+    "document_slug",
     "gather_claims",
     "seed_node_ids",
+    "verify_citations",
 ]

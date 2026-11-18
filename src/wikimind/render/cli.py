@@ -67,9 +67,11 @@ def backfill(
         typer.echo(f"error: {redact(exc)}", err=True)
         raise typer.Exit(2) from exc
     try:
-        project_id = _resolve_project_id(conn, project)
         try:
+            project_id = _resolve_project_id(conn, project)
             result = backfill_project(conn, project_id)
+        except typer.Exit:
+            raise
         except Exception as exc:
             typer.echo(f"error: {redact(exc)}", err=True)
             raise typer.Exit(2) from exc

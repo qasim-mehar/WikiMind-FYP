@@ -4,7 +4,14 @@ from __future__ import annotations
 
 import pytest
 
-from wikimind.llm import CostMeter, FakeLLM, InMemorySink, RetryExhaustedError, Usage
+from wikimind.llm import (
+    CostMeter,
+    FakeLLM,
+    InMemorySink,
+    ResponseFormatError,
+    RetryExhaustedError,
+    Usage,
+)
 from wikimind.qa.errors import AnswerFormatError, AnswerGenerationError
 from wikimind.qa.pipeline import (
     DEFAULT_CLAIM_CAP,
@@ -63,12 +70,26 @@ def test_compose_fails_cleanly_after_one_validation_retry() -> None:
     assert len(fake.calls) == 2
 
 
-def test_compose_wraps_provider_failure_in_clean_qa_error() -> None:
+def test_compose_retries_the_production_response_format_error_once() -> None:
+    """F4: GeminiClient raises ResponseFormatError, not a ValidationError."""
+
+    fake = FakeLLM([ResponseFormatError("response did not match schema"), GOOD])
+
+    payload = _compose_answer(fake, "user message")
+
+    assert payload.sufficient is True
+    assert len(fake.calls) == VALIDATION_RETRIES + 1
+    assert "did not match the required JSON shape" in fake.calls[1].user
+
+
+def test_compose_wraps_provider_failure_and_prints_its_cause() -> None:
     fake = FakeLLM([RetryExhaustedError("Gemini call failed after 3 attempts")])
 
     with pytest.raises(AnswerGenerationError) as excinfo:
         _compose_answer(fake, "user message")
     assert "answer generation failed" in str(excinfo.value)
+    assert "cause:" in str(excinfo.value)
+    assert "after 3 attempts" in str(excinfo.value)
     assert len(fake.calls) == 1
 
 

@@ -23,3 +23,10 @@ class AnswerGenerationError(QAError):
     def __init__(self, message: str, cause: WikiMindLLMError | None = None) -> None:
         super().__init__(message)
         self.cause = cause
+
+    def __str__(self) -> str:
+        # The CLI prints str(exc); surface the underlying provider cause so
+        # operators see the 503/format detail without a traceback (L4).
+        if self.cause is not None:
+            return f"{super().__str__()} (cause: {self.cause})"
+        return super().__str__()

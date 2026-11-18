@@ -87,7 +87,11 @@ def _print_result(result: AnswerResult, question: str) -> None:
     for citation in result.citations:
         claim = by_ref.get(citation.claim_id)
         suffix = f" — {claim.text}" if claim is not None else ""
+        if claim is not None and claim.node_status != "active":
+            suffix += f" [status: {claim.node_status}]"
         typer.echo(f"  [{citation.claim_id}] {citation.document_slug}{suffix}")
+    if result.unverified_removed:
+        typer.echo(f"  {result.unverified_removed} unverified citation(s) removed")
     retrieval = (
         f"retrieval: {len(result.seeds)} seeds, {len(result.claims)}/{result.claim_cap} claims"
     )
@@ -184,7 +188,11 @@ def ask(
         int,
         typer.Option(
             "--max-attempts",
-            help=f"Drafter transport attempts on 503/timeout (default {QA_MAX_ATTEMPTS}).",
+            help=(
+                f"Drafter transport attempts on 503/timeout (default {QA_MAX_ATTEMPTS}). "
+                f"Worst case {QA_MAX_ATTEMPTS} transport x 2 validation attempts; "
+                f"base delay {QA_BASE_DELAY}s, timeout {QA_TIMEOUT_S}s."
+            ),
             min=1,
             max=QA_MAX_ATTEMPTS,
         ),

@@ -17,7 +17,7 @@ from index_seed import basis_vector, seed_edge, seed_embedding, seed_node, seed_
 
 from wikimind.llm import CostMeter, FakeLLM, InMemorySink
 from wikimind.prices import EMBED_MODEL
-from wikimind.qa.pipeline import answer_question
+from wikimind.qa.pipeline import answer_question, document_slug
 from wikimind.qa.prompts import CALL_SITE_EMBED, claim_ref
 
 GOLDEN_PATH = Path(__file__).resolve().parent / "golden" / "qa_questions.json"
@@ -60,10 +60,10 @@ def _seed_case(conn, entry: dict):
             "RETURNING id",
             (project_id, sha, f"file:///{seed['document']}"),
         ).fetchone()[0]
-        citation_slug = f"source:{sha}"
-        slug_by_fixture[seed["document"]] = citation_slug
+        doc_slug = document_slug(f"file:///{seed['document']}")
+        slug_by_fixture[seed["document"]] = doc_slug
 
-        citation = seed_node(conn, project_id, citation_slug, node_type="citation")
+        citation = seed_node(conn, project_id, f"source:{sha}", node_type="citation")
         cversion = seed_node_version(conn, project_id, citation, seed["text"])
         seed_embedding(conn, project_id, cversion, EMBED_MODEL, basis_vector(40 + index))
 
@@ -77,7 +77,7 @@ def _seed_case(conn, entry: dict):
             "INSERT INTO edge_sources (project_id, edge_id, claim_id) VALUES (%s, %s, %s)",
             (project_id, edge, claim_id),
         )
-        claims.append((claim_id, citation_slug, seed["text"]))
+        claims.append((claim_id, doc_slug, seed["text"]))
 
     # A disconnected distractor: a real node with a claim, but never a seed and
     # never reachable through the seeded graph.
@@ -94,7 +94,8 @@ def _seed_case(conn, entry: dict):
     dcitation = seed_node(conn, project_id, f"source:{sha}", node_type="citation")
     seed_node_version(conn, project_id, dcitation, "orbital mechanics of Mars")
     distractor_claim = _claim(conn, project_id, document_id, dcitation, "orbital mechanics of Mars")
-    return project_id, slug_by_fixture, claims, distractor_claim
+    distractor_slug = document_slug("file:///distractor.txt")
+    return project_id, slug_by_fixture, claims, distractor_claim, distractor_slug
 
 
 class FixedEmbedder:
@@ -131,7 +132,9 @@ def test_golden_file_structure() -> None:
 
 def test_every_golden_question_answers_with_expected_sources(db_conn) -> None:
     for entry in _load()["questions"]:
-        project_id, slug_by_fixture, claims, distractor_claim = _seed_case(db_conn, entry)
+        project_id, slug_by_fixture, claims, distractor_claim, distractor_slug = _seed_case(
+            db_conn, entry
+        )
         expected_slugs = {slug_by_fixture[doc] for doc in entry["expected_source_documents"]}
         refs = [claim_ref(claim_id) for claim_id, _, _ in claims]
         scripted = {
@@ -154,10 +157,12 @@ def test_every_golden_question_answers_with_expected_sources(db_conn) -> None:
             ann_k=len(expected_slugs),
         )
 
-        for element in entry["expected_answer_elements"]:
-            assert element in result.answer, entry["id"]
-        assert result.sufficient is True, entry["id"]
-        assert {c.document_slug for c in result.citations} == expected_slugs, entry["id"]
-        assert expected_slugs <= {claim.document_slug for claim in result.claims}, entry["id"]
+        # F6: genuine retrieval checks, not assertions on our own scripted text.
+        retrieved_slugs = {claim.document_slug for claim in result.claims}
+        assert expected_slugs <= retrieved_slugs, entry["id"]
+        assert distractor_slug not in retrieved_slugs, entry["id"]
         assert all(claim.claim_id != distractor_claim for claim in result.claims), entry["id"]
+        assert all(claim.text in fake.calls[0].user for claim in result.claims), entry["id"]
+        assert result.sufficient is True, entry["id"]
+        assert result.unverified_removed == 0, entry["id"]
         assert len(fake.calls) == 1, entry["id"]
