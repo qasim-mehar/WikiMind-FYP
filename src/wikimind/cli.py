@@ -61,6 +61,15 @@ except ModuleNotFoundError as exc:
 else:
     app.add_typer(render_cli.app, name="render")
 
+try:
+    from wikimind.qa import cli as qa_cli
+except ModuleNotFoundError as exc:
+    if exc.name not in {"wikimind.qa", "wikimind.qa.cli"}:
+        raise
+else:
+    # ``wikimind ask "<question>"`` is a top-level command, like compile/index.
+    app.command(name="ask")(qa_cli.ask)
+
 
 def main() -> None:
     """Run the WikiMind command line application."""

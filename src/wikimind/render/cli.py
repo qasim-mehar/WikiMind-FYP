@@ -59,13 +59,18 @@ def backfill(
         raise typer.Exit(2)
 
     # Autocommit: with_writer_lock manages the transaction; reads commit
-    # immediately.
-    conn = connect(resolved, row_factory=dict_row, autocommit=True)
+    # immediately. Any failure — psycopg or otherwise — is reported as a clean
+    # CLI error, never a raw traceback (P3 quality pass).
+    try:
+        conn = connect(resolved, row_factory=dict_row, autocommit=True)
+    except Exception as exc:
+        typer.echo(f"error: {redact(exc)}", err=True)
+        raise typer.Exit(2) from exc
     try:
         project_id = _resolve_project_id(conn, project)
         try:
             result = backfill_project(conn, project_id)
-        except psycopg.Error as exc:
+        except Exception as exc:
             typer.echo(f"error: {redact(exc)}", err=True)
             raise typer.Exit(2) from exc
     finally:
