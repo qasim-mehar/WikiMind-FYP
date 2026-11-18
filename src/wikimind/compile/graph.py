@@ -17,7 +17,7 @@ from psycopg.types.json import Json
 
 from ..db.locks import with_writer_lock
 from ..integrity.events import UNIT_COMMITTED, emit_event
-from ..integrity.ledger import append_ledger_batch
+from ..integrity.ledger import append_ledger_batch, batch_already_committed
 from ..render.versions import materialize_version
 from .errors import AmbiguousProjectError, ProjectNotFoundError
 from .ids import (
@@ -655,28 +655,31 @@ def commit_unit(
 
         # Append this commit batch to the project's hash-chained claim ledger.
         # One derived anchor block per batch, then one claim block per accepted
-        # claim; the anchor's node is the document's citation node.
-        ledger_block_ids = append_ledger_batch(conn, project_id, citation_node, ledger_entries)
-        emit_event(
-            conn,
-            project_id,
-            UNIT_COMMITTED,
-            {
-                "run_id": None if run_id is None else str(run_id),
-                "document_id": str(unit.document_id),
-                "document_sha256": unit.document_sha256,
-                "channel_id": unit.channel_id,
-                "compile_version": compile_version,
-                "claim_ids": [str(claim) for claim in claim_uuids],
-                "touched_nodes": [str(node) for node in sorted(touched_nodes)],
-                "ledger_block_ids": [str(block_id) for block_id in ledger_block_ids],
-                "counts": {
-                    "claims": len(accepted),
-                    "nodes_created": created_nodes[0],
-                    "edges_created": created_edges[0],
+        # claim; the anchor's node is the document's citation node.  A retried
+        # commit skips BOTH the batch and its audit event, so no phantom anchor
+        # or duplicate UNIT_COMMITTED event is written (G5).
+        if not batch_already_committed(conn, project_id, citation_node, ledger_entries):
+            ledger_block_ids = append_ledger_batch(conn, project_id, citation_node, ledger_entries)
+            emit_event(
+                conn,
+                project_id,
+                UNIT_COMMITTED,
+                {
+                    "run_id": None if run_id is None else str(run_id),
+                    "document_id": str(unit.document_id),
+                    "document_sha256": unit.document_sha256,
+                    "channel_id": unit.channel_id,
+                    "compile_version": compile_version,
+                    "claim_ids": [str(claim) for claim in claim_uuids],
+                    "touched_nodes": [str(node) for node in sorted(touched_nodes)],
+                    "ledger_block_ids": [str(block_id) for block_id in ledger_block_ids],
+                    "counts": {
+                        "claims": len(accepted),
+                        "nodes_created": created_nodes[0],
+                        "edges_created": created_edges[0],
+                    },
                 },
-            },
-        )
+            )
 
         # Governance Ruling 14: every touched node leaves this transaction
         # with a current node version.  Rendering reads the rows just written

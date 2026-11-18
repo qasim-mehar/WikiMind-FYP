@@ -9,19 +9,26 @@ UUID primary key is the hash slot):
 * Each commit batch appends exactly one ``derived`` block -- the batch anchor
   (``claim_id IS NULL``) -- followed by one ``claim`` block per claim the batch
   commits, each attached to the L2 node it belongs to.  The anchor's node is
-  the unit's citation node.
+  the unit's citation node.  All-rejected units still produce an anchor-only
+  batch: that is intentional, the unit marker must have a ledger record.
 * A block's ``id`` is a UUIDv8-shaped value computed by
   :func:`wikimind.integrity.ids.ledger_block_uuid` over the domain separator,
   ``project_id``, the *previous block's id*, ``position``, ``node_id``,
   ``claim_id``, ``block_type`` and a payload digest.  For claim blocks the
-  payload digest is empty; for an anchor it is the SHA-256 of the ordered
+  payload digest is empty; for an anchor it is the fingerprint of the ordered
   ``(node_id, claim_id)`` pairs of the claim blocks that follow it in the
   batch.  Genesis uses the all-zero UUID as the predecessor.
 
 Verification recomputes every id from the previous stored id and the row's
-own columns (recomputing each anchor's batch digest from the claim blocks that
-follow it), and checks that positions are contiguous.  Any change to a row, a
-deletion, a reordering, or a change in batch membership breaks the chain.
+own columns (recomputing each anchor's batch fingerprint from the claim blocks
+that follow it), checks that positions are contiguous, and cross-checks the
+``ledger_block_ids`` recorded in ``UNIT_COMMITTED`` events against the chain.
+A truncation of the chain's tail is detected because the events outlive it.
+
+**Honest scope:** the chain is tamper-evident against tampering with the
+``ledger_blocks`` table alone (row changes, deletions, reordering, batch
+membership changes, tail truncation).  It is NOT resistant to an attacker who
+can rewrite both ``ledger_blocks`` and the ``events`` table consistently.
 Writers only INSERT; nothing here ever updates or deletes a block.
 """
 
@@ -37,7 +44,8 @@ from psycopg.rows import dict_row
 from wikimind.db.connection import connect
 from wikimind.db.locks import with_writer_lock
 
-from .ids import ZERO_UUID, batch_digest, ledger_block_uuid
+from .events import UNIT_COMMITTED
+from .ids import ZERO_UUID, batch_fingerprint, ledger_block_uuid
 from .model import IntegrityReport
 
 INSERT_BLOCK = """
@@ -70,6 +78,95 @@ class LedgerBlock:
         )
 
 
+def _candidate_pairs(entries: Sequence[tuple[UUID | str, UUID | str]]) -> list[tuple[str, str]]:
+    """Dedupe entries to one block per (node, claim), in first-seen order.
+
+    Several accepted claims can share a deterministic claim id; the frozen
+    ``UNIQUE(node_id, claim_id)`` constraint must not be violated.
+    """
+
+    return list(dict.fromkeys((str(node).lower(), str(claim).lower()) for node, claim in entries))
+
+
+def _existing_pairs(
+    conn: psycopg.Connection, project_id: str, candidates: Sequence[tuple[str, str]]
+) -> set[tuple[str, str]]:
+    if not candidates:
+        return set()
+    node_ids = sorted({node for node, _ in candidates})
+    rows = conn.execute(
+        "SELECT node_id, claim_id FROM ledger_blocks "
+        "WHERE project_id = %s AND node_id = ANY(%s) AND claim_id IS NOT NULL",
+        (project_id, node_ids),
+    ).fetchall()
+    return {(str(r["node_id"]).lower(), str(r["claim_id"]).lower()) for r in rows}
+
+
+def _next_position(conn: psycopg.Connection, project_id: str) -> tuple[int, str]:
+    row = conn.execute(
+        "SELECT COALESCE(MAX(position), -1) + 1 AS next_position "
+        "FROM ledger_blocks WHERE project_id = %s",
+        (project_id,),
+    ).fetchone()
+    previous = conn.execute(
+        "SELECT id FROM ledger_blocks WHERE project_id = %s ORDER BY position DESC LIMIT 1",
+        (project_id,),
+    ).fetchone()
+    position = int(row["next_position"])
+    prev_id = ZERO_UUID if previous is None else str(previous["id"]).lower()
+    return position, prev_id
+
+
+def anchor_id_for_batch(
+    conn: psycopg.Connection,
+    project_id: UUID | str,
+    anchor_node_id: UUID | str,
+    entries: Sequence[tuple[UUID | str, UUID | str]],
+) -> UUID:
+    """The deterministic anchor id the writer would produce at this moment."""
+
+    pid = str(project_id)
+    candidate = _candidate_pairs(entries)
+    fresh = [pair for pair in candidate if pair not in _existing_pairs(conn, pid, candidate)]
+    position, prev_id = _next_position(conn, pid)
+    return ledger_block_uuid(
+        project_id=pid,
+        prev_id=prev_id,
+        position=position,
+        node_id=str(anchor_node_id).lower(),
+        claim_id=None,
+        block_type="derived",
+        payload_digest=batch_fingerprint(pid, str(anchor_node_id).lower(), fresh),
+    )
+
+
+def batch_already_committed(
+    conn: psycopg.Connection,
+    project_id: UUID | str,
+    anchor_node_id: UUID | str,
+    entries: Sequence[tuple[UUID | str, UUID | str]],
+) -> bool:
+    """Whether this batch was already appended (retry-safe short-circuit).
+
+    Two cases mean "already done": every candidate pair is already in the
+    chain (a re-processed unit would otherwise append a phantom empty anchor),
+    or the deterministic anchor id for the current chain state already exists
+    (a retry after a mid-batch failure that left the anchor behind).
+    """
+
+    pid = str(project_id)
+    candidate = _candidate_pairs(entries)
+    seen = _existing_pairs(conn, pid, candidate)
+    if candidate and all(pair in seen for pair in candidate):
+        return True
+    anchor_id = str(anchor_id_for_batch(conn, pid, anchor_node_id, entries))
+    row = conn.execute(
+        "SELECT 1 FROM ledger_blocks WHERE id = %s AND project_id = %s",
+        (anchor_id, pid),
+    ).fetchone()
+    return row is not None
+
+
 def append_ledger_batch(
     conn: psycopg.Connection,
     project_id: UUID | str,
@@ -79,56 +176,31 @@ def append_ledger_batch(
     """Append one batch (anchor + claim blocks) on ``conn``.
 
     The caller MUST hold the canonical per-project writer lock (``commit_unit``
-    does).  Returns the new block ids in chain order.  Entries already present
-    for a ``(node_id, claim_id)`` pair are skipped, so a retried commit cannot
-    create a gap or break the chain.
+    does).  Returns the new block ids in chain order, or an empty list when the
+    batch was already committed.  Claim pairs already present are skipped, so
+    a retried commit cannot create a gap or break the chain.
     """
 
     pid = str(project_id)
-    row = conn.execute(
-        "SELECT COALESCE(MAX(position), -1) + 1 AS next_position "
-        "FROM ledger_blocks WHERE project_id = %s",
-        (pid,),
-    ).fetchone()
-    position = int(row["next_position"])
-    previous = conn.execute(
-        "SELECT id FROM ledger_blocks WHERE project_id = %s ORDER BY position DESC LIMIT 1",
-        (pid,),
-    ).fetchone()
-    prev_id = ZERO_UUID if previous is None else str(previous["id"]).lower()
+    anchor = str(anchor_node_id).lower()
+    candidate = _candidate_pairs(entries)
+    seen = _existing_pairs(conn, pid, candidate)
+    fresh = [pair for pair in candidate if pair not in seen]
+    if candidate and not fresh:
+        return []  # already committed; no phantom anchor
 
-    # Several accepted claims can share a deterministic claim id (the
-    # compile-id test does exactly that).  Keep one block per (node, claim)
-    # pair, in first-seen order, so the batch cannot violate the frozen
-    # UNIQUE(node_id, claim_id) constraint.
-    candidate = list(
-        dict.fromkeys((str(node).lower(), str(claim).lower()) for node, claim in entries)
-    )
-    if candidate:
-        node_ids = sorted({node for node, _ in candidate})
-        existing_rows = conn.execute(
-            "SELECT node_id, claim_id FROM ledger_blocks "
-            "WHERE node_id = ANY(%s) AND claim_id IS NOT NULL",
-            (node_ids,),
-        ).fetchall()
-        seen = {(str(r["node_id"]).lower(), str(r["claim_id"]).lower()) for r in existing_rows}
-        fresh = [pair for pair in candidate if pair not in seen]
-    else:
-        fresh = []
-
+    position, prev_id = _next_position(conn, pid)
+    fingerprint = batch_fingerprint(pid, anchor, fresh)
     anchor_id = ledger_block_uuid(
         project_id=pid,
         prev_id=prev_id,
         position=position,
-        node_id=str(anchor_node_id).lower(),
+        node_id=anchor,
         claim_id=None,
         block_type="derived",
-        payload_digest=batch_digest(fresh),
+        payload_digest=fingerprint,
     )
-    conn.execute(
-        INSERT_BLOCK,
-        (str(anchor_id), pid, str(anchor_node_id).lower(), None, position, "derived"),
-    )
+    conn.execute(INSERT_BLOCK, (str(anchor_id), pid, anchor, None, position, "derived"))
     ids = [anchor_id]
 
     for offset, (node_id, claim_id) in enumerate(fresh, start=1):
@@ -203,7 +275,9 @@ def verify_chain(blocks: Sequence[LedgerBlock]) -> IntegrityReport:
                 broken = True
                 break
             digest = (
-                batch_digest(_anchor_members(chain, index)) if block.block_type == "derived" else ""
+                batch_fingerprint(project_id, block.node_id, _anchor_members(chain, index))
+                if block.block_type == "derived"
+                else ""
             )
             expected = str(
                 ledger_block_uuid(
@@ -242,6 +316,74 @@ def verify_chain(blocks: Sequence[LedgerBlock]) -> IntegrityReport:
     return report
 
 
+def _mark_broken(report: IntegrityReport, project_id: str) -> None:
+    for row in report.rows:
+        if row["project_id"] == project_id and row["status"] == "valid":
+            row["status"] = "broken"
+            report.count("valid_chains", -1)
+            report.count("broken_chains", 1)
+
+
+def verify_event_references(
+    conn: psycopg.Connection,
+    blocks: Sequence[LedgerBlock],
+    report: IntegrityReport,
+    project_id: UUID | str | None = None,
+) -> IntegrityReport:
+    """Cross-check UNIT_COMMITTED block ids against the stored chain.
+
+    Events outlive the chain on a tail-only tamper: the referenced ids are
+    absent while the surviving positions are still contiguous.
+    """
+
+    known: dict[str, dict[str, int]] = {}
+    terminal: dict[str, int] = {}
+    for block in blocks:
+        known.setdefault(block.project_id, {})[block.id] = block.position
+        terminal[block.project_id] = max(terminal.get(block.project_id, -1), block.position)
+
+    if project_id is None:
+        rows = conn.execute(
+            "SELECT project_id, data FROM events WHERE kind = %s ORDER BY id",
+            (UNIT_COMMITTED,),
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT project_id, data FROM events WHERE kind = %s AND project_id = %s ORDER BY id",
+            (UNIT_COMMITTED, str(project_id)),
+        ).fetchall()
+
+    referenced: dict[str, list[int]] = {}
+    report.set_count("event_references.events", len(rows))
+    for row in rows:
+        pid = str(row["project_id"]).lower()
+        data = row["data"] or {}
+        ids = data.get("ledger_block_ids") or []
+        for block_id in ids:
+            block_id = str(block_id).lower()
+            report.count("event_references.referenced", 1)
+            position = known.get(pid, {}).get(block_id)
+            if position is None:
+                report.count("event_references.missing", 1)
+                report.finding(
+                    f"project {pid}: tail truncation at position {terminal.get(pid, -1)}: "
+                    f"event-referenced ledger block {block_id} is missing"
+                )
+                _mark_broken(report, pid)
+            else:
+                referenced.setdefault(pid, []).append(position)
+
+    for pid, positions in referenced.items():
+        if positions and max(positions) != terminal.get(pid, -1):
+            report.count("event_references.terminal_mismatch", 1)
+            report.finding(
+                f"project {pid}: event references end at position {max(positions)} "
+                f"but the chain terminal is {terminal.get(pid, -1)}"
+            )
+            _mark_broken(report, pid)
+    return report
+
+
 def verify_ledger(
     conn: psycopg.Connection,
     project_id: UUID | str | None = None,
@@ -259,4 +401,6 @@ def verify_ledger(
             "FROM ledger_blocks WHERE project_id = %s ORDER BY position",
             (str(project_id),),
         ).fetchall()
-    return verify_chain([LedgerBlock.from_row(row) for row in rows])
+    blocks = [LedgerBlock.from_row(row) for row in rows]
+    report = verify_chain(blocks)
+    return verify_event_references(conn, blocks, report, project_id)

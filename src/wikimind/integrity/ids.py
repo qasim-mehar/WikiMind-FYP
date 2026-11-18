@@ -70,11 +70,23 @@ def ledger_block_uuid(
 
 
 def batch_digest(entries: Sequence[tuple[str, str]]) -> str:
-    """Hex SHA-256 of the ordered ``(node_id, claim_id)`` pairs in a batch.
-
-    This is stored implicitly: it is hashed into the batch anchor block's id,
-    which is the only hash slot the frozen ``ledger_blocks`` table provides.
-    """
+    """Hex SHA-256 of the ordered ``(node_id, claim_id)`` pairs in a batch."""
 
     canonical = SEPARATOR.join(f"{node_id}:{claim_id}" for node_id, claim_id in entries)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def batch_fingerprint(
+    project_id: str | UUID, anchor_node_id: str | UUID, entries: Sequence[tuple[str, str]]
+) -> str:
+    """Context-bound batch digest hashed into a derived block's id.
+
+    Including the project and anchor node distinguishes two batches with the
+    same claim pairs on different documents.  It is recomputable at verify
+    time from the anchor's own columns plus the claim blocks that follow it.
+    """
+
+    canonical = SEPARATOR.join(
+        (str(project_id).lower(), str(anchor_node_id).lower(), batch_digest(entries))
+    )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
