@@ -13,7 +13,9 @@ dependencies = [
     "typer>=0.12",
     "pydantic>=2.7",
     "httpx>=0.27",
-    "pypdf>=4.2",
+    # Ruling 20: parse golden digests are pypdf-sensitive (generated
+    # under 6.x). Bumping to 7+ requires governed golden regeneration.
+    "pypdf>=6.21.2,<7",
 ]
 
 [project.optional-dependencies]
