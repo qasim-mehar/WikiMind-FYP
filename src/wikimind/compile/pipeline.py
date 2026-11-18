@@ -405,6 +405,14 @@ def _finish_run(
         conn.rollback()
         try:
             with with_writer_lock(project_id, conn):
+                conn.execute(
+                    """
+                    UPDATE compile_runs
+                    SET finished_at = now(), status = 'failed', stats = %s
+                    WHERE id = %s
+                    """,
+                    (Json(stats.to_dict()), run_id),
+                )
                 if job_id is not None and project_id is not None:
                     set_job_state(
                         conn,
