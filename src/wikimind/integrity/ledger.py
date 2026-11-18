@@ -23,7 +23,8 @@ Verification recomputes every id from the previous stored id and the row's
 own columns (recomputing each anchor's batch fingerprint from the claim blocks
 that follow it), checks that positions are contiguous, and cross-checks the
 ``ledger_block_ids`` recorded in ``UNIT_COMMITTED`` events against the chain.
-A truncation of the chain's tail is detected because the events outlive it.
+A truncation of the chain's tail is detected because the events outlive it; a
+terminal block with no event is only a warning, never a broken chain.
 
 **Honest scope:** the chain is tamper-evident against tampering with the
 ``ledger_blocks`` table alone (row changes, deletions, reordering, batch
@@ -140,21 +141,49 @@ def anchor_id_for_batch(
     )
 
 
+def _unit_marker_exists(
+    conn: psycopg.Connection,
+    project_id: str,
+    channel_id: str | None,
+    compile_version: str | None,
+) -> bool:
+    """Stable retry marker carried by UNIT_COMMITTED event metadata (G9).
+
+    ``ledger_blocks`` has no column for a unit identity, and an empty batch
+    has no claim pairs to recognize later.  The event row survives chain
+    advancement, so (project, channel_id, compile_version) is the marker.
+    """
+
+    if channel_id is None or compile_version is None:
+        return False
+    row = conn.execute(
+        "SELECT 1 FROM events WHERE project_id = %s AND kind = %s "
+        "AND data->>'channel_id' = %s AND data->>'compile_version' = %s LIMIT 1",
+        (project_id, UNIT_COMMITTED, str(channel_id), str(compile_version)),
+    ).fetchone()
+    return row is not None
+
+
 def batch_already_committed(
     conn: psycopg.Connection,
     project_id: UUID | str,
     anchor_node_id: UUID | str,
     entries: Sequence[tuple[UUID | str, UUID | str]],
+    *,
+    channel_id: str | None = None,
+    compile_version: str | None = None,
 ) -> bool:
     """Whether this batch was already appended (retry-safe short-circuit).
 
-    Two cases mean "already done": every candidate pair is already in the
-    chain (a re-processed unit would otherwise append a phantom empty anchor),
-    or the deterministic anchor id for the current chain state already exists
-    (a retry after a mid-batch failure that left the anchor behind).
+    Three cases mean "already done": a UNIT_COMMITTED marker for the unit
+    (this is what makes empty batches idempotent after the chain advanced),
+    every candidate pair already in the chain, or the deterministic anchor id
+    for the current chain state already exists (a mid-batch failure retry).
     """
 
     pid = str(project_id)
+    if _unit_marker_exists(conn, pid, channel_id, compile_version):
+        return True
     candidate = _candidate_pairs(entries)
     seen = _existing_pairs(conn, pid, candidate)
     if candidate and all(pair in seen for pair in candidate):
@@ -172,16 +201,22 @@ def append_ledger_batch(
     project_id: UUID | str,
     anchor_node_id: UUID | str,
     entries: Sequence[tuple[UUID | str, UUID | str]],
+    *,
+    channel_id: str | None = None,
+    compile_version: str | None = None,
 ) -> list[UUID]:
     """Append one batch (anchor + claim blocks) on ``conn``.
 
     The caller MUST hold the canonical per-project writer lock (``commit_unit``
     does).  Returns the new block ids in chain order, or an empty list when the
     batch was already committed.  Claim pairs already present are skipped, so
-    a retried commit cannot create a gap or break the chain.
+    a retried commit cannot create a gap or break the chain.  The optional unit
+    marker makes even an empty batch idempotent across chain advancement.
     """
 
     pid = str(project_id)
+    if _unit_marker_exists(conn, pid, channel_id, compile_version):
+        return []
     anchor = str(anchor_node_id).lower()
     candidate = _candidate_pairs(entries)
     seen = _existing_pairs(conn, pid, candidate)
@@ -338,9 +373,16 @@ def verify_event_references(
 
     known: dict[str, dict[str, int]] = {}
     terminal: dict[str, int] = {}
+    terminal_ids: dict[str, set[str]] = {}
     for block in blocks:
         known.setdefault(block.project_id, {})[block.id] = block.position
-        terminal[block.project_id] = max(terminal.get(block.project_id, -1), block.position)
+        pid = block.project_id
+        current = terminal.get(pid, -1)
+        if block.position > current:
+            terminal[pid] = block.position
+            terminal_ids[pid] = {block.id}
+        elif block.position == current:
+            terminal_ids.setdefault(pid, set()).add(block.id)
 
     if project_id is None:
         rows = conn.execute(
@@ -353,7 +395,7 @@ def verify_event_references(
             (UNIT_COMMITTED, str(project_id)),
         ).fetchall()
 
-    referenced: dict[str, list[int]] = {}
+    referenced_ids: dict[str, set[str]] = {}
     report.set_count("event_references.events", len(rows))
     for row in rows:
         pid = str(row["project_id"]).lower()
@@ -364,6 +406,8 @@ def verify_event_references(
             report.count("event_references.referenced", 1)
             position = known.get(pid, {}).get(block_id)
             if position is None:
+                # Only an event-referenced id missing from the chain proves
+                # tail truncation; events outlive the chain.
                 report.count("event_references.missing", 1)
                 report.finding(
                     f"project {pid}: tail truncation at position {terminal.get(pid, -1)}: "
@@ -371,16 +415,14 @@ def verify_event_references(
                 )
                 _mark_broken(report, pid)
             else:
-                referenced.setdefault(pid, []).append(position)
+                referenced_ids.setdefault(pid, set()).add(block_id)
 
-    for pid, positions in referenced.items():
-        if positions and max(positions) != terminal.get(pid, -1):
-            report.count("event_references.terminal_mismatch", 1)
-            report.finding(
-                f"project {pid}: event references end at position {max(positions)} "
-                f"but the chain terminal is {terminal.get(pid, -1)}"
-            )
-            _mark_broken(report, pid)
+    # G10: a terminal block with no commit event is advisory, not broken.
+    # Standalone appends and pre-event corpus blocks legitimately have none.
+    for pid, ids_at_terminal in sorted(terminal_ids.items()):
+        if not (ids_at_terminal & referenced_ids.get(pid, set())):
+            report.warning(f"project {pid}: terminal block {terminal[pid]} has no commit event")
+            report.count("event_references.terminal_without_event", 1)
     return report
 
 

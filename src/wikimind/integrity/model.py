@@ -19,6 +19,7 @@ class IntegrityReport:
     name: str
     counts: dict[str, int] = field(default_factory=dict)
     findings: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     rows: list[dict[str, Any]] = field(default_factory=list)
 
     def count(self, key: str, value: int = 1) -> None:
@@ -29,6 +30,11 @@ class IntegrityReport:
 
     def finding(self, message: str) -> None:
         self.findings.append(message)
+
+    def warning(self, message: str) -> None:
+        """Advisory note that does not change ``ok`` or the exit code."""
+
+        self.warnings.append(message)
 
     @property
     def ok(self) -> bool:
@@ -45,6 +51,7 @@ class IntegrityReport:
             "exit_code": self.exit_code,
             "counts": dict(sorted(self.counts.items())),
             "findings": list(self.findings),
+            "warnings": list(self.warnings),
             "rows": list(self.rows),
         }
 
@@ -55,4 +62,6 @@ class IntegrityReport:
             lines.append(f"  {key}: {value}")
         for finding in self.findings:
             lines.append(f"  - {finding}")
+        for warning in self.warnings:
+            lines.append(f"  warning: {warning}")
         return "\n".join(lines)

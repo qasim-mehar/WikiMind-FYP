@@ -658,8 +658,13 @@ def commit_unit(
         # claim; the anchor's node is the document's citation node.  A retried
         # commit skips BOTH the batch and its audit event, so no phantom anchor
         # or duplicate UNIT_COMMITTED event is written (G5).
-        if not batch_already_committed(conn, project_id, citation_node, ledger_entries):
-            ledger_block_ids = append_ledger_batch(conn, project_id, citation_node, ledger_entries)
+        unit_marker = {"channel_id": unit.channel_id, "compile_version": compile_version}
+        if not batch_already_committed(
+            conn, project_id, citation_node, ledger_entries, **unit_marker
+        ):
+            ledger_block_ids = append_ledger_batch(
+                conn, project_id, citation_node, ledger_entries, **unit_marker
+            )
             emit_event(
                 conn,
                 project_id,
