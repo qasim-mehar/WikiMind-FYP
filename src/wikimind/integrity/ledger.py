@@ -157,6 +157,9 @@ def _unit_marker_exists(
     channel ids are content hashes that are NOT unique across documents
     (migration 002), so omitting it would suppress a legitimate batch in a
     second document that shares a channel (quality-pass H1).
+
+    HF2: the event must also carry a non-empty ``ledger_block_ids`` array --
+    a marker without a batch proves nothing and must not suppress a commit.
     """
 
     if document_id is None or channel_id is None or compile_version is None:
@@ -164,7 +167,8 @@ def _unit_marker_exists(
     row = conn.execute(
         "SELECT 1 FROM events WHERE project_id = %s AND kind = %s "
         "AND data->>'document_id' = %s AND data->>'channel_id' = %s "
-        "AND data->>'compile_version' = %s LIMIT 1",
+        "AND data->>'compile_version' = %s "
+        "AND COALESCE(jsonb_array_length(data->'ledger_block_ids'), 0) > 0 LIMIT 1",
         (
             project_id,
             UNIT_COMMITTED,
@@ -367,10 +371,27 @@ def verify_chain(blocks: Sequence[LedgerBlock]) -> IntegrityReport:
 
 def _mark_broken(report: IntegrityReport, project_id: str) -> None:
     for row in report.rows:
-        if row["project_id"] == project_id and row["status"] == "valid":
-            row["status"] = "broken"
-            report.count("valid_chains", -1)
-            report.count("broken_chains", 1)
+        if row["project_id"] == project_id:
+            if row["status"] == "valid":
+                row["status"] = "broken"
+                report.count("valid_chains", -1)
+                report.count("broken_chains", 1)
+            return
+    # HF3: an event may reference blocks of a project whose chain rows are
+    # entirely gone.  Keep the JSON report self-consistent by recording an
+    # explicit broken row rather than leaving a finding with no broken chain.
+    report.rows.append(
+        {
+            "project_id": project_id,
+            "blocks": 0,
+            "derived_blocks": 0,
+            "claim_blocks": 0,
+            "status": "broken",
+            "note": "all blocks missing; events still reference them",
+        }
+    )
+    report.count("projects", 1)
+    report.count("broken_chains", 1)
 
 
 def verify_event_references(
