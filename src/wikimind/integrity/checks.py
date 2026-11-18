@@ -83,6 +83,33 @@ def check_provenance(conn: psycopg.Connection, project_id: UUID | str) -> Integr
         report.finding(f"{claim_node_n} claim(s) without a citation node")
         _add_examples(report, "claim", _examples(conn, bad_node, (pid,), "id"))
 
+    # L4: align with the canonical `db check` claim provenance rule: the
+    # citation node must be sourced from the claim's own document.
+    unsourced = _scalar(
+        conn,
+        "SELECT count(*) AS n FROM claims c WHERE c.project_id = %s AND NOT EXISTS ("
+        "SELECT 1 FROM node_sources s WHERE s.node_id = c.citation_node_id "
+        "AND s.document_id = c.document_id AND s.project_id = c.project_id)",
+        (pid,),
+    )
+    report.set_count("claims.citation_node_unsourced", unsourced)
+    if unsourced:
+        report.finding(
+            f"{unsourced} claim(s) cite a document their citation node is not sourced from"
+        )
+        _add_examples(
+            report,
+            "claim",
+            _examples(
+                conn,
+                "SELECT c.id AS id FROM claims c WHERE c.project_id = %s AND NOT EXISTS ("
+                "SELECT 1 FROM node_sources s WHERE s.node_id = c.citation_node_id "
+                "AND s.document_id = c.document_id AND s.project_id = c.project_id)",
+                (pid,),
+                "id",
+            ),
+        )
+
     # --- edges: every edge must carry edge_sources provenance.
     report.set_count(
         "edges.total",
@@ -203,6 +230,10 @@ def check_provenance(conn: psycopg.Connection, project_id: UUID | str) -> Integr
         (pid,),
     )
     report.set_count("compile_units.orphan", orphan_units)
+    # L3: reconciliation is intentionally asymmetric.  A compile unit that
+    # does not match a channel is a real integrity finding; a channel with no
+    # compile unit is merely pending work (mid-compile), so it is reported as
+    # an informational count only and never changes the exit code.
     report.set_count("channels.without_compile_unit", pending_channels)
     if orphan_units:
         report.finding(f"{orphan_units} compile unit(s) do not match a channel")

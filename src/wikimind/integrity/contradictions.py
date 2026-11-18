@@ -34,8 +34,19 @@ CONTRADICTIONS_SQL = """
       JOIN edge_sources s ON s.edge_id = e.id AND s.project_id = e.project_id
       JOIN claims c ON c.id = s.claim_id AND c.project_id = e.project_id
       LEFT JOIN documents d ON d.id = c.document_id AND d.project_id = e.project_id
+      -- compile_units PK is (document_id, channel_id, compile_version): join
+      -- the full key by selecting the latest version for the channel, so a
+      -- channel compiled under two prompts yields one row, not duplicates.
       LEFT JOIN compile_units u ON u.document_id = c.document_id
            AND u.channel_id = c.channel_id AND u.project_id = e.project_id
+           AND u.compile_version = (
+               SELECT u2.compile_version FROM compile_units u2
+                WHERE u2.project_id = c.project_id
+                  AND u2.document_id = c.document_id
+                  AND u2.channel_id = c.channel_id
+                ORDER BY u2.compiled_at DESC, u2.compile_version DESC
+                LIMIT 1
+           )
      WHERE e.project_id = %s AND e.edge_type = 'contradicts'
      ORDER BY e.id, c.id
 """

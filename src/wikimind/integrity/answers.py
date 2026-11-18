@@ -7,12 +7,13 @@ The entire interface is::
 
 No QA internals are assumed.  A citation is supported when the claim exists
 and the cited ``document_slug`` resolves to that claim's own provenance
-document.  Because the frozen ``documents`` table has no slug column, the
-resolver accepts the stable identifiers derivable from its frozen columns:
-the citation node's slug (``source:<sha256>``), the full SHA-256, common
-SHA-256 prefixes, the ``source_uri``, and the slugified filename stem.  All of
-these are unambiguously tied to the provenance document; a value that matches
-none of them is reported as unsupported.
+document.  Ruling 21 makes the **slugified filename stem the canonical
+document citation**.  Because the frozen ``documents`` table has no slug
+column, the resolver accepts that canonical stem plus other unambiguous
+derivations: the citation node's slug (``source:<sha256>``), the full SHA-256,
+SHA-256 prefixes of at least 12 hex characters, and the ``source_uri``.  An
+8-hex prefix is deliberately not accepted.  A value matching none of them is
+reported as unsupported.
 """
 
 from __future__ import annotations
@@ -101,7 +102,7 @@ def document_identifiers(
     values: set[str] = set()
     if sha256:
         digest = str(sha256).lower()
-        for length in (8, 12, 16, len(digest)):
+        for length in (12, 16, len(digest)):
             values.add(digest[:length])
             values.add(f"source:{digest[:length]}")
     if node_slug:
