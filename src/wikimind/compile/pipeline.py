@@ -397,10 +397,37 @@ def _finish_run(
                     RUN_FINISHED,
                     {"run_id": str(run_id), "status": status, "stats": stats.to_dict()},
                 )
-    except psycopg.Error:
-        # The run result is already reflected in the raised/returned value;
-        # losing the bookkeeping row must not mask the run outcome.
-        pass
+    except psycopg.Error as exc:
+        # G7: never swallow a finish failure.  First try a fresh transaction
+        # that forces the job terminal and records the finish, then re-raise
+        # the original error loudly so the caller cannot mistake it for a
+        # successful run.
+        conn.rollback()
+        try:
+            with with_writer_lock(project_id, conn):
+                if job_id is not None and project_id is not None:
+                    set_job_state(
+                        conn,
+                        job_id,
+                        project_id,
+                        "failed",
+                        {"run_id": str(run_id), "finish_error": redact(str(exc))},
+                    )
+                if project_id is not None:
+                    emit_event(
+                        conn,
+                        project_id,
+                        RUN_FINISHED,
+                        {
+                            "run_id": str(run_id),
+                            "status": "failed",
+                            "stats": stats.to_dict(),
+                            "finish_error": redact(str(exc)),
+                        },
+                    )
+        except psycopg.Error:
+            pass  # the original error below is still raised loudly
+        raise
 
 
 def _result(
