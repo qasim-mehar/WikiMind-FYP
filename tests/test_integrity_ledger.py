@@ -294,8 +294,16 @@ def test_empty_batch_retry_after_chain_advancement_is_a_noop(test_dsn: str) -> N
     try:
         project = seed_project(conn)
         anchor = seed_node(conn, project, "source:empty-retry")
+        document_a = seed_document(conn, project)
+        document_b = seed_document(conn, project)
         empty = append_ledger_batch(
-            conn, project, anchor, [], channel_id="empty-channel", compile_version="v1"
+            conn,
+            project,
+            anchor,
+            [],
+            document_id=str(document_a),
+            channel_id="empty-channel",
+            compile_version="v1",
         )
         assert len(empty) == 1
         emit_event(
@@ -303,6 +311,7 @@ def test_empty_batch_retry_after_chain_advancement_is_a_noop(test_dsn: str) -> N
             project,
             UNIT_COMMITTED,
             {
+                "document_id": str(document_a),
                 "channel_id": "empty-channel",
                 "compile_version": "v1",
                 "ledger_block_ids": [str(empty[0])],
@@ -314,17 +323,30 @@ def test_empty_batch_retry_after_chain_advancement_is_a_noop(test_dsn: str) -> N
             project,
             anchor,
             [(anchor, claim)],
+            document_id=str(document_b),
             channel_id="other-channel",
             compile_version="v1",
         )
         assert len(later) == 2
 
         assert batch_already_committed(
-            conn, project, anchor, [], channel_id="empty-channel", compile_version="v1"
+            conn,
+            project,
+            anchor,
+            [],
+            document_id=str(document_a),
+            channel_id="empty-channel",
+            compile_version="v1",
         )
         assert (
             append_ledger_batch(
-                conn, project, anchor, [], channel_id="empty-channel", compile_version="v1"
+                conn,
+                project,
+                anchor,
+                [],
+                document_id=str(document_a),
+                channel_id="empty-channel",
+                compile_version="v1",
             )
             == []
         )
@@ -340,6 +362,70 @@ def test_empty_batch_retry_after_chain_advancement_is_a_noop(test_dsn: str) -> N
         ).fetchone()["n"]
         assert derived == 2
         assert unit_events == 1
+        assert verify_ledger(conn, project).ok
+    finally:
+        conn.close()
+
+
+def test_marker_does_not_collide_across_documents(test_dsn: str) -> None:
+    """Quality-pass H1: channel ids are not unique across documents (migration 002)."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        anchor = seed_node(conn, project, "source:shared-channel")
+        document_a = seed_document(conn, project)
+        document_b = seed_document(conn, project)
+        channel_id, version = "identical-channel-id", "v1"
+
+        first = append_ledger_batch(
+            conn,
+            project,
+            anchor,
+            [],
+            document_id=str(document_a),
+            channel_id=channel_id,
+            compile_version=version,
+        )
+        emit_event(
+            conn,
+            project,
+            UNIT_COMMITTED,
+            {
+                "document_id": str(document_a),
+                "channel_id": channel_id,
+                "compile_version": version,
+                "ledger_block_ids": [str(first[0])],
+            },
+        )
+
+        # The second document shares channel id and compile version; it is a
+        # distinct compile unit and must get its own anchor and event.
+        assert not batch_already_committed(
+            conn,
+            project,
+            anchor,
+            [],
+            document_id=str(document_b),
+            channel_id=channel_id,
+            compile_version=version,
+        )
+        second = append_ledger_batch(
+            conn,
+            project,
+            anchor,
+            [],
+            document_id=str(document_b),
+            channel_id=channel_id,
+            compile_version=version,
+        )
+        assert len(second) == 1
+        derived = conn.execute(
+            "SELECT count(*) AS n FROM ledger_blocks "
+            "WHERE project_id = %s AND block_type = 'derived'",
+            (str(project),),
+        ).fetchone()["n"]
+        assert derived == 2
         assert verify_ledger(conn, project).ok
     finally:
         conn.close()

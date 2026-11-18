@@ -144,6 +144,7 @@ def anchor_id_for_batch(
 def _unit_marker_exists(
     conn: psycopg.Connection,
     project_id: str,
+    document_id: str | None,
     channel_id: str | None,
     compile_version: str | None,
 ) -> bool:
@@ -151,15 +152,26 @@ def _unit_marker_exists(
 
     ``ledger_blocks`` has no column for a unit identity, and an empty batch
     has no claim pairs to recognize later.  The event row survives chain
-    advancement, so (project, channel_id, compile_version) is the marker.
+    advancement, so the full compile unit identity -- (project, document,
+    channel, compile_version) -- is the marker.  ``document_id`` is essential:
+    channel ids are content hashes that are NOT unique across documents
+    (migration 002), so omitting it would suppress a legitimate batch in a
+    second document that shares a channel (quality-pass H1).
     """
 
-    if channel_id is None or compile_version is None:
+    if document_id is None or channel_id is None or compile_version is None:
         return False
     row = conn.execute(
         "SELECT 1 FROM events WHERE project_id = %s AND kind = %s "
-        "AND data->>'channel_id' = %s AND data->>'compile_version' = %s LIMIT 1",
-        (project_id, UNIT_COMMITTED, str(channel_id), str(compile_version)),
+        "AND data->>'document_id' = %s AND data->>'channel_id' = %s "
+        "AND data->>'compile_version' = %s LIMIT 1",
+        (
+            project_id,
+            UNIT_COMMITTED,
+            str(document_id),
+            str(channel_id),
+            str(compile_version),
+        ),
     ).fetchone()
     return row is not None
 
@@ -170,19 +182,20 @@ def batch_already_committed(
     anchor_node_id: UUID | str,
     entries: Sequence[tuple[UUID | str, UUID | str]],
     *,
+    document_id: str | None = None,
     channel_id: str | None = None,
     compile_version: str | None = None,
 ) -> bool:
     """Whether this batch was already appended (retry-safe short-circuit).
 
-    Three cases mean "already done": a UNIT_COMMITTED marker for the unit
+    Three cases mean "already done": a UNIT_COMMITTED marker for the full unit
     (this is what makes empty batches idempotent after the chain advanced),
     every candidate pair already in the chain, or the deterministic anchor id
     for the current chain state already exists (a mid-batch failure retry).
     """
 
     pid = str(project_id)
-    if _unit_marker_exists(conn, pid, channel_id, compile_version):
+    if _unit_marker_exists(conn, pid, document_id, channel_id, compile_version):
         return True
     candidate = _candidate_pairs(entries)
     seen = _existing_pairs(conn, pid, candidate)
@@ -202,6 +215,7 @@ def append_ledger_batch(
     anchor_node_id: UUID | str,
     entries: Sequence[tuple[UUID | str, UUID | str]],
     *,
+    document_id: str | None = None,
     channel_id: str | None = None,
     compile_version: str | None = None,
 ) -> list[UUID]:
@@ -215,7 +229,7 @@ def append_ledger_batch(
     """
 
     pid = str(project_id)
-    if _unit_marker_exists(conn, pid, channel_id, compile_version):
+    if _unit_marker_exists(conn, pid, document_id, channel_id, compile_version):
         return []
     anchor = str(anchor_node_id).lower()
     candidate = _candidate_pairs(entries)
