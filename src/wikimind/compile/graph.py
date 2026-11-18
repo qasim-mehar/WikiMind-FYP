@@ -16,6 +16,8 @@ from psycopg import sql
 from psycopg.types.json import Json
 
 from ..db.locks import with_writer_lock
+from ..integrity.events import UNIT_COMMITTED, emit_event
+from ..integrity.ledger import append_ledger_batch
 from ..render.versions import materialize_version
 from .errors import AmbiguousProjectError, ProjectNotFoundError
 from .ids import (
@@ -514,6 +516,8 @@ def commit_unit(
     created_nodes: list[int] = [0]
     created_edges: list[int] = [0]
     touched_nodes: set[UUID] = set()
+    claim_uuids: list[UUID] = []
+    ledger_entries: list[tuple[UUID, UUID]] = []
     with with_writer_lock(project_id, conn):
         citation_slug = citation_node_slug(unit.document_sha256)
         citation_node = _get_or_create_node(
@@ -537,6 +541,7 @@ def commit_unit(
                 claim_text=accepted_claim.text,
                 compile_version=compile_version,
             )
+            claim_uuids.append(claim_uuid)
             conn.execute(
                 """
                 INSERT INTO claims
@@ -593,6 +598,13 @@ def commit_unit(
                     claim_uuid,
                     created_counter=created_edges,
                 )
+            # The claim ledger is append-only and hash-chained; each accepted
+            # claim block is attached to the L2 nodes it mentions (the citation
+            # node stands in for a claim with no extracted entities).
+            if slug_to_node:
+                ledger_entries.extend((node, claim_uuid) for node in slug_to_node.values())
+            else:
+                ledger_entries.append((citation_node, claim_uuid))
 
             for relation in accepted_claim.relations:
                 subject_slug = slugify_entity(relation.subject)
@@ -639,6 +651,31 @@ def commit_unit(
             ON CONFLICT (document_id, channel_id, compile_version) DO NOTHING
             """,
             (project_id, unit.document_id, unit.channel_id, compile_version, run_id),
+        )
+
+        # Append this commit batch to the project's hash-chained claim ledger.
+        # One derived anchor block per batch, then one claim block per accepted
+        # claim; the anchor's node is the document's citation node.
+        ledger_block_ids = append_ledger_batch(conn, project_id, citation_node, ledger_entries)
+        emit_event(
+            conn,
+            project_id,
+            UNIT_COMMITTED,
+            {
+                "run_id": None if run_id is None else str(run_id),
+                "document_id": str(unit.document_id),
+                "document_sha256": unit.document_sha256,
+                "channel_id": unit.channel_id,
+                "compile_version": compile_version,
+                "claim_ids": [str(claim) for claim in claim_uuids],
+                "touched_nodes": [str(node) for node in sorted(touched_nodes)],
+                "ledger_block_ids": [str(block_id) for block_id in ledger_block_ids],
+                "counts": {
+                    "claims": len(accepted),
+                    "nodes_created": created_nodes[0],
+                    "edges_created": created_edges[0],
+                },
+            },
         )
 
         # Governance Ruling 14: every touched node leaves this transaction

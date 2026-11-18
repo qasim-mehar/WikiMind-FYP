@@ -29,6 +29,9 @@ import psycopg
 from psycopg.types.json import Json
 
 from ..config import redact
+from ..db.locks import with_writer_lock
+from ..integrity.events import RUN_FINISHED, RUN_STARTED, emit_event
+from ..integrity.jobs import JOB_KIND_COMPILE, create_job, set_job_state
 from ..llm.protocols import LLMClient
 from . import graph
 from .blocks import (
@@ -309,6 +312,7 @@ def compile_project(
     """
 
     run_id: UUID | None = None
+    job_id: UUID | None = None
     stats = CompileStats()
     try:
         row = conn.execute(
@@ -316,6 +320,9 @@ def compile_project(
             (project.id,),
         ).fetchone()
         run_id = row["id"]
+        with with_writer_lock(project.id, conn):
+            job_id = create_job(conn, project.id, JOB_KIND_COMPILE, {"run_id": str(run_id)})
+            emit_event(conn, project.id, RUN_STARTED, {"run_id": str(run_id)})
 
         documents = graph.list_documents(conn, project.id)
         units_by_document: dict[UUID, list[Unit]] = {}
@@ -354,15 +361,17 @@ def compile_project(
     except Exception as exc:
         status = "failed"
         stats.errors.append(redact(f"run failed: {exc}"))
-        _finish_run(conn, run_id, status, stats, meter)
+        _finish_run(conn, project.id, run_id, job_id, status, stats, meter)
         raise
-    _finish_run(conn, run_id, status, stats, meter)
+    _finish_run(conn, project.id, run_id, job_id, status, stats, meter)
     return _result(run_id, project, status, stats, meter)
 
 
 def _finish_run(
     conn: psycopg.Connection,
+    project_id: UUID | None,
     run_id: UUID | None,
+    job_id: UUID | None,
     status: str,
     stats: CompileStats,
     meter: Any | None,
@@ -370,14 +379,24 @@ def _finish_run(
     if run_id is None:
         return
     try:
-        conn.execute(
-            """
-            UPDATE compile_runs
-            SET finished_at = now(), status = %s, stats = %s
-            WHERE id = %s
-            """,
-            (status, Json(stats.to_dict()), run_id),
-        )
+        with with_writer_lock(project_id, conn):
+            conn.execute(
+                """
+                UPDATE compile_runs
+                SET finished_at = now(), status = %s, stats = %s
+                WHERE id = %s
+                """,
+                (status, Json(stats.to_dict()), run_id),
+            )
+            if job_id is not None and project_id is not None:
+                set_job_state(conn, job_id, project_id, status, {"run_id": str(run_id)})
+            if project_id is not None:
+                emit_event(
+                    conn,
+                    project_id,
+                    RUN_FINISHED,
+                    {"run_id": str(run_id), "status": status, "stats": stats.to_dict()},
+                )
     except psycopg.Error:
         # The run result is already reflected in the raised/returned value;
         # losing the bookkeeping row must not mask the run outcome.

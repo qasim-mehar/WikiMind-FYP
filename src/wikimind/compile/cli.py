@@ -14,7 +14,7 @@ from psycopg.rows import dict_row
 
 from wikimind.config import get_settings, redact
 from wikimind.db.connection import connect
-from wikimind.llm.cost import CostMeter, JsonlCostSink
+from wikimind.integrity.costs import build_meter
 from wikimind.llm.errors import WikiMindLLMError
 from wikimind.llm.gemini import GeminiClient
 from wikimind.llm.judge import JudgeClient
@@ -72,7 +72,8 @@ def run_compile_command(
         return 2
 
     resolved_delay = delay if delay is not None else inter_call_delay()
-    meter = CostMeter(JsonlCostSink(costs_path))
+    resolved = dsn or get_settings().db_dsn
+    meter = build_meter(costs_path, dsn=resolved)
     try:
         project = resolve_project(conn, project_ref)
         drafter = GeminiClient(meter=meter, temperature=0.0)
