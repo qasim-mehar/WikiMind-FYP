@@ -70,6 +70,14 @@ else:
     # ``wikimind ask "<question>"`` is a top-level command, like compile/index.
     app.command(name="ask")(qa_cli.ask)
 
+try:
+    from wikimind.integrity import cli as integrity_cli
+except ModuleNotFoundError as exc:
+    if exc.name not in {"wikimind.integrity", "wikimind.integrity.cli"}:
+        raise
+else:
+    app.add_typer(integrity_cli.app, name="integrity")
+
 
 def main() -> None:
     """Run the WikiMind command line application."""
