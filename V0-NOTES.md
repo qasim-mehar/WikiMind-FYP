@@ -203,3 +203,14 @@ actually provided to the model, before display. Model-claimed citations
 are never authoritative. Canonical document citation form: slugified
 filename stem (attention.pdf -> attention).
 Ruling 20 addendum (2026-11-18): the interpreter bound (>=3.11,<3.12) is now enforced in requires-python; lifting it requires governed digest regeneration.
+
+## Rulings 22-24 (2026-11-23)
+
+Ruling 22 (2026-11-23) — claim_id = full UUID in structured output; short refs are prose-only.
+Context: Finding 1 (QA acceptance). The V4 JSON contract's citations[].claim_id carries the canonical full UUID; the frozen answer prompt still hands the model short refs, so qa/verify maps prose refs to UUIDs before display. No prompt change.
+
+Ruling 23 (2026-11-23) — CLI-level integration tests mandatory.
+Context: Finding 2 (ask broken end to end by the row-factory clash). Every future user-facing command must have a test that drives the real Typer entry point against a template-spawned database with scripted LLM fakes, and that is demonstrated to fail on the broken shape before the fix lands.
+
+Ruling 24 (2026-11-23) — unverified bracket refs stripped from printed prose too.
+Context: Finding 8. A bracket ref that cannot be resolved or verified is removed from the printed answer text as well as from the citations list; the surrounding sentence stays intact.
