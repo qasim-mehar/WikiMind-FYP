@@ -219,3 +219,32 @@ Context: Finding 8. A bracket ref that cannot be resolved or verified is removed
 
 Ruling 25 (2026-11-23) — Acceptance rubric and golden-set fidelity:
 (1) Every QA answer carries machine-verified citations in prose and list (Rulings 21, 22, 24). (2) An answer must be sufficient where the corpus verifiably contains the knowledge; honest insufficiency is a PASS condition when claim-absence is demonstrated against the stored corpus. (3) Golden questions target corpus-verifiable behavior: where a golden question's target claim is absent, the question is amended to the corpus's actual content or its expected outcome is marked insufficient-with-evidence. (4) Recompiling corpus units to satisfy a golden question is not authorized without a full governance ruling; prompts stay frozen.
+
+## Ruling 26 (2026-11-23)
+
+Ruling 26 (2026-11-23) — Lane 9 closed; q05 recall gap recorded open:
+(1) Lane 9 Round 2 is accepted at 49ab315: CI run #37 green on the head
+commit; the four frozen artifacts (compile prompts, QA answer prompt, cost
+metering, migrations) byte-identical to main; W3 ledger delta 6 events,
+ $0.00602945 shadow, within budgets; zero writes to wikimind_live_l3 and
+wikimind_l0; the W2 golden-set amendment conforms to Ruling 25(3). (2) The
+W3 probe shows the frozen prompts draft the 18.4 BLEU claim and the judge
+rejects it as non-entailed — probe scope only; the original compile's
+internal path remains aggregate-evidence. (3) q05 (attn-multihead) fails
+its >=3/5 in-cap criterion at 0/5, and the card's mandated STOP was
+honored. Blocker recorded as evidence, not repaired: all five golden
+claims connect only through the attention citation hub at connecting-node
+score 0.0000, node ranks 29/46/74/123/139 against the per-node quota of 8;
+cap 150 without quota recovers only 2/5. (4) Closing the gap requires a
+mechanism that changes how hub-attached claims rank into the cap — quota
+policy, citation-node seeding exceptions, or claim-text embeddings (a
+schema change under migration governance). None is authorized by this
+ruling; each requires a new work order. Recompiling corpus units to
+satisfy a golden question remains unauthorized (Ruling 25(4) restated).
+(5) Gate C bucket, listed not fixed: the stale note and derived_from
+entry in tests/golden/qa_questions.json; the determinism test's
+same-snapshot re-run (SQL total ordering is the guarantee); the latent
+per_node_quota=None default in gather_claims(). Probe hygiene going
+forward: persist stdout by default; state probe conclusions at probe
+scope.
+Authorized by Qasim, 2026-11-23.
