@@ -211,7 +211,8 @@ def _gather_claims_page(
     score ties and the claim id breaks final ties (determinism).
 
     W1: each visited node contributes at most ``per_node_quota`` claims
-    (default :data:`DEFAULT_NODE_QUOTA`), ranked by score/depth/id. A claim
+    (default ``None`` — effective no quota; only ``answer_question`` passes an
+    explicit value, :data:`DEFAULT_NODE_QUOTA`), ranked by score/depth/id. A claim
     connecting to several nodes keeps every qualifying route, so a hub node
     can no longer crowd out the rest of the retrieved neighborhood without
     silently erasing claims that also hang off a less crowded node. Final
@@ -329,7 +330,11 @@ def gather_claims(
     scores: Mapping[UUID, float] | None = None,
     per_node_quota: int | None = None,
 ) -> list[ClaimRecord]:
-    """Claims connected to the visited nodes, best-match-first, deterministic, capped."""
+    """Claims connected to the visited nodes, best-match-first, deterministic, capped.
+
+    ``per_node_quota`` defaults to ``None`` (effective no quota); only
+    ``answer_question`` passes an explicit quota (:data:`DEFAULT_NODE_QUOTA`).
+    """
 
     if depths is None:
         seeds = set(seed_node_ids_)
