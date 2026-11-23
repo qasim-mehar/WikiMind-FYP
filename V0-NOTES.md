@@ -214,3 +214,8 @@ Context: Finding 2 (ask broken end to end by the row-factory clash). Every futur
 
 Ruling 24 (2026-11-23) — unverified bracket refs stripped from printed prose too.
 Context: Finding 8. A bracket ref that cannot be resolved or verified is removed from the printed answer text as well as from the citations list; the surrounding sentence stays intact.
+
+## Ruling 25 (2026-11-23)
+
+Ruling 25 (2026-11-23) — Acceptance rubric and golden-set fidelity:
+(1) Every QA answer carries machine-verified citations in prose and list (Rulings 21, 22, 24). (2) An answer must be sufficient where the corpus verifiably contains the knowledge; honest insufficiency is a PASS condition when claim-absence is demonstrated against the stored corpus. (3) Golden questions target corpus-verifiable behavior: where a golden question's target claim is absent, the question is amended to the corpus's actual content or its expected outcome is marked insufficient-with-evidence. (4) Recompiling corpus units to satisfy a golden question is not authorized without a full governance ruling; prompts stay frozen.
