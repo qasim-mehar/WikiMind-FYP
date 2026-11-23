@@ -248,3 +248,25 @@ per_node_quota=None default in gather_claims(). Probe hygiene going
 forward: persist stdout by default; state probe conclusions at probe
 scope.
 Authorized by Qasim, 2026-11-23.
+
+## Ruling 27 (2026-11-23)
+
+Ruling 27 (2026-11-23) — Merge form and the push convention:
+(1) Lane 9's landing on main as a fast-forward (5c08f36 -> 55eada2 via the
+lane's 6b79f61 and 49ab315, plus the Ruling 26 doc commit; lane fully
+contained; CI runs #38 and #39 green at the tip) is accepted as a complete
+Ritual G merge. Manufacturing the prescribed --no-ff merge commit after
+the fact would require rewinding and force-pushing published main; that is
+refused. Published main history is append-only: it is never rewritten to
+repair form. (2) Deviation recorded: the merge and push of main were
+executed by the agent, triggered by an instruction phrased for the human.
+The standing convention is restated: the agent pushes lane branches only;
+merges into main and pushes of main are human actions. (3) Deviation
+recorded: Ritual G's expected main hash (5d34bbb, the Lane 8 merge) was
+stale at dispatch — main had already advanced to 5c08f36 via the Rulings
+22-24 commits before Lane 9 began. Ritual cards must pin main's hash as
+verified at dispatch, or state the precondition as "the merge-base is
+unchanged" instead of an absolute hash. (4) One-time: the executor is
+authorized to commit and push this ruling itself (doc-only); from its
+landing, clause (2) applies without exception.
+Authorized by Qasim, 2026-11-23.
