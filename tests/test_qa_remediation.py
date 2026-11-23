@@ -25,7 +25,12 @@ from wikimind.integrity.costs import MIRROR_ENV_VAR, MirroringCostSink, build_me
 from wikimind.llm import CostMeter, FakeLLM
 from wikimind.prices import EMBED_MODEL
 from wikimind.qa import cli as qa_cli
-from wikimind.qa.pipeline import ClaimRecord, _gather_claims_page
+from wikimind.qa.pipeline import (
+    DEFAULT_CLAIM_CAP,
+    DEFAULT_NODE_QUOTA,
+    ClaimRecord,
+    _gather_claims_page,
+)
 from wikimind.qa.prompts import CALL_SITE_EMBED, AnswerPayload, claim_ref
 from wikimind.qa.verify import verify_citations
 
@@ -348,3 +353,69 @@ def test_claim_ranking_prefers_high_similarity_node_at_equal_depth(db_conn) -> N
     # With no scores the historical depth/id ordering still holds (regression).
     legacy, _ = _gather_claims_page(conn, project_id, depths, cap=10)
     assert {c.claim_id for c in legacy} == {relevant, irrelevant}
+
+
+def test_recall_defaults_are_pinned() -> None:
+    """W1: the acceptance-driven recall defaults are stable and explicit."""
+
+    assert DEFAULT_CLAIM_CAP == 150
+    assert DEFAULT_NODE_QUOTA == 8
+
+
+def test_hub_node_contributes_at_most_eight_claims_with_deterministic_order(db_conn) -> None:
+    """W1: a 30-claim hub cannot flood the cap; ordering stays deterministic."""
+
+    conn = db_conn
+    project_id = conn.execute(
+        "INSERT INTO projects (name) VALUES (%s) RETURNING id", (f"qa-l9-hub-{uuid4().hex[:6]}",)
+    ).fetchone()[0]
+
+    def add_doc(name: str):
+        return conn.execute(
+            "INSERT INTO documents (project_id, sha256, source_uri, parser, prompt_version, "
+            "model, schema_version) VALUES (%s, %s, %s, 'text', 'compile-v0', 'fake-llm', 'v1') "
+            "RETURNING id",
+            (project_id, uuid4().hex, f"file:///{name}.txt"),
+        ).fetchone()[0]
+
+    hub_doc, other_doc = add_doc("hub"), add_doc("other")
+    hub = seed_node(conn, project_id, "source:hub", node_type="citation")
+    other = seed_node(conn, project_id, "source:other", node_type="citation")
+
+    def add_claim(citation, doc_id, text) -> None:
+        channel = f"ch-{uuid4().hex}"
+        conn.execute(
+            "INSERT INTO channels (id, project_id, document_id, kind, ordinal, raw_text) "
+            "VALUES (%s, %s, %s, 'title', 0, %s)",
+            (channel, project_id, doc_id, text),
+        )
+        conn.execute(
+            "INSERT INTO claims (project_id, citation_node_id, channel_id, document_id, "
+            "anchor_quote, anchor_span, text) VALUES (%s, %s, %s, %s, %s, '{}'::jsonb, %s)",
+            (project_id, citation, channel, doc_id, text, text),
+        )
+
+    for i in range(30):
+        add_claim(hub, hub_doc, f"hub claim {i:02d}")
+    add_claim(other, other_doc, "other-node claim")
+
+    depths = {hub: 0, other: 0}
+    rows, truncated = _gather_claims_page(
+        conn, project_id, depths, cap=DEFAULT_CLAIM_CAP, per_node_quota=DEFAULT_NODE_QUOTA
+    )
+    hub_rows = [r for r in rows if r.document_slug == "hub"]
+    assert len(hub_rows) == DEFAULT_NODE_QUOTA
+    assert any(r.document_slug == "other" for r in rows)
+    # The quota, not the 150-cap, is the binding constraint in this fixture.
+    assert truncated is False
+    assert len(rows) == DEFAULT_NODE_QUOTA + 1
+
+    # Determinism pinned: identical inputs give identical ordered ids.
+    again, _ = _gather_claims_page(
+        conn, project_id, depths, cap=DEFAULT_CLAIM_CAP, per_node_quota=DEFAULT_NODE_QUOTA
+    )
+    assert [r.claim_id for r in rows] == [r.claim_id for r in again]
+
+    # Opting out of the quota restores the old flood behaviour (harness use).
+    unquota, _ = _gather_claims_page(conn, project_id, depths, cap=DEFAULT_CLAIM_CAP)
+    assert len([r for r in unquota if r.document_slug == "hub"]) > DEFAULT_NODE_QUOTA

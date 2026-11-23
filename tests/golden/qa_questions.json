@@ -85,6 +85,8 @@
       "question": "What real-world analogy does the GAN paper use to explain the generative and discriminative models?",
       "expected_answer_elements": ["counterfeiters", "police"],
       "expected_source_documents": ["1406.2661-gan.pdf"],
+      "expected_outcome": "insufficient",
+      "claim_absence_evidence": "0 stored claims match 'counterfeiter', 'police' or 'fake currency'; the GAN analogy is absent from the compiled corpus (read-only ILIKE scan).",
       "seed_claims": [
         {"text": "In the GAN analogy, the generative model is like a team of counterfeiters trying to produce fake currency without detection, while the discriminative model is like the police trying to detect the counterfeit currency.", "document": "1406.2661-gan.pdf"}
       ]
@@ -130,18 +132,22 @@
       "question": "Which downsides of large pre-trained language models motivate the RAG approach?",
       "expected_answer_elements": ["expand or revise", "memory", "provenance", "hallucinations"],
       "expected_source_documents": ["2005.11401-retro.pdf"],
+      "expected_outcome": "insufficient",
+      "claim_absence_evidence": "0 stored claims match 'expand or revise' or 'provenance'; the RAG-downsides statement is absent from the compiled corpus (read-only ILIKE scan).",
       "seed_claims": [
         {"text": "Large pre-trained language models cannot easily expand or revise their memory, cannot straightforwardly provide insight into their predictions, and may produce hallucinations; hybrid parametric and non-parametric memory addresses these issues.", "document": "2005.11401-retro.pdf"}
       ]
     },
     {
       "id": "contradiction-bleu",
-      "question": "What does each source say about the Transformer's BLEU score on WMT 2014 English-to-German, and do they agree?",
-      "expected_answer_elements": ["28.4 BLEU", "18.4 BLEU", "conflict", "synthetic"],
-      "expected_source_documents": ["1706.03762-attention.pdf", "contradiction-note.txt"],
+      "question": "What do the corpus's two recorded contradiction pairs actually disagree on: the R3 paper's author list and the Transformer's WMT 2014 English-to-French BLEU score?",
+      "expected_answer_elements": ["41.0", "41.8", "Bowen Zhou", "Murray Campbell", "English-to-French"],
+      "expected_source_documents": ["2005.11401-retro.pdf", "1706.03762-attention.pdf"],
       "seed_claims": [
-        {"text": "Attention Is All You Need reports that the Transformer achieves 28.4 BLEU on the WMT 2014 English-to-German translation task.", "document": "1706.03762-attention.pdf"},
-        {"text": "The synthetic test fixture claims that the Transformer reached only 18.4 BLEU on the WMT 2014 English-to-German translation task, a full 10 BLEU below the paper's reported 28.4, and it did not improve on the best ensembles.", "document": "contradiction-note.txt"}
+        {"text": "Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, and Jing Jiang are the authors of the paper titled R3: Reinforced ranker-reader for open-domain question answering.", "document": "2005.11401-retro.pdf"},
+        {"text": "The authors of the paper are Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, and Murray Campbell.", "document": "2005.11401-retro.pdf"},
+        {"text": "The Transformer (big) model achieved a BLEU score of 41.0 on the WMT 2014 English-to-French translation task.", "document": "1706.03762-attention.pdf"},
+        {"text": "The Transformer model achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task.", "document": "1706.03762-attention.pdf"}
       ]
     }
   ]

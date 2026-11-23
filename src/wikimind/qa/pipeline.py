@@ -42,7 +42,11 @@ from .verify import VerificationResult, verify_citations
 # Pinned defaults. These are the "choice" the card asks to be fixed by tests.
 DEFAULT_SEED_K = 20
 DEFAULT_HOPS = 1
-DEFAULT_CLAIM_CAP = 40
+# W1 (Ruling 25): raise recall after the acceptance diseases were diagnosed.
+# A hub entity can own dozens of claims; without a quota it floods the cap and
+# starves the rest of the retrieved neighborhood.
+DEFAULT_CLAIM_CAP = 150
+DEFAULT_NODE_QUOTA = 8
 CITATION_NODE_TYPE = "citation"
 
 # Frozen schema status domain: active|stale|superseded|archived|retracted.
@@ -195,6 +199,7 @@ def _gather_claims_page(
     *,
     cap: int,
     scores: Mapping[UUID, float] | None = None,
+    per_node_quota: int | None = None,
 ) -> tuple[list[ClaimRecord], bool]:
     """Fetch at most ``cap`` claims ranked by connecting-node match, depth, id.
 
@@ -203,13 +208,22 @@ def _gather_claims_page(
     a claim's rank is the *strongest* score among the visited nodes connecting
     to it, so a claim on a high-similarity seed survives the cap while an
     equally deep claim on a low-similarity node is cut first. Depth breaks
-    score ties and the claim id breaks final ties (determinism). A claim
-    survives only through an all-active path (F3/F8). Fetching ``cap + 1`` rows
-    makes ``truncated`` exact.
+    score ties and the claim id breaks final ties (determinism).
+
+    W1: each visited node contributes at most ``per_node_quota`` claims
+    (default :data:`DEFAULT_NODE_QUOTA`), ranked by score/depth/id. A claim
+    connecting to several nodes keeps every qualifying route, so a hub node
+    can no longer crowd out the rest of the retrieved neighborhood without
+    silently erasing claims that also hang off a less crowded node. Final
+    claim order is the strongest connecting score, then depth, then id.
+    A claim survives only through an all-active path (F3/F8). Fetching
+    ``cap + 1`` rows makes ``truncated`` exact.
     """
 
     if cap < 1:
         raise ValueError("cap must be positive")
+    if per_node_quota is not None and per_node_quota < 1:
+        raise ValueError("per_node_quota must be positive")
     if not depths:
         return [], False
 
@@ -218,6 +232,8 @@ def _gather_claims_page(
     score_values = [
         float(_unit_interval(scores.get(node_id, 0.0))) if scores else 0.0 for node_id in node_ids
     ]
+    # A huge quota makes the window filter a no-op for callers that opt out.
+    quota = per_node_quota if per_node_quota is not None else 1_000_000
     rows = conn.execute(
         """
         WITH depth_map(node_id, depth, score) AS (
@@ -227,7 +243,8 @@ def _gather_claims_page(
             WHERE vn.status <> ALL(%s::text[])
         ),
         connections AS (
-            SELECT c.id AS claim_id, MIN(dm.depth) AS best_depth, MAX(dm.score) AS best_score
+            SELECT DISTINCT c.id AS claim_id, dm.node_id AS connecting_node,
+                   dm.depth AS depth, dm.score AS score
             FROM claims c
             JOIN depth_map dm
               ON dm.node_id = c.citation_node_id
@@ -249,15 +266,28 @@ def _gather_claims_page(
                     )
               )
             WHERE c.project_id = %s
-            GROUP BY c.id
+        ),
+        per_node AS (
+            -- Hub guard: each visited node contributes at most ``quota``
+            -- claims. A claim connecting to several nodes keeps every route,
+            -- so being demoted by one hub does not silently erase it.
+            SELECT claim_id, connecting_node, depth, score,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY connecting_node
+                       ORDER BY score DESC, depth, claim_id
+                   ) AS node_rank
+            FROM connections
         )
-        SELECT c.id, c.text, d.source_uri, cn.status
-        FROM connections conn
-        JOIN claims c ON c.id = conn.claim_id AND c.project_id = %s
+        SELECT c.id, c.text, d.source_uri, cn.status,
+               MAX(pn.score) AS best_score, MIN(pn.depth) AS best_depth
+        FROM per_node pn
+        JOIN claims c ON c.id = pn.claim_id AND c.project_id = %s
         JOIN nodes cn ON cn.id = c.citation_node_id AND cn.project_id = c.project_id
         JOIN documents d ON d.id = c.document_id AND d.project_id = c.project_id
         WHERE cn.status <> ALL(%s::text[])
-        ORDER BY conn.best_score DESC, conn.best_depth, c.id
+          AND pn.node_rank <= %s
+        GROUP BY c.id, c.text, d.source_uri, cn.status
+        ORDER BY best_score DESC, best_depth, c.id
         LIMIT %s
         """,
         (
@@ -270,6 +300,7 @@ def _gather_claims_page(
             project_id,
             project_id,
             list(EXCLUDED_NODE_STATUSES),
+            quota,
             cap + 1,
         ),
     ).fetchall()
@@ -296,13 +327,16 @@ def gather_claims(
     cap: int = DEFAULT_CLAIM_CAP,
     depths: Mapping[UUID, int] | None = None,
     scores: Mapping[UUID, float] | None = None,
+    per_node_quota: int | None = None,
 ) -> list[ClaimRecord]:
     """Claims connected to the visited nodes, best-match-first, deterministic, capped."""
 
     if depths is None:
         seeds = set(seed_node_ids_)
         depths = {node_id: (0 if node_id in seeds else 1) for node_id in list(visited_node_ids)}
-    claims, _ = _gather_claims_page(conn, project_id, depths, cap=cap, scores=scores)
+    claims, _ = _gather_claims_page(
+        conn, project_id, depths, cap=cap, scores=scores, per_node_quota=per_node_quota
+    )
     return claims
 
 
@@ -389,7 +423,12 @@ def answer_question(
     scores.update(dict(scored_seeds))
     try:
         claims, truncated = _gather_claims_page(
-            conn, project_id, depths, cap=claim_cap, scores=scores
+            conn,
+            project_id,
+            depths,
+            cap=claim_cap,
+            scores=scores,
+            per_node_quota=DEFAULT_NODE_QUOTA,
         )
     except psycopg.Error as exc:
         raise QARetrievalError(f"claim gathering failed: {exc}") from exc

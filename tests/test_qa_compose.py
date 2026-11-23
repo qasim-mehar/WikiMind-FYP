@@ -114,4 +114,4 @@ def test_compose_wraps_provider_failure_and_prints_its_cause() -> None:
 def test_pinned_defaults_are_stable() -> None:
     assert QA_MAX_ATTEMPTS == 3
     assert VALIDATION_RETRIES == 1
-    assert DEFAULT_CLAIM_CAP == 40
+    assert DEFAULT_CLAIM_CAP == 150

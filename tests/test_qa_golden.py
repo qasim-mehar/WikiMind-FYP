@@ -127,7 +127,18 @@ def test_golden_file_structure() -> None:
         for source in entry["expected_source_documents"]:
             assert source in {c["document"] for c in entry["seed_claims"]}
     assert len(data["derived_from"]) == 4
-    assert "contradiction-note.txt" in {c["document"] for c in questions[-1]["seed_claims"]}
+    # W2a: the contradiction case now targets the four claim rows actually
+    # behind the two recorded contradicts edges, not the synthetic fixture.
+    assert {c["document"] for c in questions[-1]["seed_claims"]} == {
+        "2005.11401-retro.pdf",
+        "1706.03762-attention.pdf",
+    }
+    # W2b: honest insufficiency is an explicit, evidenced outcome.
+    insufficient = [e for e in questions if e.get("expected_outcome") == "insufficient"]
+    assert {e["id"] for e in insufficient} == {"gan-analogy", "rag-downsides"}
+    for entry in insufficient:
+        assert entry["claim_absence_evidence"]
+        assert entry["question"]
 
 
 def test_every_golden_question_answers_with_expected_sources(db_conn) -> None:
@@ -137,13 +148,26 @@ def test_every_golden_question_answers_with_expected_sources(db_conn) -> None:
         )
         expected_slugs = {slug_by_fixture[doc] for doc in entry["expected_source_documents"]}
         refs = [claim_ref(claim_id) for claim_id, _, _ in claims]
-        scripted = {
-            "answer": " ".join([*entry["expected_answer_elements"], *(f"[{ref}]" for ref in refs)]),
-            "sufficient": True,
-            "citations": [
-                {"claim_id": ref, "document_slug": slug} for ref, (_, slug, _) in zip(refs, claims)
-            ],
-        }
+        citations = [
+            {"claim_id": ref, "document_slug": slug} for ref, (_, slug, _) in zip(refs, claims)
+        ]
+        if entry.get("expected_outcome") == "insufficient":
+            # Ruling 25(2): honest insufficiency is a PASS when the target
+            # claim is demonstrably absent from the stored corpus.
+            scripted = {
+                "answer": "The provided claims do not contain enough information to answer. "
+                + " ".join(f"[{ref}]" for ref in refs),
+                "sufficient": False,
+                "citations": citations,
+            }
+        else:
+            scripted = {
+                "answer": " ".join(
+                    [*entry["expected_answer_elements"], *(f"[{ref}]" for ref in refs)]
+                ),
+                "sufficient": True,
+                "citations": citations,
+            }
         meter = CostMeter(InMemorySink())
         fake = FakeLLM([scripted], meter=meter)
 
@@ -154,7 +178,9 @@ def test_every_golden_question_answers_with_expected_sources(db_conn) -> None:
             embedder=FixedEmbedder(meter),
             drafter=fake,
             meter=meter,
-            ann_k=len(expected_slugs),
+            # A case can have several seed claims over the same document;
+            # retrieve enough concept seeds to reach every one of them.
+            ann_k=max(len(expected_slugs), len(claims)),
         )
 
         # F6: genuine retrieval checks, not assertions on our own scripted text.
@@ -164,6 +190,12 @@ def test_every_golden_question_answers_with_expected_sources(db_conn) -> None:
         assert all(claim.claim_id != distractor_claim for claim in result.claims), entry["id"]
         assert all(claim.text in fake.calls[0].user for claim in result.claims), entry["id"]
         assert {c.document_slug for c in result.citations} == expected_slugs, entry["id"]
-        assert result.sufficient is True, entry["id"]
+        if entry.get("expected_outcome") == "insufficient":
+            assert result.sufficient is False, entry["id"]
+            assert "do not contain enough information" in result.answer, entry["id"]
+        else:
+            assert result.sufficient is True, entry["id"]
+            for element in entry["expected_answer_elements"]:
+                assert element in result.answer, entry["id"]
         assert result.unverified_removed == 0, entry["id"]
         assert len(fake.calls) == 1, entry["id"]
