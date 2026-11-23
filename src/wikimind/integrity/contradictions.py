@@ -69,6 +69,10 @@ def list_contradictions(conn: psycopg.Connection, project_id: UUID | str) -> Int
         report.finding(f"{int(missing)} contradicts edge(s) have no provenance claim")
 
     rows = conn.execute(CONTRADICTIONS_SQL, (pid,)).fetchall()
+    # CONTRADICTIONS_SQL emits one row per (edge, provenance claim). Count
+    # DISTINCT edges for edges.contradicts; claim rows are a separate axis so
+    # an edge with two supporting claims is still one contradiction (Finding 6).
+    edge_ids: set[str] = {str(row["edge_id"]) for row in rows}
     claims: set[str] = set()
     documents: set[str] = set()
     # G12: key on the full compile_units PK (plus project) so the same
@@ -105,7 +109,8 @@ def list_contradictions(conn: psycopg.Connection, project_id: UUID | str) -> Int
             "unit_run_id": None if row["run_id"] is None else str(row["run_id"]),
         }
         report.rows.append(record)
-    report.set_count("edges.contradicts", len(rows))
+    report.set_count("edges.contradicts", len(edge_ids))
+    report.set_count("claim_rows.involved", len(rows))
     report.set_count("claims.involved", len(claims))
     report.set_count("documents.involved", len(documents))
     report.set_count("units.recorded", len(units))

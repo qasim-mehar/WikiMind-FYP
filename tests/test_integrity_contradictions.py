@@ -12,8 +12,12 @@ from integrity_seed import (
     seed_node,
     seed_project,
 )
+from typer.testing import CliRunner
 
+from wikimind.cli import app as root_app
 from wikimind.integrity.contradictions import list_contradictions
+
+runner = CliRunner()
 
 
 def _seed_contradiction(conn, *, with_provenance: bool = True):
@@ -138,3 +142,57 @@ def test_project_isolation(test_dsn: str) -> None:
         assert list_contradictions(conn, project).counts["edges.contradicts"] == 1
     finally:
         conn.close()
+
+
+def test_edge_count_is_distinct_from_claim_rows(test_dsn: str) -> None:
+    """Finding 6: one contradicts edge with two claim rows counts as ONE edge."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project = seed_project(conn)
+        document = seed_document(conn, project)
+        channel = seed_channel(conn, project, document)
+        citation = seed_node(conn, project, f"source:{document}", node_type="citation")
+        seed_node(conn, project, "alpha")
+        seed_node(conn, project, "beta")
+        claim_a = seed_claim(
+            conn, project, citation, channel, document, text="Alpha contradicts Beta."
+        )
+        claim_b = seed_claim(
+            conn, project, citation, channel, document, text="Beta contradicts Alpha."
+        )
+        seed_compile_unit(conn, project, document, channel)
+        seed_edge(
+            conn,
+            project,
+            citation,
+            citation,
+            edge_type="contradicts",
+            claims=(claim_a, claim_b),
+        )
+        report = list_contradictions(conn, project)
+        assert report.ok, report.findings
+        assert report.counts["edges.contradicts"] == 1
+        assert report.counts["claim_rows.involved"] == 2
+        assert report.counts["claims.involved"] == 2
+        assert len(report.rows) == 2
+    finally:
+        conn.close()
+
+
+def test_contradictions_human_render_with_rows_does_not_crash(test_dsn: str) -> None:
+    """Finding 7: the human render must not KeyError when rows are present."""
+
+    conn = connect_db(test_dsn)
+    try:
+        project, *_ = _seed_contradiction(conn)
+        name = conn.execute("SELECT name FROM projects WHERE id=%s", (str(project),)).fetchone()[
+            "name"
+        ]
+    finally:
+        conn.close()
+    result = runner.invoke(root_app, ["integrity", "contradictions", name, "--dsn", test_dsn])
+    assert result.exit_code == 0, result.output
+    assert "Traceback" not in result.output
+    assert "contradiction" in result.output
+    assert "->" in result.output

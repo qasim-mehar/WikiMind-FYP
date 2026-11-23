@@ -72,7 +72,7 @@ def _finish(report: IntegrityReport, as_json: bool, *, show_rows: bool = False) 
             for row in report.rows:
                 typer.echo(
                     "  contradiction {edge_id}: claim={claim_id} document={document_sha256} "
-                    "nodes={src_slug}->{dst_slug} unit={unit_channel_id}/{unit_compile_version}".format(
+                    "nodes={src_node}->{dst_node} unit={unit_channel_id}/{unit_compile_version}".format(
                         **row
                     )
                 )

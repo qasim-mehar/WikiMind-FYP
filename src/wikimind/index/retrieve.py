@@ -20,6 +20,18 @@ from ..prices import EMBED_MODEL
 from .store import format_vector
 
 
+def _val(row: object, key: str, index: int) -> object:
+    """Read a column under either psycopg row factory.
+
+    The QA path connects with ``dict_row``; the index path and the DB tests
+    use the default positional factory.  Retrieval is a shared substrate, so
+    it accepts both rather than forcing callers to pick a factory.  This keeps
+    the QA command's ``dict_row`` convention consistent end to end (Ruling 23).
+    """
+
+    return row[key] if isinstance(row, dict) else row[index]  # type: ignore[index]
+
+
 @dataclass(frozen=True, slots=True)
 class AnnHit:
     """One vector-ANN result; ``similarity`` is cosine similarity in [-1, 1]."""
@@ -110,7 +122,12 @@ def ann_search(
         (literal, project_id, model, list(exclude_node_types), literal, k),
     ).fetchall()
     return [
-        AnnHit(node_id=row[0], node_version_id=row[1], similarity=float(row[2])) for row in rows
+        AnnHit(
+            node_id=_val(row, "node_id", 0),
+            node_version_id=_val(row, "node_version_id", 1),
+            similarity=float(_val(row, "similarity", 2)),
+        )
+        for row in rows
     ]
 
 
@@ -149,7 +166,7 @@ def k_hop_expansion(
                 AND (e.src_node = w.node_id OR e.dst_node = w.node_id)
             WHERE w.depth < %s
         )
-        SELECT n.id, MIN(w.depth), n.slug, n.node_type, n.status
+        SELECT n.id, MIN(w.depth) AS depth, n.slug, n.node_type, n.status
         FROM walk w
         JOIN nodes n ON n.id = w.node_id AND n.project_id = %s
         GROUP BY n.id, n.slug, n.node_type, n.status
@@ -159,11 +176,11 @@ def k_hop_expansion(
     ).fetchall()
     return [
         GraphHit(
-            node_id=row[0],
-            depth=int(row[1]),
-            slug=row[2],
-            node_type=row[3],
-            status=row[4],
+            node_id=_val(row, "id", 0),
+            depth=int(_val(row, "depth", 1)),
+            slug=_val(row, "slug", 2),
+            node_type=_val(row, "node_type", 3),
+            status=_val(row, "status", 4),
         )
         for row in rows
     ]
@@ -207,10 +224,10 @@ def fulltext_search(
     ).fetchall()
     return [
         FtsHit(
-            node_id=row[0],
-            node_version_id=row[1],
-            version=int(row[2]),
-            rank=float(row[3]),
+            node_id=_val(row, "node_id", 0),
+            node_version_id=_val(row, "id", 1),
+            version=int(_val(row, "version", 2)),
+            rank=float(_val(row, "score", 3)),
         )
         for row in rows
     ]

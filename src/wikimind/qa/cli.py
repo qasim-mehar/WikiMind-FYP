@@ -6,6 +6,7 @@ alongside ``compile`` and ``index``. There is no web surface in Stage 1.
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 from typing import Annotated
@@ -16,7 +17,8 @@ from psycopg.rows import dict_row
 
 from wikimind.config import get_settings, redact
 from wikimind.db.connection import connect
-from wikimind.llm.cost import CostMeter, JsonlCostSink, format_usd
+from wikimind.integrity.costs import build_meter
+from wikimind.llm.cost import format_usd
 from wikimind.llm.embedder import SentenceTransformerEmbedder
 from wikimind.llm.errors import WikiMindLLMError
 from wikimind.llm.gemini import GeminiClient
@@ -52,6 +54,10 @@ ProjectOption = Annotated[
         help=f"Project to query (default: WIKIMIND_QA_PROJECT or {DEFAULT_PROJECT!r}).",
     ),
 ]
+JsonOption = Annotated[
+    bool,
+    typer.Option("--json", help="Emit the verbatim V4 answer contract as JSON (no prose)."),
+]
 
 
 def _fail(message: object, code: int = 1) -> None:
@@ -76,20 +82,47 @@ def _connect(dsn: str | None):
     return connect(resolved, row_factory=dict_row, autocommit=True)
 
 
+def _print_json(result: AnswerResult) -> None:
+    """The exact V4 contract — no diagnostics, no prose, no extra keys.
+
+    ``citations[].claim_id`` is the canonical full UUID (Ruling 22) and
+    ``document_slug`` is the slugified filename stem (Ruling 21), so the output
+    pipes straight into ``integrity verify-answer`` with no shim.
+    """
+
+    typer.echo(
+        json.dumps(
+            {
+                "answer": result.answer,
+                "sufficient": result.sufficient,
+                "citations": [
+                    {"claim_id": citation.claim_id, "document_slug": citation.document_slug}
+                    for citation in result.citations
+                ],
+            },
+            ensure_ascii=False,
+        )
+    )
+
+
 def _print_result(result: AnswerResult, question: str) -> None:
     typer.echo(f"question: {question}")
     typer.echo(f"answer:   {result.answer}")
     typer.echo(f"sufficient: {str(result.sufficient).lower()}")
     typer.echo("citations:")
+    # Canonical citations carry full UUIDs; legacy/fake payloads may still use
+    # short refs. Accept both so the human render stays informative and short.
+    by_id = {str(claim.claim_id): claim for claim in result.claims}
     by_ref = {claim.ref: claim for claim in result.claims}
     if not result.citations:
         typer.echo("  (none)")
     for citation in result.citations:
-        claim = by_ref.get(citation.claim_id)
+        claim = by_id.get(citation.claim_id) or by_ref.get(citation.claim_id)
+        ref = claim.ref if claim is not None else citation.claim_id
         suffix = f" — {claim.text}" if claim is not None else ""
         if claim is not None and claim.node_status != "active":
             suffix += f" [status: {claim.node_status}]"
-        typer.echo(f"  [{citation.claim_id}] {citation.document_slug}{suffix}")
+        typer.echo(f"  [{ref}] {citation.document_slug}{suffix}")
     if result.unverified_removed:
         typer.echo(f"  {result.unverified_removed} unverified citation(s) removed")
     retrieval = (
@@ -114,9 +147,11 @@ def run_ask(
     hops: int,
     claim_cap: int,
     max_retries: int,
+    as_json: bool = False,
 ) -> int:
     """Shared implementation; returns the process exit code."""
 
+    resolved = dsn or get_settings().db_dsn
     try:
         conn = _connect(dsn)
     except typer.Exit:
@@ -126,7 +161,9 @@ def run_ask(
         return 2
     try:
         project = _resolve_project_ref(conn, project_ref)
-        meter = CostMeter(JsonlCostSink(costs_path))
+        # R3: same sink factory as compile — WIKIMIND_COST_DB_MIRROR=1 opts into
+        # MirroringCostSink; default behaviour stays JSONL-only.
+        meter = build_meter(costs_path, dsn=resolved)
         embedder = SentenceTransformerEmbedder(meter=meter, call_site=CALL_SITE_EMBED)
         drafter = GeminiClient(
             meter=meter,
@@ -157,7 +194,10 @@ def run_ask(
     finally:
         conn.close()
 
-    _print_result(result, question)
+    if as_json:
+        _print_json(result)
+    else:
+        _print_result(result, question)
     return 0
 
 
@@ -197,6 +237,7 @@ def ask(
             max=QA_MAX_ATTEMPTS,
         ),
     ] = QA_MAX_ATTEMPTS,
+    as_json: JsonOption = False,
 ) -> None:
     """Answer a question by traversing the knowledge graph and reading its claims."""
 
@@ -212,6 +253,7 @@ def ask(
             hops=hops,
             claim_cap=max_claims,
             max_retries=max_attempts,
+            as_json=as_json,
         )
     )
 

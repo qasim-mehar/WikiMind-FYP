@@ -306,4 +306,6 @@ def test_answer_question_end_to_end_on_seeded_db(db_conn) -> None:
     assert {event.call_site for event in meter.events} == {"embed.query", "qa.answer"}
     assert result.shadow_cost_usd == meter.total_shadow_cost_usd
     assert result.unverified_removed == 0
-    assert [citation.claim_id for citation in result.citations] == [ref]
+    # Ruling 22: the structured citation carries the canonical full UUID;
+    # the short ref stays in prose only.
+    assert [citation.claim_id for citation in result.citations] == [str(claim_id)]

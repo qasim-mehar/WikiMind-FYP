@@ -11,6 +11,7 @@ answer (M6/L6); the CLI help states this explicitly.
 
 from __future__ import annotations
 
+import math
 import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -105,7 +106,15 @@ def document_slug(source_uri: str) -> str:
     return slugify_entity(PurePosixPath(name).stem) or "document"
 
 
-def seed_node_ids(
+def _unit_interval(value: float) -> float:
+    """Map a retrieval score into [0, 1] without changing its ordering."""
+
+    if math.isnan(value):
+        return 0.0
+    return max(0.0, min(1.0, value))
+
+
+def seed_node_ids_with_scores(
     conn: psycopg.Connection,
     project_id: UUID,
     query_vector: Sequence[float],
@@ -113,12 +122,14 @@ def seed_node_ids(
     *,
     ann_k: int = DEFAULT_SEED_K,
     fts_k: int = DEFAULT_SEED_K,
-) -> list[UUID]:
-    """ANN + full-text seeds, deterministically ordered, citation nodes removed.
+) -> list[tuple[UUID, float]]:
+    """ANN + FTS seeds, first-seen order, paired with a match score in [0, 1].
 
-    The type filter lives in the substrate SQL *before* the LIMIT (F2), so a
-    corpus whose top-k is entirely citation nodes still yields real seeds.
-    ``k_hop_expansion`` is a separate call and remains free to traverse them.
+    Cosine similarity is mapped from [-1, 1] to [0, 1]; FTS ``ts_rank`` values
+    are divided by their own maximum so they are comparable on the same axis.
+    A node found by both signals keeps its strongest score. The score is the
+    ranking signal R6 propagates to claim ordering; seed *order* is unchanged
+    so existing first-seen-order assertions still hold.
     """
 
     if ann_k < 1 or fts_k < 1:
@@ -143,10 +154,38 @@ def seed_node_ids(
         else []
     )
 
-    ordered: dict[UUID, None] = {}
-    for hit in (*ann_hits, *fts_hits):
-        ordered.setdefault(hit.node_id, None)
-    return list(ordered)
+    fts_max = max((hit.rank for hit in fts_hits), default=0.0)
+    scores: dict[UUID, float] = {}
+    for hit in ann_hits:
+        scores.setdefault(hit.node_id, _unit_interval((hit.similarity + 1.0) / 2.0))
+    for hit in fts_hits:
+        value = _unit_interval(hit.rank / fts_max) if fts_max > 0 else 0.0
+        scores[hit.node_id] = max(scores.get(hit.node_id, 0.0), value)
+    return [(node_id, score) for node_id, score in scores.items()]
+
+
+def seed_node_ids(
+    conn: psycopg.Connection,
+    project_id: UUID,
+    query_vector: Sequence[float],
+    query_text: str,
+    *,
+    ann_k: int = DEFAULT_SEED_K,
+    fts_k: int = DEFAULT_SEED_K,
+) -> list[UUID]:
+    """ANN + full-text seeds, deterministically ordered, citation nodes removed.
+
+    The type filter lives in the substrate SQL *before* the LIMIT (F2), so a
+    corpus whose top-k is entirely citation nodes still yields real seeds.
+    ``k_hop_expansion`` is a separate call and remains free to traverse them.
+    """
+
+    return [
+        node_id
+        for node_id, _ in seed_node_ids_with_scores(
+            conn, project_id, query_vector, query_text, ann_k=ann_k, fts_k=fts_k
+        )
+    ]
 
 
 def _gather_claims_page(
@@ -155,15 +194,18 @@ def _gather_claims_page(
     depths: Mapping[UUID, int],
     *,
     cap: int,
+    scores: Mapping[UUID, float] | None = None,
 ) -> tuple[list[ClaimRecord], bool]:
-    """Fetch at most ``cap`` claims ranked by (minimum connecting depth, id).
+    """Fetch at most ``cap`` claims ranked by connecting-node match, depth, id.
 
     ``depths`` maps visited node ids to their hop distance from a seed; seeds
-    are 0. A claim's rank is the shallowest visited node that connects to it
-    (F2/M1), so genuinely seed-adjacent claims sort before deeper ones. A
-    claim survives only through an all-active path (F3/F8): its citation node,
-    or a provenance edge whose endpoints are both active. Fetching ``cap + 1``
-    rows makes ``truncated`` exact.
+    are 0. ``scores`` (R6) maps those node ids to their retrieval match score:
+    a claim's rank is the *strongest* score among the visited nodes connecting
+    to it, so a claim on a high-similarity seed survives the cap while an
+    equally deep claim on a low-similarity node is cut first. Depth breaks
+    score ties and the claim id breaks final ties (determinism). A claim
+    survives only through an all-active path (F3/F8). Fetching ``cap + 1`` rows
+    makes ``truncated`` exact.
     """
 
     if cap < 1:
@@ -173,16 +215,19 @@ def _gather_claims_page(
 
     node_ids = list(depths)
     depth_values = [depths[node_id] for node_id in node_ids]
+    score_values = [
+        float(_unit_interval(scores.get(node_id, 0.0))) if scores else 0.0 for node_id in node_ids
+    ]
     rows = conn.execute(
         """
-        WITH depth_map(node_id, depth) AS (
-            SELECT dm.node_id, dm.depth
-            FROM unnest(%s::uuid[], %s::int[]) AS dm(node_id, depth)
+        WITH depth_map(node_id, depth, score) AS (
+            SELECT dm.node_id, dm.depth, dm.score
+            FROM unnest(%s::uuid[], %s::int[], %s::float8[]) AS dm(node_id, depth, score)
             JOIN nodes vn ON vn.id = dm.node_id AND vn.project_id = %s
             WHERE vn.status <> ALL(%s::text[])
         ),
         connections AS (
-            SELECT c.id AS claim_id, MIN(dm.depth) AS best_depth
+            SELECT c.id AS claim_id, MIN(dm.depth) AS best_depth, MAX(dm.score) AS best_score
             FROM claims c
             JOIN depth_map dm
               ON dm.node_id = c.citation_node_id
@@ -212,12 +257,13 @@ def _gather_claims_page(
         JOIN nodes cn ON cn.id = c.citation_node_id AND cn.project_id = c.project_id
         JOIN documents d ON d.id = c.document_id AND d.project_id = c.project_id
         WHERE cn.status <> ALL(%s::text[])
-        ORDER BY conn.best_depth, c.id
+        ORDER BY conn.best_score DESC, conn.best_depth, c.id
         LIMIT %s
         """,
         (
             node_ids,
             depth_values,
+            score_values,
             project_id,
             list(EXCLUDED_NODE_STATUSES),
             list(EXCLUDED_NODE_STATUSES),
@@ -249,13 +295,14 @@ def gather_claims(
     seed_node_ids_: Sequence[UUID] = (),
     cap: int = DEFAULT_CLAIM_CAP,
     depths: Mapping[UUID, int] | None = None,
+    scores: Mapping[UUID, float] | None = None,
 ) -> list[ClaimRecord]:
-    """Claims connected to the visited nodes, seed-first, deterministic, capped."""
+    """Claims connected to the visited nodes, best-match-first, deterministic, capped."""
 
     if depths is None:
         seeds = set(seed_node_ids_)
         depths = {node_id: (0 if node_id in seeds else 1) for node_id in list(visited_node_ids)}
-    claims, _ = _gather_claims_page(conn, project_id, depths, cap=cap)
+    claims, _ = _gather_claims_page(conn, project_id, depths, cap=cap, scores=scores)
     return claims
 
 
@@ -323,7 +370,10 @@ def answer_question(
 
     try:
         vector = embedder.embed([question])[0]
-        seeds = seed_node_ids(conn, project_id, vector, question, ann_k=ann_k, fts_k=fts_k)
+        scored_seeds = seed_node_ids_with_scores(
+            conn, project_id, vector, question, ann_k=ann_k, fts_k=fts_k
+        )
+        seeds = [node_id for node_id, _ in scored_seeds]
         graph = k_hop_expansion(conn, project_id, seeds, hops=hops)
     except psycopg.Error as exc:
         raise QARetrievalError(f"retrieval failed: {exc}") from exc
@@ -333,8 +383,14 @@ def answer_question(
     depths: dict[UUID, int] = {node_id: 0 for node_id in seeds}
     for hit in graph:
         depths[hit.node_id] = min(depths.get(hit.node_id, hit.depth), hit.depth)
+    # R6: a claim inherits the strongest match score of the visited nodes that
+    # connect to it. Non-seed graph nodes carry 0 until they are also seeds.
+    scores: dict[UUID, float] = {node_id: 0.0 for node_id in depths}
+    scores.update(dict(scored_seeds))
     try:
-        claims, truncated = _gather_claims_page(conn, project_id, depths, cap=claim_cap)
+        claims, truncated = _gather_claims_page(
+            conn, project_id, depths, cap=claim_cap, scores=scores
+        )
     except psycopg.Error as exc:
         raise QARetrievalError(f"claim gathering failed: {exc}") from exc
 
@@ -342,13 +398,16 @@ def answer_question(
         PromptClaim(ref=claim.ref, text=claim.text, document_slug=claim.document_slug)
         for claim in claims
     ]
+    # Ruling 22: prose keeps the short ref; the structured contract carries the
+    # full UUID. The mapping is never shown to the model (frozen prompt).
+    ref_to_uuid = {claim.ref: str(claim.claim_id) for claim in claims}
     payload = _compose_answer(
         drafter, build_user_message(question, prompt_claims), max_retries=max_retries
     )
-    verified: VerificationResult = verify_citations(payload, prompt_claims)
+    verified: VerificationResult = verify_citations(payload, prompt_claims, claim_ids=ref_to_uuid)
 
     return AnswerResult(
-        answer=payload.answer,
+        answer=verified.answer,
         sufficient=payload.sufficient,
         citations=verified.citations,
         claims=tuple(claims),
