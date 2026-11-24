@@ -4,6 +4,12 @@ Drives the REAL Typer entry point against a template-spawned database with
 no API keys and no network.  Removal is zero-LLM: the costs ledger path is
 pointed at a temp file and must stay absent.  This test landed before the
 removal command and was demonstrated to fail on the broken shape.
+
+FAIL-FIRST EVIDENCE (pre-fix tree at a1ed2e9, 2026-11-24): before any removal
+code or command existed, `pytest tests/test_integrity_removal_cli.py` reported
+`1 failed in 5.78s`, exit code 1, with `No such command 'remove'.` from the real
+Typer app and `assert 2 == 0` on `result.exit_code`. After the fix the same
+test reports `1 passed`.
 """
 
 from __future__ import annotations

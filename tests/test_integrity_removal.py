@@ -200,6 +200,61 @@ def test_duplicate_mode_refuses_when_another_page_cites(test_dsn: str) -> None:
         conn.close()
 
 
+def test_duplicate_guard_covers_claims_anchored_at_node_from_other_documents(test_dsn: str) -> None:
+    """A cascade-deleted claim's ledger block must be visible to the guard."""
+
+    conn = _connect(test_dsn)
+    try:
+        project = seed_project(conn, "removal-duplicate-foreign")
+        document, reference = _seed_plain_reference(conn, project, "a" * 64)
+        other = seed_document(conn, project, sha256="1" * 64, source_uri="memo://other.pdf")
+        seed_channel(conn, project, other, channel_id="ch-other")
+        # Anchored at the reference node but provenanced to another document.
+        claim = seed_claim(conn, project, reference, "ch-other", other)
+        holder = seed_node(conn, project, "foreign-holder")
+        conn.execute(
+            "INSERT INTO node_sources (project_id, node_id, document_id) VALUES (%s, %s, %s)",
+            (str(project), str(holder), str(other)),
+        )
+        with with_writer_lock(project, conn):
+            append_ledger_batch(conn, project, holder, [(holder, claim)])
+
+        report = remove_document(conn, project, "a" * 64, "duplicate")
+        assert report.counts["removals.failed"] == 1
+        assert any("append-only ledger block" in finding for finding in report.findings)
+        assert verify_ledger(conn, project).ok is True
+        assert document is not None  # raw source row survives in every mode
+    finally:
+        conn.close()
+
+
+def test_retracted_only_claim_not_masked_by_cosourcing(test_dsn: str) -> None:
+    """Co-citation by an active multi-source node is not evidence for a claim."""
+
+    conn = _connect(test_dsn)
+    try:
+        project = seed_project(conn, "removal-retracted-cosource")
+        document, reference, _ = _seed_compiled_reference(conn, project, "2" * 64)
+        active = seed_document(conn, project, sha256="3" * 64, source_uri="memo://active.pdf")
+        seed_channel(conn, project, active, channel_id="ch-active")
+        wide = seed_node(conn, project, "wide-entity")
+        peer = seed_node(conn, project, "peer-entity")
+        for source in (document, active):
+            conn.execute(
+                "INSERT INTO node_sources (project_id, node_id, document_id) VALUES (%s, %s, %s)",
+                (str(project), str(wide), str(source)),
+            )
+        claim = seed_claim(conn, project, reference, "ch-a", document)
+        seed_edge(conn, project, wide, peer, claims=(claim,))
+
+        assert remove_document(conn, project, "2" * 64, "retracted").counts["removals.done"] == 1
+        scan = scan_leaks(conn, project, flag_retracted=True)
+        assert scan.counts["claims.retracted_only"] >= 1
+        assert any("supported only by retracted documents" in w for w in scan.warnings)
+    finally:
+        conn.close()
+
+
 def test_removal_is_idempotent_and_every_mutation_takes_the_lock(
     test_dsn: str, monkeypatch
 ) -> None:
