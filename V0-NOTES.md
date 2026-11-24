@@ -270,3 +270,32 @@ unchanged" instead of an absolute hash. (4) One-time: the executor is
 authorized to commit and push this ruling itself (doc-only); from its
 landing, clause (2) applies without exception.
 Authorized by Qasim, 2026-11-23.
+
+## Ruling 28 (2026-11-23)
+
+Ruling 28 (2026-11-23) — Push scope reconciled; standing-docs sync:
+(1) The conflict between Ruling 27(2) and AGENTS.md sections 10/11 is
+resolved in favor of Ruling 27(2), which becomes the governing rule: the
+agent may commit to and push lane branches; merges into main and pushes
+of main are human actions. The earlier V0-NOTES "Branch plan" clause
+("the human pushes after each gate; the agent never pushes") and
+AGENTS.md sections 10/11 ("do not push lane branches") are superseded to
+that extent — lane pushes by the agent were the established practice of
+Lanes 8 and 9 and are now explicitly authorized. (2) Main receives
+changes only through (i) a human-performed merge or push, or (ii) a
+doc-only commit that a numbered ruling explicitly authorizes for that
+specific commit. Ruling 27(4) is retrospectively the template for (ii);
+self-authorization is permitted in this clause form only — a ruling may
+authorize the landing of its own doc-only text, once, and nothing else.
+(3) Published refs are append-only (Ruling 27(1) restated): no
+force-push, no history rewrite, of main or of any branch another
+contributor may have fetched. (4) Standing-docs sync ordered (Gate C
+bucket, next lane's first commits): AGENTS.md sections 10/11 updated to
+this ruling's push scope; sections 7/13 updated to reflect that
+src/wikimind/integrity/ landed with Lane 8 (CI #35); the section 12
+morning-run standing order removed (retirement already recorded); the
+_gather_claims_page and gather_claims docstrings corrected to state that
+per_node_quota defaults to None (effective no quota) and that only
+answer_question passes the quota. CI Node-20 deprecation annotations
+remain in the bucket as non-blocking.
+Authorized by Qasim, 2026-11-23.
