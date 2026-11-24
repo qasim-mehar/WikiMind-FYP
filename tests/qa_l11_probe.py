@@ -36,6 +36,9 @@ from wikimind.qa.pipeline import (
     DEFAULT_NODE_QUOTA,
     _gather_claims_page,
     _unit_interval,
+    citation_hub_scores,
+    claim_text_scores,
+    hub_attached_claim_texts,
     seed_node_ids_with_scores,
 )
 
@@ -283,6 +286,7 @@ def _measure(
     claim_texts,
     claim_hubs,
     hub_quota_exempt: bool = False,
+    production: bool = False,
 ):
     question = entry["question"]
     vector, seeds, _graph, depths, scores = _retrieve(conn, embedder, question)
@@ -302,6 +306,26 @@ def _measure(
             per_node_quota=DEFAULT_NODE_QUOTA,
         )
         gathered = [c.claim_id for c in claims]
+    elif production:
+        # The exact production path (no drafter): production helpers + the
+        # production _gather_claims_page, so this proves implementation parity.
+        for hub_id, score in citation_hub_scores(conn, _project_id(conn), vector).items():
+            if hub_id in depths:
+                scores[hub_id] = max(scores.get(hub_id, 0.0), score)
+        prod_claim_scores = claim_text_scores(
+            embedder, vector, hub_attached_claim_texts(conn, _project_id(conn))
+        )
+        prod_claims, truncated = _gather_claims_page(
+            conn,
+            _project_id(conn),
+            depths,
+            cap=DEFAULT_CLAIM_CAP,
+            scores=scores,
+            per_node_quota=DEFAULT_NODE_QUOTA,
+            claim_scores=prod_claim_scores,
+            hub_quota_exempt=True,
+        )
+        gathered = [c.claim_id for c in prod_claims]
     else:
         # (a) hub seeding exception: give visited citation hubs a nonzero score.
         for hub_id, vec in hub_vectors.items():
@@ -351,9 +375,27 @@ def _measure(
     }
 
 
+class _MemoEmbedder:
+    """Memoize identical embed calls; only model I/O is skipped, scores unchanged."""
+
+    def __init__(self, inner: Embedder) -> None:
+        self.inner = inner
+        self.cache: dict[tuple[str, ...], list[list[float]]] = {}
+
+    @property
+    def model(self) -> str:
+        return self.inner.model
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        key = tuple(texts)
+        if key not in self.cache:
+            self.cache[key] = self.inner.embed(texts)
+        return self.cache[key]
+
+
 def main() -> None:
     meter = CostMeter(InMemorySink())
-    embedder = SentenceTransformerEmbedder(meter=meter, call_site="embed.query")
+    embedder = _MemoEmbedder(SentenceTransformerEmbedder(meter=meter, call_site="embed.query"))
     with psycopg.connect(
         live_dsn(), options="-c default_transaction_read_only=on", row_factory=dict_row
     ) as conn:
@@ -367,14 +409,23 @@ def main() -> None:
 
         print("mode,question,seeds,visited,hubs,gathered,truncated,golden_ranks,cut,absence_hits")
         variants = [
-            ("before", False, False),
-            ("after-quota", True, False),
-            ("after-exempt", True, True),
+            ("before", False, False, False),
+            ("after-quota", True, False, False),
+            ("after-exempt", True, True, False),
+            ("production", True, True, True),
         ]
-        for mode, after, exempt in variants:
+        for mode, after, exempt, production in variants:
             for entry in PROBE:
                 m = _measure(
-                    conn, embedder, entry, after, hub_vectors, claim_texts, claim_hubs, exempt
+                    conn,
+                    embedder,
+                    entry,
+                    after,
+                    hub_vectors,
+                    claim_texts,
+                    claim_hubs,
+                    exempt,
+                    production,
                 )
                 ranks = (
                     ",".join(
