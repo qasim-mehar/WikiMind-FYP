@@ -275,14 +275,14 @@ landed with Lane 8 (CI #35). Gate B remains incomplete because `serve/` does not
 | `compile/` | Five-stage pipeline (analyze → dedup → write → judge → commit), deterministic IDs, pinned prompts, provenance-carrying commits, unit short-circuit, CLI + project/document registration. |
 | `index/` | Embedding store, incremental current-version indexer, ANN/FTS/k-hop/hybrid retrieval **substrates** (no ranking/fusion policy yet), CLI. |
 | `render/` | Deterministic node rendering, append-only version materialization (Ruling 14), backfill with repair, CLI. |
-| `integrity/` | Lint, contradiction/staleness checks, removal leak scan, entailment sampling, reconciliation, CLI (Lane 8, CI #35). |
+| `integrity/` | Lint, contradiction/staleness checks, removal workflow (tombstone / retracted / guarded duplicate), post-removal leak scan, entailment sampling, reconciliation, CLI (Lane 8, CI #35; removal from Lane 12). |
 
-**Planned / not implemented:** `src/wikimind/serve/` (L4: query traversal, page reading, answer
-synthesis, export/import) exists only in `docs/lanes/PLAN.md`; `src/wikimind/integrity/` (L5: lint,
-contradiction/staleness, removal leak scan, entailment sampling, reconciliation) landed with Lane 8
-(CI #35) and now writes `jobs`, `ledger_blocks`, and `events`. `node_redirects` exists in the schema
+**Planned / not implemented:** `src/wikimind/serve/` (query traversal, page reading, answer
+synthesis, export/import) exists only in `docs/lanes/PLAN.md`. `node_redirects` exists in the schema
 but has no application write path yet. `llm/cost.py::DbCostSink` is an explicit `NotImplementedError`
-stub — the cost ledger today is `costs.jsonl` on disk, not the `cost_events` table.
+stub — the cost ledger today is `costs.jsonl` on disk, not the `cost_events` table. The `integrity/`
+package is **implemented**, not planned: it landed with Lane 8 (CI #35), writes `jobs`,
+`ledger_blocks`, and `events`, and now hosts the end-to-end removal workflow.
 
 **Lane plan (`docs/lanes/PLAN.md`)** — note the actual merge history renumbered the area lanes:
 `lane/0-trunk` (deps, DB, CI) → `lane/1-parse` → `lane/2-models` → `lane/3-compile` → `lane/4-index`
@@ -444,6 +444,10 @@ Standalone module entry points also exist: `python -m wikimind.parse.cli`, `.ind
 | L4 index | `..\WikiMind-L4` | `lane/4-index` | `src/wikimind/index/` |
 | L5 versions | `..\WikiMind-L5` | `lane/5-versions` | `src/wikimind/render/` |
 | L6 hygiene | `..\WikiMind-L6` | `lane/6-hygiene` | cross-lane cleanup |
+| L7 qa | — (merged) | `lane/7-qa` | `src/wikimind/qa/` — answer path and `ask` CLI |
+| L8 integrity | — (merged) | `lane/8-integrity` | `src/wikimind/integrity/` — checks, ledger, events, jobs |
+| L9 remediation | — (merged, fast-forward) | `lane/9-remediation` | QA recall/ranking and golden set (`src/wikimind/qa/`, `tests/golden/`) |
+| L10 standing docs | — (merged) | `lane/10-standing-docs-sync` | `AGENTS.md`, `V0-NOTES.md`, QA pipeline sync |
 
 Rules for every lane: stay inside your owned files (read anything, write only your lane's files); never edit another lane's `pyproject.toml` (L0 declares all dependencies); use your own database (`wikimind_l0` for L0; test databases are per-session); make small present-tense commits (e.g. `db: add migration runner`); the agent may commit and push lane branches, but **never force-push** or rewrite published history (Ruling 28(1)/(3)); merges into main and pushes of main are human actions (Ruling 28(1)); if blocked for about 30 minutes, commit WIP, report `BLOCKED`, and stop.
 
@@ -485,10 +489,10 @@ Rules for every lane: stay inside your owned files (read anything, write only yo
 
 ---
 
-## 12. Operational state (as of 2026-11-18)
+## 12. Operational state (as of 2026-11-24)
 
-- Branch `main` tracks `origin/main`; the tree is clean except untracked `.vscode/` and `data/`.
-- The `v0-fixtures` corpus is mid-compile: the runbook targets **229 units**; `costs.jsonl` holds ~1,384 events (~$1.50 shadow cost, $0 actual) with `compile.analyze` / `compile.write` / `compile.judge` dominating. Daily OpenRouter `:free` caps produce HTTP 429 stops and Gemini 503 retries are recorded in `data/morning-run-*.log`.
+- Branch `main` tracks `origin/main` (Lane 12 dispatch verified it at `a1ed2e9`); the tree is clean except untracked `.vscode/` and `data/`.
+- The `v0-fixtures` corpus compile is **complete: 229/229 units**. Verified read-only against `wikimind_live_l3`: documents 4, claims 530, edges 1593, compile_units 229, cost_events 1427. `costs.jsonl` holds **1,434 events** (~$1.51 shadow cost, $0 actual), dominated by `compile.write` / `compile.judge` / `compile.analyze`. Daily OpenRouter `:free` caps produced HTTP 429 stops and Gemini 503 retries recorded in `data/morning-run-*.log`; the morning-run trigger is retired.
 - Full evaluation under `V0_PROTOCOL.md` is still ahead (D14). A ~30-question directional mini-check runs once the engine answers end-to-end; CI thresholds apply only to the full run.
 - Corpus material in `data/v0/` must stay legal sources only (Semantic Scholar, arXiv, Retraction Watch).
 
@@ -504,7 +508,6 @@ Rules for every lane: stay inside your owned files (read anything, write only yo
 | Work on retrieval/QA | D10, `PROJECT.md` §10.2 → `src/wikimind/index/` (note: `serve/` not yet built) |
 | Work on lint/removal | D5–D9, `PROJECT.md` §10.3–10.4 → `src/wikimind/integrity/` (landed with Lane 8, CI #35) |
 | Set up or run verification | `README.dev.md` → `pyproject.toml` → `.github/workflows/ci.yml` |
-| Operate the current compile | `docs/runbooks/morning-run.md` → `V0-NOTES.md` |
 
 ## 14. First-session checklist
 
