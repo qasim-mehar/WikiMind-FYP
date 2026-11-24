@@ -491,8 +491,8 @@ Rules for every lane: stay inside your owned files (read anything, write only yo
 
 ## 12. Operational state (as of 2026-11-24)
 
-- Branch `main` tracks `origin/main` (Lane 12 dispatch verified it at `a1ed2e9`); the tree is clean except untracked `.vscode/` and `data/`.
-- The `v0-fixtures` corpus compile is **complete: 229/229 units**. Verified read-only against `wikimind_live_l3`: documents 4, claims 530, edges 1593, compile_units 229, cost_events 1427. `costs.jsonl` holds **1,434 events** (~$1.51 shadow cost, $0 actual), dominated by `compile.write` / `compile.judge` / `compile.analyze`. Daily OpenRouter `:free` caps produced HTTP 429 stops and Gemini 503 retries recorded in `data/morning-run-*.log`; the morning-run trigger is retired.
+- Branch `main` tracks `origin/main`; the tree is clean except untracked `.vscode/` and `data/`.
+- The `v0-fixtures` corpus compile is **complete: 229/229 units**. Verified read-only against `wikimind_live_l3`: documents 4, claims 530, edges 1593, compile_units 229, cost_events 1427. `costs.jsonl` holds **1,434 events** (~$1.51 shadow cost, $0 actual), dominated by `compile.write` / `compile.judge` / `compile.analyze`. Daily OpenRouter `:free` caps produced HTTP 429 stops and Gemini 503 retries recorded in `data/morning-run-*.log`.
 - Full evaluation under `V0_PROTOCOL.md` is still ahead (D14). A ~30-question directional mini-check runs once the engine answers end-to-end; CI thresholds apply only to the full run.
 - Corpus material in `data/v0/` must stay legal sources only (Semantic Scholar, arXiv, Retraction Watch).
 
