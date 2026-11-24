@@ -21,7 +21,15 @@ def test_integrity_commands_are_mounted() -> None:
     result = runner.invoke(app, ["integrity", "--help"])
     assert result.exit_code == 0, result.output
     text = _plain_help(result)
-    for command in ("check", "import-costs", "verify-answer", "contradictions", "verify-ledger"):
+    for command in (
+        "check",
+        "import-costs",
+        "verify-answer",
+        "contradictions",
+        "verify-ledger",
+        "remove",
+        "leaks",
+    ):
         assert command in text
 
 

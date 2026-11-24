@@ -20,8 +20,12 @@ from wikimind.db.locks import with_writer_lock
 RUN_STARTED = "compile.run_started"
 RUN_FINISHED = "compile.run_finished"
 UNIT_COMMITTED = "compile.unit_committed"
+REMOVAL_COMPLETED = "integrity.removal_completed"
+REMOVAL_REFUSED = "integrity.removal_refused"
 
-KNOWN_KINDS = frozenset({RUN_STARTED, RUN_FINISHED, UNIT_COMMITTED})
+KNOWN_KINDS = frozenset(
+    {RUN_STARTED, RUN_FINISHED, UNIT_COMMITTED, REMOVAL_COMPLETED, REMOVAL_REFUSED}
+)
 
 
 def emit_event(
