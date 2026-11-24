@@ -105,10 +105,19 @@ def resolve_document(conn: psycopg.Connection, project_id: UUID | str, target: s
     return next(iter(matches.values()))
 
 
-def _claim_ids(conn: psycopg.Connection, pid: str, document_id: str) -> list[str]:
+def _claim_ids(conn: psycopg.Connection, ref: DocumentRef) -> list[str]:
+    """Every claim a node deletion would cascade away.
+
+    Claims are deleted by ``citation_node_id`` (the FK cascade), not only by
+    ``document_id``.  A merged citation node can anchor claims whose provenance
+    document differs from the resolved one; those claims' ledger blocks are
+    equally cascade-deleted, so the duplicate guard must see them too.
+    """
+
     rows = conn.execute(
-        "SELECT id::text AS id FROM claims WHERE project_id = %s AND document_id = %s ORDER BY id",
-        (pid, document_id),
+        "SELECT id::text AS id FROM claims WHERE project_id = %s "
+        "AND (document_id = %s OR citation_node_id = %s) ORDER BY id",
+        (ref.project_id, ref.document_id, ref.node_id),
     ).fetchall()
     return [str(row["id"]) for row in rows]
 
@@ -169,8 +178,8 @@ def _append_removal_version(
     text = render_node(conn, pid, node)
     row = conn.execute(
         "SELECT coalesce(max(version), 0) + 1 AS next_version "
-        "FROM node_versions WHERE node_id = %s",
-        (node,),
+        "FROM node_versions WHERE node_id = %s AND project_id = %s",
+        (node, pid),
     ).fetchone()
     version = conn.execute(
         "INSERT INTO node_versions (project_id, node_id, version, rendered_text) "
@@ -201,7 +210,13 @@ def _limited_findings(report: IntegrityReport, key: str, label: str, values: lis
 
 
 def _claim_support(conn: psycopg.Connection, pid: str) -> dict[str, set[str]]:
-    """Documents supporting each claim: its own, ledger nodes, and edge nodes."""
+    """Provenance documents for each claim — never inferred from co-citation.
+
+    A claim's support is its own provenance document plus the documents of its
+    citation node.  Expanding through every document that happens to source a
+    ledger or edge endpoint would manufacture support: a widely-sourced entity
+    node would mask a retracted-only claim and defeat D7 lint.
+    """
 
     support: dict[str, set[str]] = {}
 
@@ -214,27 +229,20 @@ def _claim_support(conn: psycopg.Connection, pid: str) -> dict[str, set[str]]:
     ).fetchall():
         add(row["id"], row["document_id"])
     for row in conn.execute(
-        "SELECT b.claim_id::text AS claim_id, s.document_id::text AS document_id "
-        "FROM ledger_blocks b JOIN node_sources s "
-        "ON s.node_id = b.node_id AND s.project_id = b.project_id "
-        "WHERE b.project_id = %s AND b.claim_id IS NOT NULL",
-        (pid,),
-    ).fetchall():
-        add(row["claim_id"], row["document_id"])
-    for row in conn.execute(
-        "SELECT es.claim_id::text AS claim_id, s.document_id::text AS document_id "
-        "FROM edge_sources es "
-        "JOIN edges e ON e.id = es.edge_id AND e.project_id = es.project_id "
-        "JOIN node_sources s ON s.project_id = es.project_id "
-        "AND (s.node_id = e.src_node OR s.node_id = e.dst_node) "
-        "WHERE es.project_id = %s",
+        "SELECT c.id::text AS claim_id, s.document_id::text AS document_id "
+        "FROM claims c JOIN node_sources s "
+        "ON s.node_id = c.citation_node_id AND s.project_id = c.project_id "
+        "WHERE c.project_id = %s",
         (pid,),
     ).fetchall():
         add(row["claim_id"], row["document_id"])
     return support
 
 
-def _document_statuses(conn: psycopg.Connection, pid: str) -> dict[str, str]:
+def _document_statuses(conn: psycopg.Connection, pid: str) -> dict[str, set[str]]:
+    """All citation-node statuses of each document (a document may have many)."""
+
+    statuses: dict[str, set[str]] = {}
     rows = conn.execute(
         "SELECT DISTINCT d.id::text AS document_id, n.status AS status "
         "FROM documents d "
@@ -244,7 +252,22 @@ def _document_statuses(conn: psycopg.Connection, pid: str) -> dict[str, str]:
         "WHERE d.project_id = %s",
         (pid,),
     ).fetchall()
-    return {str(row["document_id"]): str(row["status"]) for row in rows}
+    for row in rows:
+        statuses.setdefault(str(row["document_id"]), set()).add(str(row["status"]))
+    return statuses
+
+
+def _support_class(document_id: str, statuses: dict[str, set[str]]) -> str:
+    """retracted / archived / active — all citation nodes must agree."""
+
+    states = statuses.get(document_id, set())
+    if not states:
+        return "active"
+    if all(state == "retracted" for state in states):
+        return "retracted"
+    if all(state in REMOVED_STATUSES for state in states):
+        return "archived"
+    return "active"
 
 
 def scan_leaks(
@@ -332,13 +355,13 @@ def scan_leaks(
 
     statuses = _document_statuses(conn, pid)
     for claim_id, documents in sorted(_claim_support(conn, pid).items()):
-        support_statuses = {statuses[doc] for doc in documents if doc in statuses}
-        if not support_statuses or not all(
-            status in REMOVED_STATUSES for status in support_statuses
-        ):
+        if not documents:
+            continue
+        classes = {_support_class(document, statuses) for document in documents}
+        if not classes <= {"retracted", "archived"}:
             continue
         report.count("claims.removed_only", 1)
-        if all(status == "retracted" for status in support_statuses):
+        if classes == {"retracted"}:
             report.count("claims.retracted_only", 1)
             if flag_retracted:
                 report.warning(f"claim {claim_id} is supported only by retracted documents")
@@ -405,7 +428,7 @@ def remove_document(
         if ref.status in REMOVED_STATUSES:
             return refuse(f"document {ref.sha256} is already {ref.status}")
 
-        claim_ids = _claim_ids(conn, pid, ref.document_id)
+        claim_ids = _claim_ids(conn, ref)
         block_ids: list[str] = []
         if mode == MODE_DUPLICATE:
             blockers = _duplicate_blockers(conn, ref, claim_ids)
@@ -454,5 +477,13 @@ def remove_document(
         set_job_state(conn, job_id, project_id, "done", {"status": final_status})
 
     report.set_count("removals.done", 1)
-    _merge(report, scan_leaks(conn, project_id))
+    # D7: the removal path itself flags retracted-only claims; the read-only
+    # `leaks` command is for re-running the same scan later.
+    _merge(report, scan_leaks(conn, project_id, flag_retracted=True))
+    leaks = report.counts.get("leaks.total", 0)
+    if leaks:
+        report.warning(
+            f"removal is committed (job done) but {leaks} active leak(s) remain; "
+            "the non-zero exit code reports the leaks, not a failed removal"
+        )
     return report
