@@ -17,6 +17,7 @@ from psycopg.types.json import Jsonb
 
 TERMINAL_STATES = frozenset({"done", "failed", "crashed"})
 JOB_KIND_COMPILE = "compile"
+JOB_KIND_REMOVAL = "removal"
 
 
 def create_job(

@@ -24,6 +24,7 @@ from .contradictions import list_contradictions
 from .costs import import_costs
 from .ledger import verify_ledger
 from .model import IntegrityReport
+from .removal import MODE_TOMBSTONE, remove_document, scan_leaks
 
 app = typer.Typer(
     name="integrity",
@@ -167,6 +168,56 @@ def contradictions_command(
     finally:
         conn.close()
     _finish(report, as_json, show_rows=not as_json)
+
+
+@app.command("remove")
+def remove_command(
+    project: Annotated[str, typer.Argument(help="Project name or UUID.")],
+    target: Annotated[
+        str,
+        typer.Argument(
+            help="Document sha256 (or prefix), source URI, filename stem, or citation slug."
+        ),
+    ],
+    mode: Annotated[
+        str,
+        typer.Option(
+            "--mode", "-m", help="Removal mode: tombstone (default), retracted, duplicate."
+        ),
+    ] = MODE_TOMBSTONE,
+    dsn: DsnOption = None,
+    as_json: JsonOption = False,
+) -> None:
+    """Tombstone, retract, or safely remove a duplicate document (no LLM calls)."""
+
+    conn = _connect(dsn)
+    try:
+        project_id = _project_id(conn, project)
+        report = remove_document(conn, project_id, target, mode)
+    except psycopg.Error as exc:
+        _db_error(exc)
+    finally:
+        conn.close()
+    _finish(report, as_json)
+
+
+@app.command("leaks")
+def leaks_command(
+    project: Annotated[str, typer.Argument(help="Project name or UUID.")],
+    dsn: DsnOption = None,
+    as_json: JsonOption = False,
+) -> None:
+    """Read-only leak scan: active pages still citing removed documents."""
+
+    conn = _connect(dsn)
+    try:
+        project_id = _project_id(conn, project)
+        report = scan_leaks(conn, project_id, flag_retracted=True)
+    except psycopg.Error as exc:
+        _db_error(exc)
+    finally:
+        conn.close()
+    _finish(report, as_json)
 
 
 @app.command("verify-ledger")
