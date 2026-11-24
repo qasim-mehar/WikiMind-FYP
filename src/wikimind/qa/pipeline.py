@@ -5,6 +5,12 @@ traversing from embedded CURRENT node versions and following claim/edge-source
 provenance. Citation-type nodes are barred from *seed* selection at the SQL
 level (Q2/F2); k-hop expansion may still traverse through them.
 
+Lane 11 (Ruling 26 remediation): a visited citation hub may nonetheless join
+the claim-gathering connecting-node set directly. Its attached claims are
+ranked at query time by the local embedder (nothing persisted, no schema
+change) and the hub is exempt from the per-node quota, so a hub-attached claim
+competes with a nonzero, relevance-derived score instead of score 0.0.
+
 Worst-case composition is 3 transport attempts x 2 validation attempts per
 answer (M6/L6); the CLI help states this explicitly.
 """
@@ -23,9 +29,11 @@ from pydantic import ValidationError
 
 from ..compile.ids import slugify_entity
 from ..index.retrieve import ann_search, fulltext_search, k_hop_expansion
+from ..index.store import format_vector
 from ..llm.cost import CostMeter
 from ..llm.errors import ResponseFormatError, WikiMindLLMError
 from ..llm.protocols import Embedder, LLMClient
+from ..prices import EMBED_MODEL
 from .errors import AnswerFormatError, AnswerGenerationError, QARetrievalError
 from .prompts import (
     CALL_SITE_ANSWER,
@@ -47,6 +55,9 @@ DEFAULT_HOPS = 1
 # starves the rest of the retrieved neighborhood.
 DEFAULT_CLAIM_CAP = 150
 DEFAULT_NODE_QUOTA = 8
+# Lane 11: the citation-hub seeding exception is on by default. Passing False
+# to answer_question restores the W1-only behaviour for A/B tests.
+DEFAULT_HUB_CLAIM_RANKING = True
 CITATION_NODE_TYPE = "citation"
 
 # Frozen schema status domain: active|stale|superseded|archived|retracted.
@@ -192,6 +203,86 @@ def seed_node_ids(
     ]
 
 
+def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
+    """Cosine similarity of two equal-length vectors, in [-1, 1]."""
+
+    if len(a) != len(b):
+        raise ValueError("vectors must have the same dimension")
+    dot = sum(x * y for x, y in zip(a, b))
+    norm_a = math.sqrt(sum(x * x for x in a))
+    norm_b = math.sqrt(sum(y * y for y in b))
+    return dot / (norm_a * norm_b) if norm_a and norm_b else 0.0
+
+
+def citation_hub_scores(
+    conn: psycopg.Connection,
+    project_id: UUID,
+    query_vector: Sequence[float],
+) -> dict[UUID, float]:
+    """Match scores for CURRENT citation-node versions against the query.
+
+    Citation nodes are barred from seed selection (F2), but a visited hub may
+    still enter claim gathering with a real retrieval score instead of 0.0.
+    The stored BGE embedding of the hub's CURRENT version is read only; the
+    query vector is supplied by the caller's metered embedder.
+    """
+
+    rows = conn.execute(
+        """
+        SELECT n.id, 1 - (e.vec <=> %s::vector) AS similarity
+        FROM nodes n
+        JOIN embeddings e
+          ON e.node_version_id = n.current_version_id AND e.project_id = n.project_id
+        WHERE n.project_id = %s AND n.node_type = %s AND e.model = %s
+        ORDER BY n.id
+        """,
+        (format_vector(list(query_vector)), project_id, CITATION_NODE_TYPE, EMBED_MODEL),
+    ).fetchall()
+    return {
+        _val(row, "id", 0): _unit_interval((float(_val(row, "similarity", 1)) + 1.0) / 2.0)
+        for row in rows
+    }
+
+
+def claim_text_scores(
+    embedder: Embedder,
+    query_vector: Sequence[float],
+    claim_texts: Mapping[UUID, str],
+) -> dict[UUID, float]:
+    """Query-time relevance of each hub-attached claim, from its distilled text.
+
+    ``embedder`` is the same metered, in-process local embedder used for the
+    question (call site ``embed.query``, $0 shadow). Nothing is persisted; the
+    mapping is ephemeral. Claim ids are sorted first so the embedder sees a
+    stable input order and the result is deterministic.
+    """
+
+    ordered_ids = sorted(claim_texts)
+    if not ordered_ids:
+        return {}
+    vectors = embedder.embed([claim_texts[claim_id] for claim_id in ordered_ids])
+    return {
+        claim_id: _unit_interval((_cosine(query_vector, vector) + 1.0) / 2.0)
+        for claim_id, vector in zip(ordered_ids, vectors)
+    }
+
+
+def hub_attached_claim_texts(conn: psycopg.Connection, project_id: UUID) -> dict[UUID, str]:
+    """All claims whose citation node is a citation hub, keyed by claim id."""
+
+    rows = conn.execute(
+        """
+        SELECT c.id, c.text
+        FROM claims c
+        JOIN nodes n ON n.id = c.citation_node_id AND n.project_id = c.project_id
+        WHERE c.project_id = %s AND n.node_type = %s
+        ORDER BY c.id
+        """,
+        (project_id, CITATION_NODE_TYPE),
+    ).fetchall()
+    return {_val(row, "id", 0): str(_val(row, "text", 1)) for row in rows}
+
+
 def _gather_claims_page(
     conn: psycopg.Connection,
     project_id: UUID,
@@ -200,6 +291,8 @@ def _gather_claims_page(
     cap: int,
     scores: Mapping[UUID, float] | None = None,
     per_node_quota: int | None = None,
+    claim_scores: Mapping[UUID, float] | None = None,
+    hub_quota_exempt: bool = False,
 ) -> tuple[list[ClaimRecord], bool]:
     """Fetch at most ``cap`` claims ranked by connecting-node match, depth, id.
 
@@ -219,6 +312,13 @@ def _gather_claims_page(
     claim order is the strongest connecting score, then depth, then id.
     A claim survives only through an all-active path (F3/F8). Fetching
     ``cap + 1`` rows makes ``truncated`` exact.
+
+    Lane 11: when ``claim_scores`` is supplied, a claim connected through a
+    citation hub uses that query-time text score in place of the hub's (zero)
+    retrieval score, so hub-attached claims rank by relevance rather than by
+    claim id. With ``hub_quota_exempt`` the hub is exempt from the per-node
+    quota (the seeding exception); it still answers to the global ``cap``.
+    Both default to off, preserving the W1 behaviour and all prior callers.
     """
 
     if cap < 1:
@@ -233,6 +333,9 @@ def _gather_claims_page(
     score_values = [
         float(_unit_interval(scores.get(node_id, 0.0))) if scores else 0.0 for node_id in node_ids
     ]
+    claim_score_items = sorted((claim_scores or {}).items())
+    claim_ids = [claim_id for claim_id, _ in claim_score_items]
+    claim_score_values = [float(_unit_interval(value)) for _, value in claim_score_items]
     # A huge quota makes the window filter a no-op for callers that opt out.
     quota = per_node_quota if per_node_quota is not None else 1_000_000
     rows = conn.execute(
@@ -243,9 +346,16 @@ def _gather_claims_page(
             JOIN nodes vn ON vn.id = dm.node_id AND vn.project_id = %s
             WHERE vn.status <> ALL(%s::text[])
         ),
+        claim_score_map(claim_id, score) AS (
+            SELECT cs.claim_id, cs.score
+            FROM unnest(%s::uuid[], %s::float8[]) AS cs(claim_id, score)
+        ),
         connections AS (
             SELECT DISTINCT c.id AS claim_id, dm.node_id AS connecting_node,
-                   dm.depth AS depth, dm.score AS score
+                   dm.depth AS depth,
+                   CASE WHEN n.node_type = 'citation'
+                        THEN GREATEST(dm.score, COALESCE(csm.score, 0.0))
+                        ELSE dm.score END AS score
             FROM claims c
             JOIN depth_map dm
               ON dm.node_id = c.citation_node_id
@@ -266,18 +376,24 @@ def _gather_claims_page(
                           AND en.status = ANY(%s::text[])
                     )
               )
+            JOIN nodes n ON n.id = dm.node_id AND n.project_id = c.project_id
+            LEFT JOIN claim_score_map csm ON csm.claim_id = c.id
             WHERE c.project_id = %s
         ),
         per_node AS (
             -- Hub guard: each visited node contributes at most ``quota``
             -- claims. A claim connecting to several nodes keeps every route,
-            -- so being demoted by one hub does not silently erase it.
+            -- so being demoted by one hub does not silently erase it. Lane 11:
+            -- a citation hub taking part in the seeding exception is exempt
+            -- from that guard; relevance (not claim id) orders its claims.
             SELECT claim_id, connecting_node, depth, score,
-                   ROW_NUMBER() OVER (
-                       PARTITION BY connecting_node
-                       ORDER BY score DESC, depth, claim_id
-                   ) AS node_rank
+                   CASE WHEN %s AND n.node_type = 'citation' THEN 1
+                        ELSE ROW_NUMBER() OVER (
+                            PARTITION BY connecting_node
+                            ORDER BY score DESC, depth, claim_id
+                        ) END AS node_rank
             FROM connections
+            JOIN nodes n ON n.id = connecting_node AND n.project_id = %s
         )
         SELECT c.id, c.text, d.source_uri, cn.status,
                MAX(pn.score) AS best_score, MIN(pn.depth) AS best_depth
@@ -297,7 +413,11 @@ def _gather_claims_page(
             score_values,
             project_id,
             list(EXCLUDED_NODE_STATUSES),
+            claim_ids,
+            claim_score_values,
             list(EXCLUDED_NODE_STATUSES),
+            project_id,
+            hub_quota_exempt,
             project_id,
             project_id,
             list(EXCLUDED_NODE_STATUSES),
@@ -400,8 +520,16 @@ def answer_question(
     hops: int = DEFAULT_HOPS,
     claim_cap: int = DEFAULT_CLAIM_CAP,
     max_retries: int = QA_MAX_ATTEMPTS,
+    hub_claim_ranking: bool = DEFAULT_HUB_CLAIM_RANKING,
 ) -> AnswerResult:
-    """Answer one question from the compiled graph using a single drafter call."""
+    """Answer one question from the compiled graph using a single drafter call.
+
+    With ``hub_claim_ranking`` (the default), visited citation hubs join claim
+    gathering with a nonzero match score and their attached claims are ranked
+    by the metered local embedder at query time; no schema change, nothing
+    persisted, deterministic (score, depth, id) ordering. Set it to ``False``
+    to restore the W1-only retrieval path for A/B tests.
+    """
 
     if not question.strip():
         raise ValueError("question must not be empty")
@@ -427,6 +555,18 @@ def answer_question(
     scores: dict[UUID, float] = {node_id: 0.0 for node_id in depths}
     scores.update(dict(scored_seeds))
     try:
+        claim_scores: dict[UUID, float] | None = None
+        if hub_claim_ranking:
+            # (a) A citation hub barred from seeding may still enter claim
+            # gathering directly, carrying the match of its CURRENT version.
+            for hub_id, score in citation_hub_scores(conn, project_id, vector).items():
+                if hub_id in depths:
+                    scores[hub_id] = max(scores.get(hub_id, 0.0), score)
+            # (b) Rank hub-attached claims by query-time text relevance using
+            # the same in-process, metered local embedder ($0, nothing stored).
+            claim_scores = claim_text_scores(
+                embedder, vector, hub_attached_claim_texts(conn, project_id)
+            )
         claims, truncated = _gather_claims_page(
             conn,
             project_id,
@@ -434,6 +574,8 @@ def answer_question(
             cap=claim_cap,
             scores=scores,
             per_node_quota=DEFAULT_NODE_QUOTA,
+            claim_scores=claim_scores,
+            hub_quota_exempt=hub_claim_ranking,
         )
     except psycopg.Error as exc:
         raise QARetrievalError(f"claim gathering failed: {exc}") from exc
