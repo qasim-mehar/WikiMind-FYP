@@ -14,6 +14,7 @@ from typer.testing import CliRunner
 
 from wikimind.cli import app as root_app
 from wikimind.compile.graph import create_project
+from wikimind.config import Settings
 from wikimind.ingest import IngestOutcome, estimate_compile_cost
 from wikimind.ingest import cli as ingest_cli
 
@@ -29,9 +30,9 @@ def test_add_help() -> None:
 
 
 def test_add_no_dsn_reports_friendly_error(monkeypatch, tmp_path) -> None:
-    monkeypatch.chdir(tmp_path)  # keep the worktree .env out of get_settings()
-    monkeypatch.setenv("WIKIMIND_ENV_FILE", str(tmp_path / "missing.env"))
-    monkeypatch.delenv("WIKIMIND_DB", raising=False)
+    # Stub settings instead of mutating process env: CI may inject WIKIMIND_DB
+    # at the job level, and .env loading must not affect this assertion.
+    monkeypatch.setattr(ingest_cli, "get_settings", lambda: Settings())
     source = tmp_path / "note.txt"
     source.write_text("text", encoding="utf-8")
 
@@ -83,10 +84,16 @@ def test_add_yes_skips_confirmation(test_dsn: str, tmp_path: Path, monkeypatch) 
 
     assert result.exit_code == 0, result.output
     assert "done: project stub-project" in result.output
-    assert "yes" not in captured  # the flag is consumed into the confirm callback
+    assert captured["confirm"](estimate_compile_cost(["passage"])) is True
 
 
 def test_add_default_prompt_can_be_declined(test_dsn: str, tmp_path: Path, monkeypatch) -> None:
+    prompts: list[str] = []
+
+    def fake_confirm(text: str, **_kwargs) -> bool:
+        prompts.append(text)
+        return False
+
     def fake_add(conn, **kwargs):
         estimate = estimate_compile_cost(["passage"])
         assert kwargs["confirm"](estimate) is False
@@ -96,18 +103,15 @@ def test_add_default_prompt_can_be_declined(test_dsn: str, tmp_path: Path, monke
             skipped_reason="declined by user",
         )
 
+    monkeypatch.setattr(ingest_cli.typer, "confirm", fake_confirm)
     monkeypatch.setattr(ingest_cli, "add_documents", fake_add)
     source = tmp_path / "note.txt"
     source.write_text("text", encoding="utf-8")
 
-    result = runner.invoke(
-        root_app,
-        ["add", "proj", str(source), "--dsn", test_dsn],
-        input="n\n",
-    )
+    result = runner.invoke(root_app, ["add", "proj", str(source), "--dsn", test_dsn])
 
     assert result.exit_code == 0, result.output
-    assert "Proceed with compile" in result.output
+    assert prompts and "Proceed with compile" in prompts[0]
     assert "skipped: declined by user" in result.output
 
 
