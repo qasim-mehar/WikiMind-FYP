@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 .env
 .env.*
-costs.jsonl
+/costs.jsonl
 .pytest_cache/
 .ruff_cache/
 *.egg-info/
