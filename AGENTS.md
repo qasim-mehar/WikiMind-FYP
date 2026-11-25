@@ -357,7 +357,7 @@ Reads are always allowed. Projects mutate in parallel; within one project, write
 
 These are the behaviors the system is being built to implement. An agent operating a live instance follows them; a coding agent implements them.
 
-**Ingest (one source):** enqueue a job serialized per project → fetch raw → parse (GROBID for academic PDFs, HTML to markdown, plain text) → **distill** with a Flash-tier model → identify-or-mint entities/concepts (FTS + embedding + schema disambiguation; flag rather than guess a merge) → mint the 1:1 reference node → write provenance-bearing edges (contradictions get `contradicts` edges, never a silent winner) → **dirty-page discipline** (only touch pages this source affects) → emit events → land edits as proposals in review mode, else auto-merge → report an ingest summary such as "touched 12 pages, 2 contradictions flagged".
+**Ingest (one source):** enqueue a job serialized per project → fetch raw → parse (GROBID for academic PDFs, HTML to markdown, plain text) → **distill** with a Flash-tier model → identify-or-mint entities/concepts (FTS + embedding + schema disambiguation; flag rather than guess a merge) → mint the 1:1 reference node → write provenance-bearing edges (contradictions get `contradicts` edges, never a silent winner) → **dirty-page discipline** (only touch pages this source affects) → emit events → land edits as proposals in review mode, else auto-merge → report an ingest summary such as "touched 12 pages, 2 contradictions flagged". The Stage 1 CLI exposes the implemented subset as `wikimind add` (extract → cost preview → confirm → compile, idempotent by unit markers); see §10.
 
 **Query (one question):** resolve anaphora using memory → read the lightweight projection → select entry nodes by search (not a full node list) → traverse edges 1–2 hops → read full bodies only of selected nodes → **sufficiency check: never fabricate to close a gap** → synthesize with citations (node IDs + source documents) → quote-level verification (M2) → file durable answers back as `synthesis` nodes → remember a session summary. Trust tier and status MUST surface on every cited claim.
 
@@ -425,6 +425,7 @@ wikimind llm smoke [--costs-path PATH]        # dry-run unless WIKIMIND_LIVE=1 w
 wikimind llm costs [--path PATH]
 wikimind project create <name> [--dsn]
 wikimind project list [--dsn]
+wikimind add <project> <files...> [--dsn] [--costs-path PATH] [--parser NAME] [--force] [--yes] [--no-compile] [--create-project] [--claims-per-unit N] [--delay N] [--min-score 0..5]
 wikimind document add <project> <files...> [--dsn] [--parser NAME]
 wikimind document list <project> [--dsn]
 wikimind compile <project> [--dsn] [--costs-path PATH] [--delay N] [--min-score 0..5]
@@ -432,6 +433,8 @@ wikimind index <project> [--dsn] [--batch-size N] [--costs-path PATH]
 wikimind render backfill <project> [--dsn]
 ```
 Standalone module entry points also exist: `python -m wikimind.parse.cli`, `.index.cli`, `.render.cli`, `.llm.cli`. `compile` requires `WIKIMIND_LIVE=1`.
+
+`wikimind add` (Lane 16) is the one-command ingest path: extract → estimate → confirm → compile, with visible stage progress and a conservative shadow-cost preview before any LLM call (`--yes` accepts it non-interactively). Re-adding compiled files is a no-op because the engine's unit markers and deterministic claim IDs suppress duplicate work and claims; `--force` clears those markers to re-run distillation (regeneration, not replay — dedup still prevents duplicate claims). The low-level `document add` + `compile` pair remains for scripted control.
 
 ### Worktree protocol
 
