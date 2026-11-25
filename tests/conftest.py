@@ -161,14 +161,17 @@ def pytest_runtest_logreport(report) -> None:
 
 
 def pytest_sessionfinish(session, exitstatus) -> None:
-    if not _LANE16_FAILURES:
-        return
+    import sys
+
     capture = session.config.pluginmanager.getplugin("capturemanager")
     if capture is not None:
         capture.suspend_global_capture(in_=True)
     try:
+        stream = sys.__stdout__
+        stream.write(f"::error::LANE16_DIAG exitstatus={exitstatus!r} n={len(_LANE16_FAILURES)}\n")
         for nodeid, detail in _LANE16_FAILURES:
-            print(f"::error::LANE16_DIAG {nodeid} :: {detail}", flush=True)
+            stream.write(f"::error::LANE16_DIAG {nodeid} :: {detail}\n")
+        stream.flush()
     finally:
         if capture is not None:
             capture.resume_global_capture()
