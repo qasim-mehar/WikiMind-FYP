@@ -1,0 +1,15 @@
+question: On which open-domain question answering tasks do RAG models achieve state-of-the-art results?
+answer:   RAG models achieve state-of-the-art results on three open-domain question answering tasks: Natural Questions, WebQuestions, and CuratedTrec [c-46bf5d504588, c-4b0e8a1eb511].
+sufficient: true
+citations:
+  [c-46bf5d504588] 2005-11401-retro — RAG models set the state of the art on three open domain QA tasks.
+  [c-4b0e8a1eb511] 2005-11401-retro — RAG models achieve state-of-the-art results on the Natural Questions, WebQuestions, and CuratedTrec open-domain question answering tasks.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002799250000 (3 ledger events)
+wall:     43.354s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  21%|██        | 42/199 [00:00<00:00, 417.18it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1562.21it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

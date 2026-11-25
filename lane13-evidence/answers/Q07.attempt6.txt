@@ -1,0 +1,15 @@
+question: How many identical layers are in the Transformer encoder and decoder stacks?
+answer:   The Transformer encoder is composed of a stack of 6 identical layers [c-93df88c97b40]. Similarly, the decoder is composed of a stack of 6 identical layers [c-23c34ccffce9].
+sufficient: true
+citations:
+  [c-93df88c97b40] 1706-03762-attention — The encoder is composed of a stack of 6 identical layers.
+  [c-23c34ccffce9] 1706-03762-attention — The decoder is composed of a stack of 6 identical layers.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002612250000 (3 ledger events)
+wall:     29.651s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  19%|█▊        | 37/199 [00:00<00:00, 361.13it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1805.59it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

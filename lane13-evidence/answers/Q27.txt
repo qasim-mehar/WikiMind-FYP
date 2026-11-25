@@ -1,0 +1,14 @@
+question: What does the contradiction note claim about the Transformer's improvement over prior results on WMT 2014 English-to-German?
+answer:   The contradiction note claims that the Transformer model improved over existing best results on the WMT 2014 English-to-German translation task by over 2 BLEU [c-cc28fdac16c0].
+sufficient: true
+citations:
+  [c-cc28fdac16c0] contradiction-note — The Transformer model improved over existing best results on the WMT 2014 English-to-German translation task by over 2 BLEU.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002688500000 (3 ledger events)
+wall:     36.099s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  42%|████▏     | 83/199 [00:00<00:00, 822.30it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1822.43it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

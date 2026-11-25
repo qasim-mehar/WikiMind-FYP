@@ -1,0 +1,16 @@
+question: What weight decay coefficient did the Transformer authors use with the Adam optimizer?
+answer:   The provided claims do not contain information regarding the weight decay coefficient used with the Adam optimizer in the Transformer architecture. The claims only specify that the Adam optimizer's beta1 parameter is 0.9 [c-774be8a63d5c], the beta2 parameter is 0.98 [c-a909387fba98], and the epsilon parameter is 10^-9 [c-90451fd4eb6b].
+sufficient: false
+citations:
+  [c-774be8a63d5c] 1706-03762-attention — The Adam optimizer beta1 parameter is set to 0.9.
+  [c-a909387fba98] 1706-03762-attention — The Adam optimizer beta2 parameter is set to 0.98.
+  [c-90451fd4eb6b] 1706-03762-attention — The Adam optimizer epsilon parameter is set to 10^-9.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002698750000 (3 ledger events)
+wall:     37.494s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  36%|███▌      | 71/199 [00:00<00:00, 687.53it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1030.48it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

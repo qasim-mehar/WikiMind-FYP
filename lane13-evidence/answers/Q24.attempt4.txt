@@ -1,0 +1,6 @@
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  76%|███████▌  | 151/199 [00:00<00:00, 1455.98it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1658.02it/s]
+error: answer generation failed: Gemini call failed after 3 attempts: 504 DEADLINE_EXCEEDED. {'error': {'code': 504, 'message': 'Deadline expired before operation could complete.', 'status': 'DEADLINE_EXCEEDED'}} (cause: Gemini call failed after 3 attempts: 504 DEADLINE_EXCEEDED. {'error': {'code': 504, 'message': 'Deadline expired before operation could complete.', 'status': 'DEADLINE_EXCEEDED'}})

@@ -1,0 +1,49 @@
+{
+  "Q28": {
+    "target": "inference latency",
+    "corpus_claims_total": 530,
+    "term_hits": {
+      "latency": [],
+      "millisecond": []
+    }
+  },
+  "Q29": {
+    "target": "Adam weight decay coefficient",
+    "corpus_claims_total": 530,
+    "term_hits": {
+      "weight decay": []
+    }
+  },
+  "Q30": {
+    "target": "V100 GPUs for the GAN model",
+    "corpus_claims_total": 530,
+    "term_hits": {
+      "V100": [
+        "RAG models and BART baselines are trained using 8, 32GB NVIDIA V100 GPUs."
+      ],
+      "adversarial nets": [
+        "Adversarial nets are a framework where a generative model is pitted against a discriminative model that determines if a sample is from the model distribution or the data distribution.",
+        "Adversarial nets can be implemented using multilayer perceptrons for both the generative and discriminative models.",
+        "Adversarial nets using multilayer perceptrons can be trained using backpropagation and dropout algorithms.",
+        "Generative adversarial nets are trained by simultaneously updating the discriminative distribution.",
+        "The adversarial nets framework does not require a Markov chain for sampling.",
+        "The authors trained adversarial nets on the MNIST, Toronto Face Database (TFD), and CIFAR-10 datasets.",
+        "The title of the document is Generative Adversarial Nets."
+      ],
+      "generative adversarial": [
+        "Generative adversarial nets are trained by simultaneously updating the discriminative distribution.",
+        "The title of the document is Generative Adversarial Nets."
+      ]
+    }
+  },
+  "Q31": {
+    "target": "December 2019 Wikipedia dump",
+    "corpus_claims_total": 530,
+    "term_hits": {
+      "December 2019": [],
+      "December 2018": [
+        "The experiments use the December 2018 Wikipedia dump."
+      ]
+    }
+  }
+}

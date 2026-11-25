@@ -1,0 +1,16 @@
+question: Who are the authors of the paper 'R3: Reinforced ranker-reader for open-domain question answering', and does the corpus give conflicting author lists?
+answer:   The corpus provides conflicting author lists for the paper 'R3: Reinforced ranker-reader for open-domain question answering'. One claim lists the authors as Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, and Jing Jiang [c-e38bbcd6852b]. A second claim lists the authors as Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, and Murray Campbell [c-f0b5b2356517].
+sufficient: true
+citations:
+  [c-e38bbcd6852b] 2005-11401-retro — Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, and Jing Jiang are the authors of the paper titled R3: Reinforced ranker-reader for open-domain question answering.
+  [c-f0b5b2356517] 2005-11401-retro — The authors of the paper are Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, and Murray Campbell.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002967000000 (3 ledger events)
+wall:     44.708s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:   6%|▌         | 12/199 [00:00<00:01, 102.09it/s]
+Loading weights:  12%|█▏        | 23/199 [00:00<00:01, 99.10it/s] 
+Loading weights:  25%|██▌       | 50/199 [00:00<00:00, 165.64it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 571.43it/s]

@@ -1,0 +1,15 @@
+question: How many parallel attention heads does the Transformer use, and what is the dimension of each attention head?
+answer:   The Transformer model employs 8 parallel attention heads [c-7fac685e3560]. Each attention head uses a dimension of 64 for both the key dimension (dk) and the value dimension (dv) [c-4720bca0595f].
+sufficient: true
+citations:
+  [c-7fac685e3560] 1706-03762-attention — The model employs 8 parallel attention heads.
+  [c-4720bca0595f] 1706-03762-attention — In the Transformer architecture, each attention head uses a dimension of 64 for both the key dimension (dk) and the value dimension (dv).
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002623000000 (3 ledger events)
+wall:     34.833s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  19%|█▉        | 38/199 [00:00<00:00, 372.85it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1721.91it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

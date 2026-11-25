@@ -1,0 +1,12 @@
+question: Which December 2019 Wikipedia dump was used as the non-parametric knowledge source in the RAG experiments?
+answer:   The experiments described in the provided claims use the December 2018 Wikipedia dump as the non-parametric knowledge source [c-d2677485567b].
+sufficient: true
+citations:
+  [c-d2677485567b] 2005-11401-retro — The experiments use the December 2018 Wikipedia dump.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002653750000 (3 ledger events)
+wall:     29.825s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2503.15it/s]

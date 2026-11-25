@@ -1,0 +1,12 @@
+question: What is the exact inference latency in milliseconds of the Transformer big model on the WMT 2014 test set?
+answer:   The provided claims do not contain information regarding the exact inference latency in milliseconds of the Transformer big model on the WMT 2014 test set.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002466750000 (3 ledger events)
+wall:     32.201s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2836.91it/s]
