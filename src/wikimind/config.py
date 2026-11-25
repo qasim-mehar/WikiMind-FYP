@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
+
+import psycopg
+from psycopg.conninfo import conninfo_to_dict
 
 _ENV_KEY = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _DSN_PASSWORD = re.compile(r"(?i)(postgres(?:ql)?://[^:/@\s]+:)([^@\s]+)(@)")
@@ -16,6 +20,37 @@ _BEARER = re.compile(r"(?i)(bearer\s+)([A-Za-z0-9._~+/=-]+)")
 SECRET_ENV_KEYS = ("GEMINI_API_KEY", "OPENROUTER_API_KEY", "WIKIMIND_DB")
 
 DEFAULT_ENV_FILE = ".env"
+
+# The DB cost mirror is opt-in with ``=1`` (see ``integrity.costs.build_meter``),
+# and Ruling 15 pins the compiled corpus to this database.  An operator can
+# easily point WIKIMIND_DB at the corpus for a read-only probe and forget that
+# the mirror would append to cost_events there, so the entry layer refuses the
+# combination unless explicitly overridden.
+COST_MIRROR_ENV_VAR = "WIKIMIND_COST_DB_MIRROR"
+PROTECTED_CORPUS_DATABASES = frozenset({"wikimind_live_l3"})
+
+
+def cost_mirror_requested(environ: Mapping[str, str] | None = None) -> bool:
+    """Whether the cost_events mirror is armed (the same ``=1`` gate as the sink)."""
+
+    env = os.environ if environ is None else environ
+    return env.get(COST_MIRROR_ENV_VAR, "").strip() == "1"
+
+
+def database_name_from_dsn(dsn: str) -> str:
+    """Return only the dbname from a DSN; never log or return credentials."""
+
+    try:
+        return str(conninfo_to_dict(dsn).get("dbname", ""))
+    except (ValueError, TypeError, psycopg.Error):
+        return ""
+
+
+def protected_cost_mirror_database(dsn: str) -> str | None:
+    """Return the protected corpus name when ``dsn`` targets it, else None."""
+
+    name = database_name_from_dsn(dsn)
+    return name if name in PROTECTED_CORPUS_DATABASES else None
 
 
 def load_dotenv(path: str | Path | None = None, *, override: bool = False) -> Path | None:
