@@ -147,32 +147,3 @@ def empty_db_dsn(base_dsn: str) -> Iterator[str]:
 def db_conn(test_dsn: str) -> Iterator[psycopg.Connection]:
     with psycopg.connect(test_dsn) as conn:
         yield conn
-
-
-# TEMPORARY lane-16 diagnostic: surface failing test details as GitHub Actions
-# annotations (plain pytest logs are not readable anonymously). Removed after
-# the CI failure is identified.
-_LANE16_FAILURES: list[tuple[str, str]] = []
-
-
-def pytest_runtest_logreport(report) -> None:
-    if report.failed:
-        _LANE16_FAILURES.append((report.nodeid, str(report.longrepr)[-900:]))
-
-
-def pytest_sessionfinish(session, exitstatus) -> None:
-    import sys
-
-    capture = session.config.pluginmanager.getplugin("capturemanager")
-    if capture is not None:
-        capture.suspend_global_capture(in_=True)
-    try:
-        stream = sys.__stdout__
-        stream.write(f"::error::LANE16_DIAG exitstatus={exitstatus!r} n={len(_LANE16_FAILURES)}\n")
-        for nodeid, detail in _LANE16_FAILURES:
-            flat = " | ".join(line.strip() for line in detail.splitlines() if line.strip())
-            stream.write(f"::error::LANE16_DIAG {nodeid} :: {flat[-1000:]}\n")
-        stream.flush()
-    finally:
-        if capture is not None:
-            capture.resume_global_capture()

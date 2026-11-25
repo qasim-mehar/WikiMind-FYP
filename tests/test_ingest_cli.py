@@ -7,6 +7,7 @@ throwaway database created by conftest.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from uuid import uuid4
 
@@ -24,7 +25,9 @@ runner = CliRunner(env={"COLUMNS": "200"})
 def test_add_help() -> None:
     result = runner.invoke(root_app, ["add", "--help"])
     assert result.exit_code == 0
-    flat = result.output.replace("\n", "")
+    # Rich styling can insert ANSI codes *inside* an option name, so strip them
+    # before checking (same convention as test_compile_cli.plain_help).
+    flat = re.sub(r"\s+", "", re.sub(r"\x1b\[[0-9;]*m", "", result.output))
     for option in ("--force", "--yes", "--no-compile", "--claims-per-unit", "--create-project"):
         assert option in flat
 
