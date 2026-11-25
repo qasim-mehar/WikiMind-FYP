@@ -170,7 +170,8 @@ def pytest_sessionfinish(session, exitstatus) -> None:
         stream = sys.__stdout__
         stream.write(f"::error::LANE16_DIAG exitstatus={exitstatus!r} n={len(_LANE16_FAILURES)}\n")
         for nodeid, detail in _LANE16_FAILURES:
-            stream.write(f"::error::LANE16_DIAG {nodeid} :: {detail}\n")
+            flat = " | ".join(line.strip() for line in detail.splitlines() if line.strip())
+            stream.write(f"::error::LANE16_DIAG {nodeid} :: {flat[-1000:]}\n")
         stream.flush()
     finally:
         if capture is not None:
