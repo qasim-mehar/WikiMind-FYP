@@ -54,6 +54,16 @@ else:
     app.add_typer(compile_cli.document_app, name="document")
 
 try:
+    from wikimind.ingest import cli as ingest_cli
+except ModuleNotFoundError as exc:
+    if exc.name not in {"wikimind.ingest", "wikimind.ingest.cli"}:
+        raise
+else:
+    # ``wikimind add <project> <files...>`` is a top-level command: one visible
+    # flow for extract -> register -> estimate -> confirm -> compile.
+    app.command(name="add")(ingest_cli.add_cmd)
+
+try:
     from wikimind.render import cli as render_cli
 except ModuleNotFoundError as exc:
     if exc.name not in {"wikimind.render", "wikimind.render.cli"}:
