@@ -1,0 +1,1566 @@
+{
+  "protocol_counts": {
+    "single_hop": 40,
+    "multi_hop": 60,
+    "contradiction_or_aggregation": 30
+  },
+  "additional_group": {
+    "unanswerable": 20,
+    "rationale": "work-card B5 rubric requires honest-insufficiency testing; protocol says 'at least 130'"
+  },
+  "questions": [
+    {
+      "id": "S001",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What new network architecture is proposed in 'Attention Is All You Need', and what two mechanisms does it dispense with?",
+      "target": "Transformer; recurrence and convolutions",
+      "rubric": "Must name Transformer and state that it dispenses entirely with recurrence and convolutions."
+    },
+    {
+      "id": "S002",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What BLEU score did the Transformer (big) model achieve on WMT 2014 English-to-German?",
+      "target": "28.4 BLEU",
+      "rubric": "Must give 28.4, cite abstract or section 6.1/Table 2."
+    },
+    {
+      "id": "S003",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "How many identical layers are in the Transformer encoder stack and in the decoder stack?",
+      "target": "6 and 6",
+      "rubric": "Both stacks have N=6."
+    },
+    {
+      "id": "S004",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What is the dimension d_model of the Transformer's sub-layer outputs and embeddings?",
+      "target": "512",
+      "rubric": "512."
+    },
+    {
+      "id": "S005",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "How many parallel attention heads does the Transformer use, and what are d_k and d_v?",
+      "target": "h=8, d_k=d_v=64",
+      "rubric": "8 heads and 64 for both key and value dimension."
+    },
+    {
+      "id": "S006",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What is the inner dimensionality d_ff of the position-wise feed-forward network?",
+      "target": "2048",
+      "rubric": "2048."
+    },
+    {
+      "id": "S007",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What positional encoding scheme does the Transformer use?",
+      "target": "sine and cosine functions of different frequencies",
+      "rubric": "Sinusoidal encoding; PE(pos,2i)=sin(pos/10000^(2i/d_model)) etc."
+    },
+    {
+      "id": "S008",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What is the attention function of Scaled Dot-Product Attention?",
+      "target": "softmax(QK^T/sqrt(d_k))V",
+      "rubric": "Must include scaling by sqrt(d_k) and softmax weighting of values."
+    },
+    {
+      "id": "S009",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What Adam settings (beta1, beta2, epsilon) are reported for the Transformer?",
+      "target": "0.9, 0.98, 1e-9",
+      "rubric": "All three values."
+    },
+    {
+      "id": "S010",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "How many warmup steps are used in the Transformer learning-rate schedule?",
+      "target": "4000",
+      "rubric": "4000."
+    },
+    {
+      "id": "S011",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "How many training steps and how many hours for the base Transformer model?",
+      "target": "100,000 steps; 12 hours",
+      "rubric": "Both values."
+    },
+    {
+      "id": "S012",
+      "bucket": "single-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "According to the abstract, what single-model state-of-the-art BLEU did the Transformer reach on WMT 2014 English-to-French?",
+      "target": "41.8 BLEU",
+      "rubric": "41.8 from the abstract (note: body says 41.0, asked separately in C bucket)."
+    },
+    {
+      "id": "S013",
+      "bucket": "single-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "How is training generative adversarial nets formulated as a game?",
+      "target": "minimax two-player game between generator G and discriminator D",
+      "rubric": "Minimax/two-player, G versus D."
+    },
+    {
+      "id": "S014",
+      "bucket": "single-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "For a fixed generator G, what is the optimal discriminator D*_G(x)?",
+      "target": "p_data(x)/(p_data(x)+p_g(x))",
+      "rubric": "Exact formula."
+    },
+    {
+      "id": "S015",
+      "bucket": "single-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "What is the global minimum value of the virtual training criterion C(G)?",
+      "target": "-log 4",
+      "rubric": "-log 4, attained iff p_g = p_data."
+    },
+    {
+      "id": "S016",
+      "bucket": "single-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "C(G) equals -log 4 plus twice which divergence?",
+      "target": "Jensen-Shannon divergence",
+      "rubric": "JSD between p_data and p_g."
+    },
+    {
+      "id": "S017",
+      "bucket": "single-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "Which three datasets were adversarial nets trained on?",
+      "target": "MNIST, Toronto Face Database (TFD), CIFAR-10",
+      "rubric": "All three."
+    },
+    {
+      "id": "S018",
+      "bucket": "single-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "What value of k (discriminator steps per generator step) was used in the experiments?",
+      "target": "k = 1",
+      "rubric": "1."
+    },
+    {
+      "id": "S019",
+      "bucket": "single-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "What Parzen-window log-likelihood did adversarial nets achieve on MNIST?",
+      "target": "225 +/- 2",
+      "rubric": "225 +/- 2 (not 214 etc.)."
+    },
+    {
+      "id": "S020",
+      "bucket": "single-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "Why train G to maximize log D(G(z)) rather than minimize log(1-D(G(z)))?",
+      "target": "stronger gradients early because log(1-D) saturates",
+      "rubric": "Saturation / stronger gradients; same fixed point."
+    },
+    {
+      "id": "S021",
+      "bucket": "single-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "Do adversarial nets require Markov chains or unrolled approximate inference?",
+      "target": "No",
+      "rubric": "No Markov chains, no unrolled inference; backprop and forward sampling only."
+    },
+    {
+      "id": "S022",
+      "bucket": "single-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "What is the 'Helvetica scenario' in adversarial nets?",
+      "target": "G collapses many z to the same x; D and G must stay synchronized",
+      "rubric": "Mode collapse from insufficient D updates."
+    },
+    {
+      "id": "S023",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What is the parametric memory component of RAG models?",
+      "target": "pre-trained seq2seq model (BART-large)",
+      "rubric": "BART-large seq2seq, about 400M parameters."
+    },
+    {
+      "id": "S024",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What is the non-parametric memory of RAG?",
+      "target": "a dense vector index of Wikipedia",
+      "rubric": "Dense vector index of Wikipedia accessed by a neural retriever."
+    },
+    {
+      "id": "S025",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Which retriever do RAG models use?",
+      "target": "Dense Passage Retriever (DPR), BERT-based bi-encoder",
+      "rubric": "DPR, BERTBASE bi-encoder, MIPS."
+    },
+    {
+      "id": "S026",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What are the two RAG formulations and how do they differ?",
+      "target": "RAG-Sequence (same document for the whole sequence) vs RAG-Token (different document per token)",
+      "rubric": "Both names and the distinction."
+    },
+    {
+      "id": "S027",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Which Wikipedia dump is used as the non-parametric knowledge source?",
+      "target": "December 2018 dump",
+      "rubric": "December 2018."
+    },
+    {
+      "id": "S028",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How many documents are in the Wikipedia index and how long is each?",
+      "target": "21M documents of 100 words each",
+      "rubric": "21M disjoint 100-word chunks."
+    },
+    {
+      "id": "S029",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What Exact Match score does RAG-Sequence achieve on Natural Questions?",
+      "target": "44.5 EM",
+      "rubric": "44.5."
+    },
+    {
+      "id": "S030",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What Exact Match score does RAG-Token achieve on Natural Questions?",
+      "target": "44.1 EM",
+      "rubric": "44.1."
+    },
+    {
+      "id": "S031",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What is RAG-Token's FEVER 3-way label accuracy?",
+      "target": "72.5",
+      "rubric": "72.5 (89.5 is the 2-way figure)."
+    },
+    {
+      "id": "S032",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "In human evaluation, what percent of Jeopardy comparisons found RAG more factual than BART?",
+      "target": "42.7%",
+      "rubric": "42.7%."
+    },
+    {
+      "id": "S033",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How can RAG's world knowledge be updated without retraining?",
+      "target": "replace / hot-swap the non-parametric index",
+      "rubric": "Index hot-swapping."
+    },
+    {
+      "id": "S034",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What is retrieval collapse in RAG training?",
+      "target": "retriever returns same documents regardless of input; generator ignores them; model equals BART",
+      "rubric": "Collapse, generator ignores docs, equivalent to BART."
+    },
+    {
+      "id": "S035",
+      "bucket": "single-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How many trainable parameters do RAG models have in total?",
+      "target": "626M",
+      "rubric": "626M (110M+110M BERT plus 406M BART)."
+    },
+    {
+      "id": "S036",
+      "bucket": "single-hop",
+      "docs": [
+        "contradiction-note"
+      ],
+      "question": "What does the contradiction-note fixture say about itself?",
+      "target": "synthetic test fixture, not a real citation, deliberately false",
+      "rubric": "Must note it is synthetic/false and should not be cited."
+    },
+    {
+      "id": "S037",
+      "bucket": "single-hop",
+      "docs": [
+        "contradiction-note"
+      ],
+      "question": "Which source paper does the contradiction note refer to?",
+      "target": "Attention Is All You Need (Vaswani et al., arXiv:1706.03762)",
+      "rubric": "Paper name and arXiv id."
+    },
+    {
+      "id": "S038",
+      "bucket": "single-hop",
+      "docs": [
+        "contradiction-note"
+      ],
+      "question": "What 28.4 BLEU claim does the note quote from the Attention paper's abstract?",
+      "target": "28.4 BLEU on WMT14 EN-DE, more than 2 BLEU over best ensembles",
+      "rubric": "28.4 and >2 BLEU."
+    },
+    {
+      "id": "S039",
+      "bucket": "single-hop",
+      "docs": [
+        "contradiction-note"
+      ],
+      "question": "What deliberately contradictory BLEU value does the note assert?",
+      "target": "18.4 BLEU, a full 10 BLEU below 28.4",
+      "rubric": "18.4 and the 10-point deficit."
+    },
+    {
+      "id": "S040",
+      "bucket": "single-hop",
+      "docs": [
+        "contradiction-note"
+      ],
+      "question": "According to the note, did the Transformer improve on the best ensembles?",
+      "target": "the note says it did not",
+      "rubric": "No improvement claim."
+    },
+    {
+      "id": "M001",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Using the reported step time and step count, how long did base and big Transformer training take and on how many GPUs?",
+      "target": "base 0.4s x 100k = 12h; big 1.0s x 300k = 3.5 days; 8 NVIDIA P100",
+      "rubric": "Both durations and the 8 P100."
+    },
+    {
+      "id": "M002",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Why does the Transformer scale dot products by 1/sqrt(d_k), and what happens for large d_k without scaling?",
+      "target": "large dot products push softmax into small-gradient regions; scaling counteracts",
+      "rubric": "Gradient-saturation explanation."
+    },
+    {
+      "id": "M003",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "The encoder has two sub-layers and the decoder three; across six layers each, how many sub-layer applications occur?",
+      "target": "6x2 + 6x3 = 30",
+      "rubric": "30; must combine counts."
+    },
+    {
+      "id": "M004",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "With h=8 heads of d_k=d_v=64 and d_model=512, what is the concatenated head output dimension before the final projection?",
+      "target": "8 x 64 = 512",
+      "rubric": "512; must combine."
+    },
+    {
+      "id": "M005",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Table 1 lists maximum path lengths: how does the Transformer's path compare with ByteNet's and ConvS2S's?",
+      "target": "O(1) vs O(log_k n) for ByteNet and O(n/k) for ConvS2S",
+      "rubric": "All three values."
+    },
+    {
+      "id": "M006",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "According to the complexity discussion, when is self-attention faster than recurrent layers?",
+      "target": "when sequence length n is smaller than representation dimension d",
+      "rubric": "n < d."
+    },
+    {
+      "id": "M007",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Table 3 row (E) found learned positional embeddings nearly identical to sinusoids; why keep sinusoids?",
+      "target": "they may allow extrapolation to longer sequences",
+      "rubric": "Extrapolation rationale."
+    },
+    {
+      "id": "M008",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Which checkpoint-averaging and beam settings were used for base versus big translation models?",
+      "target": "base last 5 checkpoints (10-min intervals); big last 20; beam 4, length penalty 0.6",
+      "rubric": "Both averaging counts plus beam and alpha."
+    },
+    {
+      "id": "M009",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "For English constituency parsing, how did depth/width and decoding settings differ from the base translation model?",
+      "target": "4 layers, d_model=1024; beam 21, alpha 0.3, max output length +300",
+      "rubric": "Depth/width and decoding changes."
+    },
+    {
+      "id": "M010",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What do Table 3 rows (A)-(D) conclude about heads, d_k, model size and dropout?",
+      "target": "single-head 0.9 BLEU worse; too many heads hurt; smaller d_k hurts; bigger models better; dropout helpful",
+      "rubric": "At least three of five."
+    },
+    {
+      "id": "M011",
+      "bucket": "multi-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "How do Proposition 1 and Theorem 1 connect the optimal discriminator to the global optimum?",
+      "target": "D* = p_data/(p_data+p_g); at p_g=p_data, D*=1/2 and C(G)=-log 4",
+      "rubric": "Must link D* to C(G)."
+    },
+    {
+      "id": "M012",
+      "bucket": "multi-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "Why not optimize D to completion in the inner loop, and what is the practical alternative?",
+      "target": "prohibitive and overfits; alternate k D steps with one G step (k=1)",
+      "rubric": "Reason plus k-step scheme."
+    },
+    {
+      "id": "M013",
+      "bucket": "multi-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "How do the generator/discriminator activation choices support backprop-only training?",
+      "target": "generator rectifier+sigmoid, discriminator maxout+dropout; no feedback loops allows piecewise linear units",
+      "rubric": "Activations plus no Markov chain."
+    },
+    {
+      "id": "M014",
+      "bucket": "multi-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "Compare adversarial nets with Deep GSN on the MNIST and TFD Parzen scores.",
+      "target": "MNIST 225 vs 214; TFD 2057 vs 1890",
+      "rubric": "Both comparisons."
+    },
+    {
+      "id": "M015",
+      "bucket": "multi-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "Per Table 2, how do adversarial nets compare with MCMC-based models on sampling and p(x) evaluation?",
+      "target": "no Markov chain for sampling; p(x) not explicitly represented, Parzen approximation",
+      "rubric": "Both dimensions."
+    },
+    {
+      "id": "M016",
+      "bucket": "multi-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "What statistical advantage is claimed for updating G only through gradients flowing from D?",
+      "target": "input components not copied into generator parameters; can represent sharp/degenerate distributions",
+      "rubric": "Both points."
+    },
+    {
+      "id": "M017",
+      "bucket": "multi-hop",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "List the extensions proposed in the conclusion / future work.",
+      "target": "conditional GAN, learned approximate inference, semi-supervised learning, efficiency improvements",
+      "rubric": "At least three."
+    },
+    {
+      "id": "M018",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How does RAG-Sequence decoding approximate argmax and why need Thorough or Fast Decoding?",
+      "target": "beam search per document then marginalize; Thorough adds forward passes, Fast approximates for long outputs",
+      "rubric": "Both decoding procedures."
+    },
+    {
+      "id": "M019",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How does RAG's FEVER accuracy compare with state of the art and BART on 3-way and 2-way?",
+      "target": "3-way 72.5 vs 76.8 SotA vs 64.0 BART; 2-way 89.5 vs 92.2 vs 81.1",
+      "rubric": "Both tasks."
+    },
+    {
+      "id": "M020",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Why does BM25 outperform learned retrieval on FEVER but not on other tasks?",
+      "target": "FEVER claims are entity-centric so word overlap works; differentiable retrieval is crucial for QA",
+      "rubric": "Explanation for both."
+    },
+    {
+      "id": "M021",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Summarize the index hot-swapping experiment and its conclusion.",
+      "target": "82 world leaders; 70%/68% matched, 12%/4% mismatched; knowledge updated by replacing the index",
+      "rubric": "Numbers and conclusion."
+    },
+    {
+      "id": "M022",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What did the null-document experiments find?",
+      "target": "three logit models tried, none improved, mechanism omitted; MS-MARCO learns fixed retrieval for some questions",
+      "rubric": "Both findings."
+    },
+    {
+      "id": "M023",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Compare RAG with T5-11B and T5-large on Natural Questions including parameter counts.",
+      "target": "RAG-Seq 44.5 with 626M; T5-11B 34.5 with 11B; T5-large 28.9 with 770M",
+      "rubric": "All three."
+    },
+    {
+      "id": "M024",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How large is the non-parametric index in vectors, dimensions, values and memory?",
+      "target": "21M x 728 = 15.3B values; ~100GB, 36GB after 8-bit compression",
+      "rubric": "All figures."
+    },
+    {
+      "id": "M025",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How does RAG produce correct answers when the answer is absent from retrieved documents?",
+      "target": "parametric knowledge; 11.8% accuracy on NQ versus 0% for extractive models",
+      "rubric": "Both."
+    },
+    {
+      "id": "M026",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How does RAG performance change as more documents are retrieved?",
+      "target": "RAG-Sequence improves monotonically; RAG-Token peaks at 10; BLEU/Rouge trade-off",
+      "rubric": "Both model behaviours."
+    },
+    {
+      "id": "M027",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What retrieval counts were used at test time for each task and model?",
+      "target": "15 docs for RAG-Token QA; 50 for RAG-Sequence QA; 10 for generation tasks",
+      "rubric": "All three."
+    },
+    {
+      "id": "M028",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How do RAG and BART compare in the Jeopardy human evaluation for factuality and specificity?",
+      "target": "RAG better 42.7%/37.4%; BART better 7.1%/16.8%",
+      "rubric": "Both dimensions."
+    },
+    {
+      "id": "M029",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Why did the authors train a BART baseline for Jeopardy and MS-MARCO?",
+      "target": "to compare parametric-only generation with parametric plus non-parametric generation",
+      "rubric": "Rationale."
+    },
+    {
+      "id": "M030",
+      "bucket": "multi-hop",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How is RAG related to memory networks and to retrieve-and-edit approaches?",
+      "target": "external memory of human-readable/writable raw text; aggregates several documents rather than lightly editing one",
+      "rubric": "Both relations."
+    },
+    {
+      "id": "M031",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "RAG cites Vaswani et al. [58]. What architecture does that cited paper introduce and what are its headline translation results?",
+      "target": "Transformer; 28.4 BLEU EN-DE and 41.8/41.0 BLEU EN-FR",
+      "rubric": "Architecture and at least one BLEU."
+    },
+    {
+      "id": "M032",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "How many GPUs did the Transformer and RAG papers use for training, and which GPU models?",
+      "target": "8 NVIDIA P100 for Transformer; 8 x 32GB NVIDIA V100 for RAG",
+      "rubric": "Both."
+    },
+    {
+      "id": "M033",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Compare the parameter counts of Transformer base (Table 3) and RAG's BART-large generator.",
+      "target": "65M versus 400M/406M",
+      "rubric": "Both."
+    },
+    {
+      "id": "M034",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Both papers use beam search: give the Transformer translation and RAG generation beam settings.",
+      "target": "Transformer beam 4, alpha 0.6; RAG beam 4 for generation, greedy for QA",
+      "rubric": "Both."
+    },
+    {
+      "id": "M035",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Which optimization techniques appear in the Transformer paper and which in the RAG paper?",
+      "target": "Transformer Adam with warmup schedule; RAG Adam with mixed precision via Fairseq",
+      "rubric": "Both."
+    },
+    {
+      "id": "M036",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "What do the two papers say about code availability?",
+      "target": "Transformer tensor2tensor; RAG HuggingFace Transformers plus interactive demo",
+      "rubric": "Both."
+    },
+    {
+      "id": "M037",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Compare the experimental corpora: Transformer's WMT14 data versus RAG's Wikipedia index.",
+      "target": "4.5M EN-DE pairs and 36M EN-FR sentences versus 21M Wikipedia documents",
+      "rubric": "Both."
+    },
+    {
+      "id": "M038",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Which paper introduces 'non-parametric memory', and which paper's architecture family supplies RAG's generator?",
+      "target": "RAG introduces the term; Transformer is the attention-based seq2seq family behind BART",
+      "rubric": "Both."
+    },
+    {
+      "id": "M039",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "How do the two papers handle long sequences: restricted attention versus retrieval?",
+      "target": "Transformer restricted attention neighbourhood r (O(n/r)); RAG retrieves top-K documents",
+      "rubric": "Both."
+    },
+    {
+      "id": "M040",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "What regularization is reported in the Transformer, GAN and RAG papers?",
+      "target": "Transformer dropout 0.1 and label smoothing 0.1; GAN dropout in discriminator; RAG mixed precision training",
+      "rubric": "At least two."
+    },
+    {
+      "id": "M041",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Which BLEU-related scores appear across the corpus?",
+      "target": "Transformer 28.4/41.8/41.0/27.3; RAG Q-BLEU-1 22.2; GAN uses Parzen log-likelihood, not BLEU",
+      "rubric": "At least one from two papers."
+    },
+    {
+      "id": "M042",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Name the sequence-to-sequence baselines compared in RAG and the transduction baselines compared in the Transformer paper.",
+      "target": "RAG: BART, T5; Transformer: GNMT, ConvS2S, ByteNet, Deep-Att",
+      "rubric": "At least one from each."
+    },
+    {
+      "id": "M043",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Where does reference [58] of the RAG paper appear and what does it cite?",
+      "target": "Vaswani et al., Attention is all you need, NeurIPS 2017",
+      "rubric": "Correct reference."
+    },
+    {
+      "id": "M044",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Which papers report using eight GPUs and which GPU models?",
+      "target": "Transformer 8 P100; RAG 8 V100; GAN no GPU count given",
+      "rubric": "Both plus GAN absence."
+    },
+    {
+      "id": "M045",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "What role does 'attention' play in the Transformer paper versus in RAG's DPR?",
+      "target": "core self-attention mechanism in Transformer; DPR uses a BERT bi-encoder with MIPS retrieval",
+      "rubric": "Both."
+    },
+    {
+      "id": "M046",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Which model has the smallest and which the largest parameter count across the Transformer and RAG tables?",
+      "target": "smallest about 28M in Transformer Table 3; largest T5-11B at 11B in RAG",
+      "rubric": "Both."
+    },
+    {
+      "id": "M047",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Transformer cites Bahdanau et al. [2] and RAG cites BART [32]; what common task family do these belong to?",
+      "target": "neural machine translation / sequence-to-sequence generation",
+      "rubric": "Task family."
+    },
+    {
+      "id": "M048",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Which of the documents explicitly mention Wikipedia?",
+      "target": "primarily the RAG document; the Transformer and GAN documents do not use Wikipedia as a corpus",
+      "rubric": "RAG and absence elsewhere."
+    },
+    {
+      "id": "M049",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Which length-penalty settings are reported for Transformer translation and for parsing?",
+      "target": "alpha = 0.6 for translation; alpha = 0.3 for constituency parsing",
+      "rubric": "Both."
+    },
+    {
+      "id": "M050",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Compare the experimental scales of the three papers.",
+      "target": "GAN MNIST/TFD/CIFAR-10; Transformer 4.5M/36M sentence pairs; RAG 21M Wikipedia documents",
+      "rubric": "All three."
+    },
+    {
+      "id": "M051",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Which paper reports a 40K-sentence training setting and which reports 21M documents?",
+      "target": "Transformer parsing on 40K WSJ sentences; RAG Wikipedia 21M documents",
+      "rubric": "Both."
+    },
+    {
+      "id": "M052",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "What is the longest explicit training time reported in the corpus?",
+      "target": "Transformer big trained for 3.5 days on 8 P100; no explicit times for GAN or RAG",
+      "rubric": "Transformer figure plus absence."
+    },
+    {
+      "id": "M053",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Which papers use BLEU and which use Exact Match or human evaluation?",
+      "target": "Transformer reports BLEU; GAN uses Parzen log-likelihood; RAG uses EM, Q-BLEU-1, Rouge-L, label accuracy and human eval",
+      "rubric": "At least two papers."
+    },
+    {
+      "id": "M054",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "contradiction-note"
+      ],
+      "question": "How do the contradiction note and the Attention paper disagree about the EN-DE BLEU, and which is marked false?",
+      "target": "28.4 in the paper versus 18.4 in the note; the note is marked synthetic/false",
+      "rubric": "Both values and false marker."
+    },
+    {
+      "id": "M055",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Is RAG's BART generator in the same model family as the architecture introduced by the Transformer paper?",
+      "target": "yes, BART is a pre-trained seq2seq transformer in the attention family",
+      "rubric": "Family link."
+    },
+    {
+      "id": "M056",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "2005.11401-retro"
+      ],
+      "question": "Compare the state-of-the-art claims: Transformer on WMT14 and RAG on open-domain QA.",
+      "target": "Transformer SOTA on WMT14 EN-DE and EN-FR; RAG SOTA on NQ, WebQuestions and CuratedTrec",
+      "rubric": "Both."
+    },
+    {
+      "id": "M057",
+      "bucket": "multi-hop",
+      "docs": [
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Which model has a generator and discriminator, and which has a retriever and generator?",
+      "target": "GAN: generator and discriminator; RAG: retriever and generator",
+      "rubric": "Both."
+    },
+    {
+      "id": "M058",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Which evaluation metrics are shared across the papers?",
+      "target": "BLEU in Transformer; human evaluation in GAN (pairwise) and RAG (factuality/specificity)",
+      "rubric": "At least one shared or comparable metric."
+    },
+    {
+      "id": "M059",
+      "bucket": "multi-hop",
+      "docs": [
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Which document introduces 'Retrieval-Augmented Generation' and which discusses 'adversarial nets'?",
+      "target": "the RAG document and the GAN document",
+      "rubric": "Both."
+    },
+    {
+      "id": "M060",
+      "bucket": "multi-hop",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Across all documents, list every explicit GPU count.",
+      "target": "8 P100 (Transformer), 8 V100 (RAG), none for GAN",
+      "rubric": "All plus absence."
+    },
+    {
+      "id": "C001",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Does the corpus report one or more BLEU values for the Transformer on WMT14 English-to-French?",
+      "target": "conflict: 41.8 (abstract, Table 2) versus 41.0 (section 6.1)",
+      "rubric": "Must cite both sides."
+    },
+    {
+      "id": "C002",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What BLEU values are given for EN-FR in the abstract versus section 6.1?",
+      "target": "41.8 versus 41.0",
+      "rubric": "Both values."
+    },
+    {
+      "id": "C003",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Which parts of the Attention paper agree on 41.8 for EN-FR?",
+      "target": "the abstract and Table 2",
+      "rubric": "Both."
+    },
+    {
+      "id": "C004",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Is 41.0 or 41.8 the value stated in section 6.1 'Machine Translation'?",
+      "target": "41.0",
+      "rubric": "41.0."
+    },
+    {
+      "id": "C005",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What EN-FR BLEU is stated in Table 2 of the Attention paper?",
+      "target": "41.8",
+      "rubric": "41.8."
+    },
+    {
+      "id": "C006",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What EN-FR BLEU is stated in the abstract of the Attention paper?",
+      "target": "41.8",
+      "rubric": "41.8."
+    },
+    {
+      "id": "C007",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What does the paper say about the big model's EN-FR training cost relative to previous state of the art?",
+      "target": "less than one quarter of the training cost",
+      "rubric": "One quarter."
+    },
+    {
+      "id": "C008",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Give the EN-DE BLEU values for Transformer big and base from Table 2.",
+      "target": "28.4 and 27.3",
+      "rubric": "Both."
+    },
+    {
+      "id": "C009",
+      "bucket": "aggregation",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "List all single-model EN-DE BLEU scores in Table 2 of the Attention paper.",
+      "target": "ByteNet 23.75, GNMT+RL 24.6, ConvS2S 25.16, MoE 26.03, Transformer base 27.3, Transformer big 28.4",
+      "rubric": "At least four."
+    },
+    {
+      "id": "C010",
+      "bucket": "aggregation",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "Which model in Table 2 has the highest EN-FR BLEU?",
+      "target": "Transformer (big), 41.8",
+      "rubric": "Name and value."
+    },
+    {
+      "id": "C011",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention",
+        "contradiction-note"
+      ],
+      "question": "Does the corpus say the Transformer's EN-DE BLEU is 28.4 or 18.4?",
+      "target": "conflict: 28.4 in the paper, 18.4 in the synthetic false note",
+      "rubric": "Both sides; flag note as false."
+    },
+    {
+      "id": "C012",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention",
+        "contradiction-note"
+      ],
+      "question": "Which of the two EN-DE BLEU values comes from the synthetic test fixture?",
+      "target": "18.4",
+      "rubric": "18.4 is synthetic/false."
+    },
+    {
+      "id": "C013",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention",
+        "contradiction-note"
+      ],
+      "question": "Quote the abstract sentence containing the 28.4 BLEU claim.",
+      "target": "'Our model achieves 28.4 BLEU ... improving ... by over 2 BLEU'",
+      "rubric": "Contains 28.4 and over 2 BLEU."
+    },
+    {
+      "id": "C014",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention",
+        "contradiction-note"
+      ],
+      "question": "Quote the note's contradictory restatement containing 18.4 BLEU.",
+      "target": "'only 18.4 BLEU ... a full 10 BLEU below ... did not improve'",
+      "rubric": "18.4 and the 10-point deficit."
+    },
+    {
+      "id": "C015",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention",
+        "contradiction-note"
+      ],
+      "question": "How large is the gap between the two reported EN-DE BLEU values?",
+      "target": "10 BLEU",
+      "rubric": "10."
+    },
+    {
+      "id": "C016",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention",
+        "contradiction-note"
+      ],
+      "question": "Does the corpus agree on whether the Transformer improved over the best ensembles?",
+      "target": "conflict: paper says over 2 BLEU improvement, note says no improvement",
+      "rubric": "Both sides."
+    },
+    {
+      "id": "C017",
+      "bucket": "contradiction",
+      "docs": [
+        "contradiction-note"
+      ],
+      "question": "Which source paper does the contradiction note cite?",
+      "target": "Attention Is All You Need (arXiv:1706.03762)",
+      "rubric": "Correct paper."
+    },
+    {
+      "id": "C018",
+      "bucket": "contradiction",
+      "docs": [
+        "contradiction-note"
+      ],
+      "question": "What does the note instruct readers about citing it?",
+      "target": "'Do not cite this file.'",
+      "rubric": "Quote or paraphrase."
+    },
+    {
+      "id": "C019",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention",
+        "contradiction-note"
+      ],
+      "question": "Which document is authoritative for the EN-DE BLEU, according to the note itself?",
+      "target": "the Attention paper; the note is a synthetic false restatement",
+      "rubric": "Paper authoritative."
+    },
+    {
+      "id": "C020",
+      "bucket": "aggregation",
+      "docs": [
+        "1706.03762-attention",
+        "contradiction-note"
+      ],
+      "question": "How many distinct EN-DE BLEU numbers are associated with the Transformer across the corpus?",
+      "target": "27.3 (base), 28.4 (big), and 18.4 (false note)",
+      "rubric": "All three with roles."
+    },
+    {
+      "id": "C021",
+      "bucket": "contradiction",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Does the corpus give conflicting author lists for any reference?",
+      "target": "yes, reference R3 [62] appears with two different author lists",
+      "rubric": "Both lists or their differing names."
+    },
+    {
+      "id": "C022",
+      "bucket": "contradiction",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Who are the authors of R3 in its first occurrence in the RAG paper?",
+      "target": "Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, Jing Jiang",
+      "rubric": "At least several names in order."
+    },
+    {
+      "id": "C023",
+      "bucket": "contradiction",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Who are the authors of R3 in its second occurrence in the RAG paper?",
+      "target": "Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, Murray Campbell",
+      "rubric": "At least several names in order."
+    },
+    {
+      "id": "C024",
+      "bucket": "contradiction",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Which names differ between the two R3 author lists?",
+      "target": "Bowen Zhou versus Murray Campbell, Gerry Tesauro versus Gerald Tesauro, and reordered authors",
+      "rubric": "At least two differences."
+    },
+    {
+      "id": "C025",
+      "bucket": "aggregation",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Aggregate the Natural Questions Exact Match scores of all models in RAG Table 1.",
+      "target": "T5-11B 34.5, T5-11B+SSM 36.6, REALM 40.4, DPR 41.5, RAG-Token 44.1, RAG-Sequence 44.5",
+      "rubric": "At least four."
+    },
+    {
+      "id": "C026",
+      "bucket": "aggregation",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Which RAG variant wins each QA dataset in Table 1?",
+      "target": "NQ RAG-Sequence, TQA RAG-Sequence, WQ RAG-Token, CT RAG-Sequence",
+      "rubric": "All four."
+    },
+    {
+      "id": "C027",
+      "bucket": "aggregation",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Aggregate all dropout rates explicitly mentioned across the three papers.",
+      "target": "Transformer base 0.1 and big 0.3 for EN-FR; GAN dropout in discriminator; RAG none specified",
+      "rubric": "At least Transformer rates plus absence."
+    },
+    {
+      "id": "C028",
+      "bucket": "aggregation",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Aggregate all explicit parameter counts mentioned in the corpus.",
+      "target": "Transformer base 65M and big 213M; RAG 626M, BART 400M/406M, T5-11B 11B, T5-large 770M",
+      "rubric": "At least three."
+    },
+    {
+      "id": "C029",
+      "bucket": "aggregation",
+      "docs": [
+        "1706.03762-attention",
+        "1406.2661-gan",
+        "2005.11401-retro"
+      ],
+      "question": "Which GPU count appears in more than one document?",
+      "target": "eight GPUs in Transformer (P100) and RAG (V100); none for GAN",
+      "rubric": "Both plus absence."
+    },
+    {
+      "id": "C030",
+      "bucket": "contradiction",
+      "docs": [
+        "1706.03762-attention",
+        "contradiction-note"
+      ],
+      "question": "Are the claims of a greater-than-2-BLEU improvement and a 10-BLEU deficit consistent?",
+      "target": "no: the paper claims improvement, the synthetic note claims a deficit",
+      "rubric": "Both sides and verdict."
+    },
+    {
+      "id": "U001",
+      "bucket": "unanswerable",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What is the exact inference latency in milliseconds of the Transformer big model on the WMT 2014 test set?",
+      "target": "absent: no inference latency is reported",
+      "rubric": "Honest insufficiency; must not fabricate a number."
+    },
+    {
+      "id": "U002",
+      "bucket": "unanswerable",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What weight decay coefficient did the Transformer authors use with Adam?",
+      "target": "absent: weight decay not stated",
+      "rubric": "Insufficiency; Adam beta/epsilon are present but weight decay is not."
+    },
+    {
+      "id": "U003",
+      "bucket": "unanswerable",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "How many NVIDIA V100 GPUs were used to train the generative adversarial nets model?",
+      "target": "absent: V100 GPUs belong to the RAG paper, not GAN",
+      "rubric": "Insufficiency; must not transfer the RAG fact."
+    },
+    {
+      "id": "U004",
+      "bucket": "unanswerable",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "Which December 2019 Wikipedia dump was used as the RAG knowledge source?",
+      "target": "absent: the corpus says December 2018",
+      "rubric": "Insufficiency; must not say 2019."
+    },
+    {
+      "id": "U005",
+      "bucket": "unanswerable",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "What learning-rate schedule was used for the GAN discriminator?",
+      "target": "absent: not stated",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U006",
+      "bucket": "unanswerable",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What token-level batch size did RAG use during training?",
+      "target": "absent: 25,000-token batches belong to the Transformer paper",
+      "rubric": "Insufficiency; must not transfer."
+    },
+    {
+      "id": "U007",
+      "bucket": "unanswerable",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "Which named optimizer (e.g. Adam or SGD) was used to train adversarial nets?",
+      "target": "absent: only 'standard gradient-based learning rule' and momentum are mentioned",
+      "rubric": "Insufficiency; momentum is not a named optimizer here."
+    },
+    {
+      "id": "U008",
+      "bucket": "unanswerable",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What numerical precision (e.g. FP16 mixed precision) was used to train the Transformer?",
+      "target": "absent: mixed precision appears only in the RAG paper",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U009",
+      "bucket": "unanswerable",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What is the Transformer parsing model's F1 on the development set?",
+      "target": "absent: only WSJ section 23 test F1 is reported",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U010",
+      "bucket": "unanswerable",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "Which dataset did the adversarial nets paper use for fact verification?",
+      "target": "absent: FEVER fact verification belongs to RAG",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U011",
+      "bucket": "unanswerable",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How many Wikipedia articles are in the December 2018 dump?",
+      "target": "absent: 21M refers to 100-word documents, not articles",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U012",
+      "bucket": "unanswerable",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What sampling temperature was used for Transformer beam search?",
+      "target": "absent: beam size and length penalty are given, not temperature",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U013",
+      "bucket": "unanswerable",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "What is the squeeze-excitation ratio of the GAN generator?",
+      "target": "absent: no such concept in corpus",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U014",
+      "bucket": "unanswerable",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "What dropout rate was used for RAG-Token generation?",
+      "target": "absent: no RAG dropout rate is specified",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U015",
+      "bucket": "unanswerable",
+      "docs": [
+        "contradiction-note"
+      ],
+      "question": "Who is the first author of the contradiction-note fixture?",
+      "target": "absent: no author is given",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U016",
+      "bucket": "unanswerable",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What BLEU score did BART-large achieve on WMT14 English-to-German?",
+      "target": "absent: BART is only compared within RAG tasks",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U017",
+      "bucket": "unanswerable",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "On what exact date was 'Attention Is All You Need' first submitted to arXiv?",
+      "target": "absent: arXiv id is given, not a submission date",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U018",
+      "bucket": "unanswerable",
+      "docs": [
+        "2005.11401-retro"
+      ],
+      "question": "How many attention heads does RAG's BART-large generator use?",
+      "target": "absent: not stated in the RAG paper",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U019",
+      "bucket": "unanswerable",
+      "docs": [
+        "1406.2661-gan"
+      ],
+      "question": "What is the learning rate of the GAN discriminator update?",
+      "target": "absent: not stated",
+      "rubric": "Insufficiency."
+    },
+    {
+      "id": "U020",
+      "bucket": "unanswerable",
+      "docs": [
+        "1706.03762-attention"
+      ],
+      "question": "What is the maximum path length of a restricted self-attention layer in Big Bird?",
+      "target": "absent: Big Bird is not in the corpus; only the Transformer's O(n/r) plan is mentioned",
+      "rubric": "Insufficiency; must not fabricate."
+    }
+  ]
+}

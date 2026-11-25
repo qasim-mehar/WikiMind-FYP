@@ -1,0 +1,617 @@
+# Lane 14 — Phase A report (full question set + answer key + spend)
+
+- Frozen question-set SHA256: `bc0fd07c0148bc2452b1bca01aa946e093283967c47b116112b20d97a9648dc4`
+- Questions: 150 (40 single-hop, 60 multi-hop, 30 contradiction/aggregation, 20 unanswerable)
+- Answer-key statuses: {'absent': 20, 'conflict': 11, 'insufficient-evidence': 6, 'one-sided': 2, 'present': 111}
+- Authoring spend: $0.00 shadow (zero LLM calls); isolated ledger `author_costs.jsonl` is empty.
+
+## Full question set (frozen)
+
+- **S001** [single-hop; docs=1706.03762-attention] What new network architecture is proposed in 'Attention Is All You Need', and what two mechanisms does it dispense with?
+  - Target: Transformer; recurrence and convolutions
+  - Rubric: Must name Transformer and state that it dispenses entirely with recurrence and convolutions.
+- **S002** [single-hop; docs=1706.03762-attention] What BLEU score did the Transformer (big) model achieve on WMT 2014 English-to-German?
+  - Target: 28.4 BLEU
+  - Rubric: Must give 28.4, cite abstract or section 6.1/Table 2.
+- **S003** [single-hop; docs=1706.03762-attention] How many identical layers are in the Transformer encoder stack and in the decoder stack?
+  - Target: 6 and 6
+  - Rubric: Both stacks have N=6.
+- **S004** [single-hop; docs=1706.03762-attention] What is the dimension d_model of the Transformer's sub-layer outputs and embeddings?
+  - Target: 512
+  - Rubric: 512.
+- **S005** [single-hop; docs=1706.03762-attention] How many parallel attention heads does the Transformer use, and what are d_k and d_v?
+  - Target: h=8, d_k=d_v=64
+  - Rubric: 8 heads and 64 for both key and value dimension.
+- **S006** [single-hop; docs=1706.03762-attention] What is the inner dimensionality d_ff of the position-wise feed-forward network?
+  - Target: 2048
+  - Rubric: 2048.
+- **S007** [single-hop; docs=1706.03762-attention] What positional encoding scheme does the Transformer use?
+  - Target: sine and cosine functions of different frequencies
+  - Rubric: Sinusoidal encoding; PE(pos,2i)=sin(pos/10000^(2i/d_model)) etc.
+- **S008** [single-hop; docs=1706.03762-attention] What is the attention function of Scaled Dot-Product Attention?
+  - Target: softmax(QK^T/sqrt(d_k))V
+  - Rubric: Must include scaling by sqrt(d_k) and softmax weighting of values.
+- **S009** [single-hop; docs=1706.03762-attention] What Adam settings (beta1, beta2, epsilon) are reported for the Transformer?
+  - Target: 0.9, 0.98, 1e-9
+  - Rubric: All three values.
+- **S010** [single-hop; docs=1706.03762-attention] How many warmup steps are used in the Transformer learning-rate schedule?
+  - Target: 4000
+  - Rubric: 4000.
+- **S011** [single-hop; docs=1706.03762-attention] How many training steps and how many hours for the base Transformer model?
+  - Target: 100,000 steps; 12 hours
+  - Rubric: Both values.
+- **S012** [single-hop; docs=1706.03762-attention] According to the abstract, what single-model state-of-the-art BLEU did the Transformer reach on WMT 2014 English-to-French?
+  - Target: 41.8 BLEU
+  - Rubric: 41.8 from the abstract (note: body says 41.0, asked separately in C bucket).
+- **S013** [single-hop; docs=1406.2661-gan] How is training generative adversarial nets formulated as a game?
+  - Target: minimax two-player game between generator G and discriminator D
+  - Rubric: Minimax/two-player, G versus D.
+- **S014** [single-hop; docs=1406.2661-gan] For a fixed generator G, what is the optimal discriminator D*_G(x)?
+  - Target: p_data(x)/(p_data(x)+p_g(x))
+  - Rubric: Exact formula.
+- **S015** [single-hop; docs=1406.2661-gan] What is the global minimum value of the virtual training criterion C(G)?
+  - Target: -log 4
+  - Rubric: -log 4, attained iff p_g = p_data.
+- **S016** [single-hop; docs=1406.2661-gan] C(G) equals -log 4 plus twice which divergence?
+  - Target: Jensen-Shannon divergence
+  - Rubric: JSD between p_data and p_g.
+- **S017** [single-hop; docs=1406.2661-gan] Which three datasets were adversarial nets trained on?
+  - Target: MNIST, Toronto Face Database (TFD), CIFAR-10
+  - Rubric: All three.
+- **S018** [single-hop; docs=1406.2661-gan] What value of k (discriminator steps per generator step) was used in the experiments?
+  - Target: k = 1
+  - Rubric: 1.
+- **S019** [single-hop; docs=1406.2661-gan] What Parzen-window log-likelihood did adversarial nets achieve on MNIST?
+  - Target: 225 +/- 2
+  - Rubric: 225 +/- 2 (not 214 etc.).
+- **S020** [single-hop; docs=1406.2661-gan] Why train G to maximize log D(G(z)) rather than minimize log(1-D(G(z)))?
+  - Target: stronger gradients early because log(1-D) saturates
+  - Rubric: Saturation / stronger gradients; same fixed point.
+- **S021** [single-hop; docs=1406.2661-gan] Do adversarial nets require Markov chains or unrolled approximate inference?
+  - Target: No
+  - Rubric: No Markov chains, no unrolled inference; backprop and forward sampling only.
+- **S022** [single-hop; docs=1406.2661-gan] What is the 'Helvetica scenario' in adversarial nets?
+  - Target: G collapses many z to the same x; D and G must stay synchronized
+  - Rubric: Mode collapse from insufficient D updates.
+- **S023** [single-hop; docs=2005.11401-retro] What is the parametric memory component of RAG models?
+  - Target: pre-trained seq2seq model (BART-large)
+  - Rubric: BART-large seq2seq, about 400M parameters.
+- **S024** [single-hop; docs=2005.11401-retro] What is the non-parametric memory of RAG?
+  - Target: a dense vector index of Wikipedia
+  - Rubric: Dense vector index of Wikipedia accessed by a neural retriever.
+- **S025** [single-hop; docs=2005.11401-retro] Which retriever do RAG models use?
+  - Target: Dense Passage Retriever (DPR), BERT-based bi-encoder
+  - Rubric: DPR, BERTBASE bi-encoder, MIPS.
+- **S026** [single-hop; docs=2005.11401-retro] What are the two RAG formulations and how do they differ?
+  - Target: RAG-Sequence (same document for the whole sequence) vs RAG-Token (different document per token)
+  - Rubric: Both names and the distinction.
+- **S027** [single-hop; docs=2005.11401-retro] Which Wikipedia dump is used as the non-parametric knowledge source?
+  - Target: December 2018 dump
+  - Rubric: December 2018.
+- **S028** [single-hop; docs=2005.11401-retro] How many documents are in the Wikipedia index and how long is each?
+  - Target: 21M documents of 100 words each
+  - Rubric: 21M disjoint 100-word chunks.
+- **S029** [single-hop; docs=2005.11401-retro] What Exact Match score does RAG-Sequence achieve on Natural Questions?
+  - Target: 44.5 EM
+  - Rubric: 44.5.
+- **S030** [single-hop; docs=2005.11401-retro] What Exact Match score does RAG-Token achieve on Natural Questions?
+  - Target: 44.1 EM
+  - Rubric: 44.1.
+- **S031** [single-hop; docs=2005.11401-retro] What is RAG-Token's FEVER 3-way label accuracy?
+  - Target: 72.5
+  - Rubric: 72.5 (89.5 is the 2-way figure).
+- **S032** [single-hop; docs=2005.11401-retro] In human evaluation, what percent of Jeopardy comparisons found RAG more factual than BART?
+  - Target: 42.7%
+  - Rubric: 42.7%.
+- **S033** [single-hop; docs=2005.11401-retro] How can RAG's world knowledge be updated without retraining?
+  - Target: replace / hot-swap the non-parametric index
+  - Rubric: Index hot-swapping.
+- **S034** [single-hop; docs=2005.11401-retro] What is retrieval collapse in RAG training?
+  - Target: retriever returns same documents regardless of input; generator ignores them; model equals BART
+  - Rubric: Collapse, generator ignores docs, equivalent to BART.
+- **S035** [single-hop; docs=2005.11401-retro] How many trainable parameters do RAG models have in total?
+  - Target: 626M
+  - Rubric: 626M (110M+110M BERT plus 406M BART).
+- **S036** [single-hop; docs=contradiction-note] What does the contradiction-note fixture say about itself?
+  - Target: synthetic test fixture, not a real citation, deliberately false
+  - Rubric: Must note it is synthetic/false and should not be cited.
+- **S037** [single-hop; docs=contradiction-note] Which source paper does the contradiction note refer to?
+  - Target: Attention Is All You Need (Vaswani et al., arXiv:1706.03762)
+  - Rubric: Paper name and arXiv id.
+- **S038** [single-hop; docs=contradiction-note] What 28.4 BLEU claim does the note quote from the Attention paper's abstract?
+  - Target: 28.4 BLEU on WMT14 EN-DE, more than 2 BLEU over best ensembles
+  - Rubric: 28.4 and >2 BLEU.
+- **S039** [single-hop; docs=contradiction-note] What deliberately contradictory BLEU value does the note assert?
+  - Target: 18.4 BLEU, a full 10 BLEU below 28.4
+  - Rubric: 18.4 and the 10-point deficit.
+- **S040** [single-hop; docs=contradiction-note] According to the note, did the Transformer improve on the best ensembles?
+  - Target: the note says it did not
+  - Rubric: No improvement claim.
+- **M001** [multi-hop; docs=1706.03762-attention] Using the reported step time and step count, how long did base and big Transformer training take and on how many GPUs?
+  - Target: base 0.4s x 100k = 12h; big 1.0s x 300k = 3.5 days; 8 NVIDIA P100
+  - Rubric: Both durations and the 8 P100.
+- **M002** [multi-hop; docs=1706.03762-attention] Why does the Transformer scale dot products by 1/sqrt(d_k), and what happens for large d_k without scaling?
+  - Target: large dot products push softmax into small-gradient regions; scaling counteracts
+  - Rubric: Gradient-saturation explanation.
+- **M003** [multi-hop; docs=1706.03762-attention] The encoder has two sub-layers and the decoder three; across six layers each, how many sub-layer applications occur?
+  - Target: 6x2 + 6x3 = 30
+  - Rubric: 30; must combine counts.
+- **M004** [multi-hop; docs=1706.03762-attention] With h=8 heads of d_k=d_v=64 and d_model=512, what is the concatenated head output dimension before the final projection?
+  - Target: 8 x 64 = 512
+  - Rubric: 512; must combine.
+- **M005** [multi-hop; docs=1706.03762-attention] Table 1 lists maximum path lengths: how does the Transformer's path compare with ByteNet's and ConvS2S's?
+  - Target: O(1) vs O(log_k n) for ByteNet and O(n/k) for ConvS2S
+  - Rubric: All three values.
+- **M006** [multi-hop; docs=1706.03762-attention] According to the complexity discussion, when is self-attention faster than recurrent layers?
+  - Target: when sequence length n is smaller than representation dimension d
+  - Rubric: n < d.
+- **M007** [multi-hop; docs=1706.03762-attention] Table 3 row (E) found learned positional embeddings nearly identical to sinusoids; why keep sinusoids?
+  - Target: they may allow extrapolation to longer sequences
+  - Rubric: Extrapolation rationale.
+- **M008** [multi-hop; docs=1706.03762-attention] Which checkpoint-averaging and beam settings were used for base versus big translation models?
+  - Target: base last 5 checkpoints (10-min intervals); big last 20; beam 4, length penalty 0.6
+  - Rubric: Both averaging counts plus beam and alpha.
+- **M009** [multi-hop; docs=1706.03762-attention] For English constituency parsing, how did depth/width and decoding settings differ from the base translation model?
+  - Target: 4 layers, d_model=1024; beam 21, alpha 0.3, max output length +300
+  - Rubric: Depth/width and decoding changes.
+- **M010** [multi-hop; docs=1706.03762-attention] What do Table 3 rows (A)-(D) conclude about heads, d_k, model size and dropout?
+  - Target: single-head 0.9 BLEU worse; too many heads hurt; smaller d_k hurts; bigger models better; dropout helpful
+  - Rubric: At least three of five.
+- **M011** [multi-hop; docs=1406.2661-gan] How do Proposition 1 and Theorem 1 connect the optimal discriminator to the global optimum?
+  - Target: D* = p_data/(p_data+p_g); at p_g=p_data, D*=1/2 and C(G)=-log 4
+  - Rubric: Must link D* to C(G).
+- **M012** [multi-hop; docs=1406.2661-gan] Why not optimize D to completion in the inner loop, and what is the practical alternative?
+  - Target: prohibitive and overfits; alternate k D steps with one G step (k=1)
+  - Rubric: Reason plus k-step scheme.
+- **M013** [multi-hop; docs=1406.2661-gan] How do the generator/discriminator activation choices support backprop-only training?
+  - Target: generator rectifier+sigmoid, discriminator maxout+dropout; no feedback loops allows piecewise linear units
+  - Rubric: Activations plus no Markov chain.
+- **M014** [multi-hop; docs=1406.2661-gan] Compare adversarial nets with Deep GSN on the MNIST and TFD Parzen scores.
+  - Target: MNIST 225 vs 214; TFD 2057 vs 1890
+  - Rubric: Both comparisons.
+- **M015** [multi-hop; docs=1406.2661-gan] Per Table 2, how do adversarial nets compare with MCMC-based models on sampling and p(x) evaluation?
+  - Target: no Markov chain for sampling; p(x) not explicitly represented, Parzen approximation
+  - Rubric: Both dimensions.
+- **M016** [multi-hop; docs=1406.2661-gan] What statistical advantage is claimed for updating G only through gradients flowing from D?
+  - Target: input components not copied into generator parameters; can represent sharp/degenerate distributions
+  - Rubric: Both points.
+- **M017** [multi-hop; docs=1406.2661-gan] List the extensions proposed in the conclusion / future work.
+  - Target: conditional GAN, learned approximate inference, semi-supervised learning, efficiency improvements
+  - Rubric: At least three.
+- **M018** [multi-hop; docs=2005.11401-retro] How does RAG-Sequence decoding approximate argmax and why need Thorough or Fast Decoding?
+  - Target: beam search per document then marginalize; Thorough adds forward passes, Fast approximates for long outputs
+  - Rubric: Both decoding procedures.
+- **M019** [multi-hop; docs=2005.11401-retro] How does RAG's FEVER accuracy compare with state of the art and BART on 3-way and 2-way?
+  - Target: 3-way 72.5 vs 76.8 SotA vs 64.0 BART; 2-way 89.5 vs 92.2 vs 81.1
+  - Rubric: Both tasks.
+- **M020** [multi-hop; docs=2005.11401-retro] Why does BM25 outperform learned retrieval on FEVER but not on other tasks?
+  - Target: FEVER claims are entity-centric so word overlap works; differentiable retrieval is crucial for QA
+  - Rubric: Explanation for both.
+- **M021** [multi-hop; docs=2005.11401-retro] Summarize the index hot-swapping experiment and its conclusion.
+  - Target: 82 world leaders; 70%/68% matched, 12%/4% mismatched; knowledge updated by replacing the index
+  - Rubric: Numbers and conclusion.
+- **M022** [multi-hop; docs=2005.11401-retro] What did the null-document experiments find?
+  - Target: three logit models tried, none improved, mechanism omitted; MS-MARCO learns fixed retrieval for some questions
+  - Rubric: Both findings.
+- **M023** [multi-hop; docs=2005.11401-retro] Compare RAG with T5-11B and T5-large on Natural Questions including parameter counts.
+  - Target: RAG-Seq 44.5 with 626M; T5-11B 34.5 with 11B; T5-large 28.9 with 770M
+  - Rubric: All three.
+- **M024** [multi-hop; docs=2005.11401-retro] How large is the non-parametric index in vectors, dimensions, values and memory?
+  - Target: 21M x 728 = 15.3B values; ~100GB, 36GB after 8-bit compression
+  - Rubric: All figures.
+- **M025** [multi-hop; docs=2005.11401-retro] How does RAG produce correct answers when the answer is absent from retrieved documents?
+  - Target: parametric knowledge; 11.8% accuracy on NQ versus 0% for extractive models
+  - Rubric: Both.
+- **M026** [multi-hop; docs=2005.11401-retro] How does RAG performance change as more documents are retrieved?
+  - Target: RAG-Sequence improves monotonically; RAG-Token peaks at 10; BLEU/Rouge trade-off
+  - Rubric: Both model behaviours.
+- **M027** [multi-hop; docs=2005.11401-retro] What retrieval counts were used at test time for each task and model?
+  - Target: 15 docs for RAG-Token QA; 50 for RAG-Sequence QA; 10 for generation tasks
+  - Rubric: All three.
+- **M028** [multi-hop; docs=2005.11401-retro] How do RAG and BART compare in the Jeopardy human evaluation for factuality and specificity?
+  - Target: RAG better 42.7%/37.4%; BART better 7.1%/16.8%
+  - Rubric: Both dimensions.
+- **M029** [multi-hop; docs=2005.11401-retro] Why did the authors train a BART baseline for Jeopardy and MS-MARCO?
+  - Target: to compare parametric-only generation with parametric plus non-parametric generation
+  - Rubric: Rationale.
+- **M030** [multi-hop; docs=2005.11401-retro] How is RAG related to memory networks and to retrieve-and-edit approaches?
+  - Target: external memory of human-readable/writable raw text; aggregates several documents rather than lightly editing one
+  - Rubric: Both relations.
+- **M031** [multi-hop; docs=1706.03762-attention+2005.11401-retro] RAG cites Vaswani et al. [58]. What architecture does that cited paper introduce and what are its headline translation results?
+  - Target: Transformer; 28.4 BLEU EN-DE and 41.8/41.0 BLEU EN-FR
+  - Rubric: Architecture and at least one BLEU.
+- **M032** [multi-hop; docs=1706.03762-attention+2005.11401-retro] How many GPUs did the Transformer and RAG papers use for training, and which GPU models?
+  - Target: 8 NVIDIA P100 for Transformer; 8 x 32GB NVIDIA V100 for RAG
+  - Rubric: Both.
+- **M033** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Compare the parameter counts of Transformer base (Table 3) and RAG's BART-large generator.
+  - Target: 65M versus 400M/406M
+  - Rubric: Both.
+- **M034** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Both papers use beam search: give the Transformer translation and RAG generation beam settings.
+  - Target: Transformer beam 4, alpha 0.6; RAG beam 4 for generation, greedy for QA
+  - Rubric: Both.
+- **M035** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Which optimization techniques appear in the Transformer paper and which in the RAG paper?
+  - Target: Transformer Adam with warmup schedule; RAG Adam with mixed precision via Fairseq
+  - Rubric: Both.
+- **M036** [multi-hop; docs=1706.03762-attention+2005.11401-retro] What do the two papers say about code availability?
+  - Target: Transformer tensor2tensor; RAG HuggingFace Transformers plus interactive demo
+  - Rubric: Both.
+- **M037** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Compare the experimental corpora: Transformer's WMT14 data versus RAG's Wikipedia index.
+  - Target: 4.5M EN-DE pairs and 36M EN-FR sentences versus 21M Wikipedia documents
+  - Rubric: Both.
+- **M038** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Which paper introduces 'non-parametric memory', and which paper's architecture family supplies RAG's generator?
+  - Target: RAG introduces the term; Transformer is the attention-based seq2seq family behind BART
+  - Rubric: Both.
+- **M039** [multi-hop; docs=1706.03762-attention+2005.11401-retro] How do the two papers handle long sequences: restricted attention versus retrieval?
+  - Target: Transformer restricted attention neighbourhood r (O(n/r)); RAG retrieves top-K documents
+  - Rubric: Both.
+- **M040** [multi-hop; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] What regularization is reported in the Transformer, GAN and RAG papers?
+  - Target: Transformer dropout 0.1 and label smoothing 0.1; GAN dropout in discriminator; RAG mixed precision training
+  - Rubric: At least two.
+- **M041** [multi-hop; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] Which BLEU-related scores appear across the corpus?
+  - Target: Transformer 28.4/41.8/41.0/27.3; RAG Q-BLEU-1 22.2; GAN uses Parzen log-likelihood, not BLEU
+  - Rubric: At least one from two papers.
+- **M042** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Name the sequence-to-sequence baselines compared in RAG and the transduction baselines compared in the Transformer paper.
+  - Target: RAG: BART, T5; Transformer: GNMT, ConvS2S, ByteNet, Deep-Att
+  - Rubric: At least one from each.
+- **M043** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Where does reference [58] of the RAG paper appear and what does it cite?
+  - Target: Vaswani et al., Attention is all you need, NeurIPS 2017
+  - Rubric: Correct reference.
+- **M044** [multi-hop; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] Which papers report using eight GPUs and which GPU models?
+  - Target: Transformer 8 P100; RAG 8 V100; GAN no GPU count given
+  - Rubric: Both plus GAN absence.
+- **M045** [multi-hop; docs=1706.03762-attention+2005.11401-retro] What role does 'attention' play in the Transformer paper versus in RAG's DPR?
+  - Target: core self-attention mechanism in Transformer; DPR uses a BERT bi-encoder with MIPS retrieval
+  - Rubric: Both.
+- **M046** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Which model has the smallest and which the largest parameter count across the Transformer and RAG tables?
+  - Target: smallest about 28M in Transformer Table 3; largest T5-11B at 11B in RAG
+  - Rubric: Both.
+- **M047** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Transformer cites Bahdanau et al. [2] and RAG cites BART [32]; what common task family do these belong to?
+  - Target: neural machine translation / sequence-to-sequence generation
+  - Rubric: Task family.
+- **M048** [multi-hop; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] Which of the documents explicitly mention Wikipedia?
+  - Target: primarily the RAG document; the Transformer and GAN documents do not use Wikipedia as a corpus
+  - Rubric: RAG and absence elsewhere.
+- **M049** [multi-hop; docs=1706.03762-attention] Which length-penalty settings are reported for Transformer translation and for parsing?
+  - Target: alpha = 0.6 for translation; alpha = 0.3 for constituency parsing
+  - Rubric: Both.
+- **M050** [multi-hop; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] Compare the experimental scales of the three papers.
+  - Target: GAN MNIST/TFD/CIFAR-10; Transformer 4.5M/36M sentence pairs; RAG 21M Wikipedia documents
+  - Rubric: All three.
+- **M051** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Which paper reports a 40K-sentence training setting and which reports 21M documents?
+  - Target: Transformer parsing on 40K WSJ sentences; RAG Wikipedia 21M documents
+  - Rubric: Both.
+- **M052** [multi-hop; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] What is the longest explicit training time reported in the corpus?
+  - Target: Transformer big trained for 3.5 days on 8 P100; no explicit times for GAN or RAG
+  - Rubric: Transformer figure plus absence.
+- **M053** [multi-hop; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] Which papers use BLEU and which use Exact Match or human evaluation?
+  - Target: Transformer reports BLEU; GAN uses Parzen log-likelihood; RAG uses EM, Q-BLEU-1, Rouge-L, label accuracy and human eval
+  - Rubric: At least two papers.
+- **M054** [multi-hop; docs=1706.03762-attention+contradiction-note] How do the contradiction note and the Attention paper disagree about the EN-DE BLEU, and which is marked false?
+  - Target: 28.4 in the paper versus 18.4 in the note; the note is marked synthetic/false
+  - Rubric: Both values and false marker.
+- **M055** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Is RAG's BART generator in the same model family as the architecture introduced by the Transformer paper?
+  - Target: yes, BART is a pre-trained seq2seq transformer in the attention family
+  - Rubric: Family link.
+- **M056** [multi-hop; docs=1706.03762-attention+2005.11401-retro] Compare the state-of-the-art claims: Transformer on WMT14 and RAG on open-domain QA.
+  - Target: Transformer SOTA on WMT14 EN-DE and EN-FR; RAG SOTA on NQ, WebQuestions and CuratedTrec
+  - Rubric: Both.
+- **M057** [multi-hop; docs=1406.2661-gan+2005.11401-retro] Which model has a generator and discriminator, and which has a retriever and generator?
+  - Target: GAN: generator and discriminator; RAG: retriever and generator
+  - Rubric: Both.
+- **M058** [multi-hop; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] Which evaluation metrics are shared across the papers?
+  - Target: BLEU in Transformer; human evaluation in GAN (pairwise) and RAG (factuality/specificity)
+  - Rubric: At least one shared or comparable metric.
+- **M059** [multi-hop; docs=1406.2661-gan+2005.11401-retro] Which document introduces 'Retrieval-Augmented Generation' and which discusses 'adversarial nets'?
+  - Target: the RAG document and the GAN document
+  - Rubric: Both.
+- **M060** [multi-hop; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] Across all documents, list every explicit GPU count.
+  - Target: 8 P100 (Transformer), 8 V100 (RAG), none for GAN
+  - Rubric: All plus absence.
+- **C001** [contradiction; docs=1706.03762-attention] Does the corpus report one or more BLEU values for the Transformer on WMT14 English-to-French?
+  - Target: conflict: 41.8 (abstract, Table 2) versus 41.0 (section 6.1)
+  - Rubric: Must cite both sides.
+- **C002** [contradiction; docs=1706.03762-attention] What BLEU values are given for EN-FR in the abstract versus section 6.1?
+  - Target: 41.8 versus 41.0
+  - Rubric: Both values.
+- **C003** [contradiction; docs=1706.03762-attention] Which parts of the Attention paper agree on 41.8 for EN-FR?
+  - Target: the abstract and Table 2
+  - Rubric: Both.
+- **C004** [contradiction; docs=1706.03762-attention] Is 41.0 or 41.8 the value stated in section 6.1 'Machine Translation'?
+  - Target: 41.0
+  - Rubric: 41.0.
+- **C005** [contradiction; docs=1706.03762-attention] What EN-FR BLEU is stated in Table 2 of the Attention paper?
+  - Target: 41.8
+  - Rubric: 41.8.
+- **C006** [contradiction; docs=1706.03762-attention] What EN-FR BLEU is stated in the abstract of the Attention paper?
+  - Target: 41.8
+  - Rubric: 41.8.
+- **C007** [contradiction; docs=1706.03762-attention] What does the paper say about the big model's EN-FR training cost relative to previous state of the art?
+  - Target: less than one quarter of the training cost
+  - Rubric: One quarter.
+- **C008** [contradiction; docs=1706.03762-attention] Give the EN-DE BLEU values for Transformer big and base from Table 2.
+  - Target: 28.4 and 27.3
+  - Rubric: Both.
+- **C009** [aggregation; docs=1706.03762-attention] List all single-model EN-DE BLEU scores in Table 2 of the Attention paper.
+  - Target: ByteNet 23.75, GNMT+RL 24.6, ConvS2S 25.16, MoE 26.03, Transformer base 27.3, Transformer big 28.4
+  - Rubric: At least four.
+- **C010** [aggregation; docs=1706.03762-attention] Which model in Table 2 has the highest EN-FR BLEU?
+  - Target: Transformer (big), 41.8
+  - Rubric: Name and value.
+- **C011** [contradiction; docs=1706.03762-attention+contradiction-note] Does the corpus say the Transformer's EN-DE BLEU is 28.4 or 18.4?
+  - Target: conflict: 28.4 in the paper, 18.4 in the synthetic false note
+  - Rubric: Both sides; flag note as false.
+- **C012** [contradiction; docs=1706.03762-attention+contradiction-note] Which of the two EN-DE BLEU values comes from the synthetic test fixture?
+  - Target: 18.4
+  - Rubric: 18.4 is synthetic/false.
+- **C013** [contradiction; docs=1706.03762-attention+contradiction-note] Quote the abstract sentence containing the 28.4 BLEU claim.
+  - Target: 'Our model achieves 28.4 BLEU ... improving ... by over 2 BLEU'
+  - Rubric: Contains 28.4 and over 2 BLEU.
+- **C014** [contradiction; docs=1706.03762-attention+contradiction-note] Quote the note's contradictory restatement containing 18.4 BLEU.
+  - Target: 'only 18.4 BLEU ... a full 10 BLEU below ... did not improve'
+  - Rubric: 18.4 and the 10-point deficit.
+- **C015** [contradiction; docs=1706.03762-attention+contradiction-note] How large is the gap between the two reported EN-DE BLEU values?
+  - Target: 10 BLEU
+  - Rubric: 10.
+- **C016** [contradiction; docs=1706.03762-attention+contradiction-note] Does the corpus agree on whether the Transformer improved over the best ensembles?
+  - Target: conflict: paper says over 2 BLEU improvement, note says no improvement
+  - Rubric: Both sides.
+- **C017** [contradiction; docs=contradiction-note] Which source paper does the contradiction note cite?
+  - Target: Attention Is All You Need (arXiv:1706.03762)
+  - Rubric: Correct paper.
+- **C018** [contradiction; docs=contradiction-note] What does the note instruct readers about citing it?
+  - Target: 'Do not cite this file.'
+  - Rubric: Quote or paraphrase.
+- **C019** [contradiction; docs=1706.03762-attention+contradiction-note] Which document is authoritative for the EN-DE BLEU, according to the note itself?
+  - Target: the Attention paper; the note is a synthetic false restatement
+  - Rubric: Paper authoritative.
+- **C020** [aggregation; docs=1706.03762-attention+contradiction-note] How many distinct EN-DE BLEU numbers are associated with the Transformer across the corpus?
+  - Target: 27.3 (base), 28.4 (big), and 18.4 (false note)
+  - Rubric: All three with roles.
+- **C021** [contradiction; docs=2005.11401-retro] Does the corpus give conflicting author lists for any reference?
+  - Target: yes, reference R3 [62] appears with two different author lists
+  - Rubric: Both lists or their differing names.
+- **C022** [contradiction; docs=2005.11401-retro] Who are the authors of R3 in its first occurrence in the RAG paper?
+  - Target: Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, Jing Jiang
+  - Rubric: At least several names in order.
+- **C023** [contradiction; docs=2005.11401-retro] Who are the authors of R3 in its second occurrence in the RAG paper?
+  - Target: Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, Murray Campbell
+  - Rubric: At least several names in order.
+- **C024** [contradiction; docs=2005.11401-retro] Which names differ between the two R3 author lists?
+  - Target: Bowen Zhou versus Murray Campbell, Gerry Tesauro versus Gerald Tesauro, and reordered authors
+  - Rubric: At least two differences.
+- **C025** [aggregation; docs=2005.11401-retro] Aggregate the Natural Questions Exact Match scores of all models in RAG Table 1.
+  - Target: T5-11B 34.5, T5-11B+SSM 36.6, REALM 40.4, DPR 41.5, RAG-Token 44.1, RAG-Sequence 44.5
+  - Rubric: At least four.
+- **C026** [aggregation; docs=2005.11401-retro] Which RAG variant wins each QA dataset in Table 1?
+  - Target: NQ RAG-Sequence, TQA RAG-Sequence, WQ RAG-Token, CT RAG-Sequence
+  - Rubric: All four.
+- **C027** [aggregation; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] Aggregate all dropout rates explicitly mentioned across the three papers.
+  - Target: Transformer base 0.1 and big 0.3 for EN-FR; GAN dropout in discriminator; RAG none specified
+  - Rubric: At least Transformer rates plus absence.
+- **C028** [aggregation; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] Aggregate all explicit parameter counts mentioned in the corpus.
+  - Target: Transformer base 65M and big 213M; RAG 626M, BART 400M/406M, T5-11B 11B, T5-large 770M
+  - Rubric: At least three.
+- **C029** [aggregation; docs=1706.03762-attention+1406.2661-gan+2005.11401-retro] Which GPU count appears in more than one document?
+  - Target: eight GPUs in Transformer (P100) and RAG (V100); none for GAN
+  - Rubric: Both plus absence.
+- **C030** [contradiction; docs=1706.03762-attention+contradiction-note] Are the claims of a greater-than-2-BLEU improvement and a 10-BLEU deficit consistent?
+  - Target: no: the paper claims improvement, the synthetic note claims a deficit
+  - Rubric: Both sides and verdict.
+- **U001** [unanswerable; docs=1706.03762-attention] What is the exact inference latency in milliseconds of the Transformer big model on the WMT 2014 test set?
+  - Target: absent: no inference latency is reported
+  - Rubric: Honest insufficiency; must not fabricate a number.
+- **U002** [unanswerable; docs=1706.03762-attention] What weight decay coefficient did the Transformer authors use with Adam?
+  - Target: absent: weight decay not stated
+  - Rubric: Insufficiency; Adam beta/epsilon are present but weight decay is not.
+- **U003** [unanswerable; docs=1406.2661-gan] How many NVIDIA V100 GPUs were used to train the generative adversarial nets model?
+  - Target: absent: V100 GPUs belong to the RAG paper, not GAN
+  - Rubric: Insufficiency; must not transfer the RAG fact.
+- **U004** [unanswerable; docs=2005.11401-retro] Which December 2019 Wikipedia dump was used as the RAG knowledge source?
+  - Target: absent: the corpus says December 2018
+  - Rubric: Insufficiency; must not say 2019.
+- **U005** [unanswerable; docs=1406.2661-gan] What learning-rate schedule was used for the GAN discriminator?
+  - Target: absent: not stated
+  - Rubric: Insufficiency.
+- **U006** [unanswerable; docs=2005.11401-retro] What token-level batch size did RAG use during training?
+  - Target: absent: 25,000-token batches belong to the Transformer paper
+  - Rubric: Insufficiency; must not transfer.
+- **U007** [unanswerable; docs=1406.2661-gan] Which named optimizer (e.g. Adam or SGD) was used to train adversarial nets?
+  - Target: absent: only 'standard gradient-based learning rule' and momentum are mentioned
+  - Rubric: Insufficiency; momentum is not a named optimizer here.
+- **U008** [unanswerable; docs=1706.03762-attention] What numerical precision (e.g. FP16 mixed precision) was used to train the Transformer?
+  - Target: absent: mixed precision appears only in the RAG paper
+  - Rubric: Insufficiency.
+- **U009** [unanswerable; docs=1706.03762-attention] What is the Transformer parsing model's F1 on the development set?
+  - Target: absent: only WSJ section 23 test F1 is reported
+  - Rubric: Insufficiency.
+- **U010** [unanswerable; docs=1406.2661-gan] Which dataset did the adversarial nets paper use for fact verification?
+  - Target: absent: FEVER fact verification belongs to RAG
+  - Rubric: Insufficiency.
+- **U011** [unanswerable; docs=2005.11401-retro] How many Wikipedia articles are in the December 2018 dump?
+  - Target: absent: 21M refers to 100-word documents, not articles
+  - Rubric: Insufficiency.
+- **U012** [unanswerable; docs=1706.03762-attention] What sampling temperature was used for Transformer beam search?
+  - Target: absent: beam size and length penalty are given, not temperature
+  - Rubric: Insufficiency.
+- **U013** [unanswerable; docs=1406.2661-gan] What is the squeeze-excitation ratio of the GAN generator?
+  - Target: absent: no such concept in corpus
+  - Rubric: Insufficiency.
+- **U014** [unanswerable; docs=2005.11401-retro] What dropout rate was used for RAG-Token generation?
+  - Target: absent: no RAG dropout rate is specified
+  - Rubric: Insufficiency.
+- **U015** [unanswerable; docs=contradiction-note] Who is the first author of the contradiction-note fixture?
+  - Target: absent: no author is given
+  - Rubric: Insufficiency.
+- **U016** [unanswerable; docs=1706.03762-attention] What BLEU score did BART-large achieve on WMT14 English-to-German?
+  - Target: absent: BART is only compared within RAG tasks
+  - Rubric: Insufficiency.
+- **U017** [unanswerable; docs=1706.03762-attention] On what exact date was 'Attention Is All You Need' first submitted to arXiv?
+  - Target: absent: arXiv id is given, not a submission date
+  - Rubric: Insufficiency.
+- **U018** [unanswerable; docs=2005.11401-retro] How many attention heads does RAG's BART-large generator use?
+  - Target: absent: not stated in the RAG paper
+  - Rubric: Insufficiency.
+- **U019** [unanswerable; docs=1406.2661-gan] What is the learning rate of the GAN discriminator update?
+  - Target: absent: not stated
+  - Rubric: Insufficiency.
+- **U020** [unanswerable; docs=1706.03762-attention] What is the maximum path length of a restricted self-attention layer in Big Bird?
+  - Target: absent: Big Bird is not in the corpus; only the Transformer's O(n/r) plan is mentioned
+  - Rubric: Insufficiency; must not fabricate.
+
+## Answer key (built from stored claims after freeze)
+
+- **S001** present -> expected `answer-present`; claim_ids=0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3,1ec92c83-5808-d526-945f-c168e65977ac,2680f33e-07ba-52cd-9c7d-240858968e13,276a1ea0-4b43-4413-ece6-070f417cdbfd,2e60401e-f433-1865-2771-e1772f8b943e
+- **S002** present -> expected `answer-present`; claim_ids=276a1ea0-4b43-4413-ece6-070f417cdbfd,4a5f1287-b1ee-f6cd-0c4e-9c3b7d2c94ba,82789749-ad65-6291-3ad0-0979f226aa87,9c758c0f-3b8b-4671-0d56-e893feefd5b8,cc28fdac-16c0-1dd8-d753-c7118b887e38,e02ff743-4fc3-5287-6fcd-2f18a97d70e7
+- **S003** present -> expected `answer-present`; claim_ids=039dd244-a9fb-116f-7c7a-111acb641f0b,0d273dd3-d6af-8abe-fabc-08beb03b6234,11d8a249-d854-5fc0-672b-6e2277e3e2f4,12091aac-3efd-c13a-0925-66c1d6ce931c,159a2d8b-e73a-a5ba-21f9-59ffec4e064c,181d7c84-5b5b-7d3c-e1f7-0029ec89230a
+- **S004** present -> expected `answer-present`; claim_ids=42903554-d1c5-b2e9-d31c-e61d723d392a,9836bfb0-f945-1604-e5e0-c0da5d5b8f1a,ca5287c1-17fe-b192-977d-cc12a4e80a10
+- **S005** present -> expected `answer-present`; claim_ids=0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,11d8a249-d854-5fc0-672b-6e2277e3e2f4,13d3a7c2-1e9c-a144-f882-78699857d7c1,15bb123a-1935-59bb-c17c-8d799fde5ff4,165d3018-4079-fb4b-581b-873e44bdf963,1afe72ec-79bb-8d4a-ce9b-a976a96fb47d
+- **S006** present -> expected `answer-present`; claim_ids=e51f9c97-0b55-49df-3f77-3bd97a777249
+- **S007** present -> expected `answer-present`; claim_ids=052d935e-88a8-24af-7dd8-aadad7d48899,0637c340-355b-c031-bee4-1ae4937276d4,2aa01a08-8be8-1b46-5ff5-fac947e03838,336effd0-b7b5-ca02-5620-e06e5173ebd1,4a164079-b29a-19ee-11d6-5a14b1f72622,4f469983-bdba-3026-a92b-6892c2a2e561
+- **S008** present -> expected `answer-present`; claim_ids=1b39c522-b64f-c7e8-3a8f-b920a948fe51,2ecf6bf8-d2e0-5d8b-0d7c-0de960b3c4e2,76bd0671-14c9-d831-36b9-c607250ee73b,eb0c33ef-f5f3-32c1-2bb4-ed540a54da9a
+- **S009** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08815f71-6cf8-25fc-0351-99a78733e354,0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234
+- **S010** present -> expected `answer-present`; claim_ids=f1ef409c-8c09-908c-5aca-ee3d711c90c8
+- **S011** present -> expected `answer-present`; claim_ids=0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0da48d25-402b-bda6-e283-6957f7613c5a,17f18708-2a67-fa35-f1d4-fb3172da5ca1,283e118c-30af-1736-6d71-fc67aa9935ec,42903554-d1c5-b2e9-d31c-e61d723d392a
+- **S012** present -> expected `answer-present`; claim_ids=276a1ea0-4b43-4413-ece6-070f417cdbfd,4a5f1287-b1ee-f6cd-0c4e-9c3b7d2c94ba,82789749-ad65-6291-3ad0-0979f226aa87,9c758c0f-3b8b-4671-0d56-e893feefd5b8,cc28fdac-16c0-1dd8-d753-c7118b887e38,e02ff743-4fc3-5287-6fcd-2f18a97d70e7
+- **S013** present -> expected `answer-present`; claim_ids=18954884-8cce-9e96-ff61-4a280c3bfb5d,26abb3ab-2a3e-d2d2-ce71-c3e740798400,33d009d1-247a-d0a2-6a45-2ccde37669d8,3c460458-6cdb-f123-20e3-557c30fc9c93,3d76e470-3be2-dc2c-3eb8-bfb81730690d,466c9248-ea69-0072-2475-f3e22b366113
+- **S014** present -> expected `answer-present`; claim_ids=00ef2d16-9fa0-5329-d318-c43b781e2c98,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0b756f60-4a4c-b875-d6fe-f044799460f7,0b78ae05-4ffc-e720-452d-35989724b539,1c8d785c-4567-d3da-8297-4167b67c3c6b,2347e3c2-ef24-5907-b349-0d7280f90ba0
+- **S015** present -> expected `answer-present`; claim_ids=0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,17f18708-2a67-fa35-f1d4-fb3172da5ca1,2125873e-36f5-348e-8c8a-9bfc757fe196,21796d87-bcfb-a9fe-1b78-fd962e94df46
+- **S016** present -> expected `answer-present`; claim_ids=2b821ea9-e6ec-480c-ef98-88c6a2db6f83
+- **S017** present -> expected `answer-present`; claim_ids=0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0efb9038-1366-796c-6b3c-7306ae728099,17f18708-2a67-fa35-f1d4-fb3172da5ca1,1eb576df-d1d3-6e80-03cf-8e248d558663
+- **S018** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08815f71-6cf8-25fc-0351-99a78733e354,0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234
+- **S019** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc
+- **S020** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08815f71-6cf8-25fc-0351-99a78733e354,0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234
+- **S021** present -> expected `answer-present`; claim_ids=2dfb0dc9-81c7-7ce6-66bd-197f5f2d9f92,466f8f58-cd5b-1bc4-a37f-3dbe1525ef4e,fe0d6633-522b-bc06-48ef-e9b457c5d300
+- **S022** present -> expected `answer-present`; claim_ids=1b39c522-b64f-c7e8-3a8f-b920a948fe51,336effd0-b7b5-ca02-5620-e06e5173ebd1,33d009d1-247a-d0a2-6a45-2ccde37669d8,7f1fd271-fc92-0892-8e52-bb12ef446384,914959a2-4694-0062-f625-a0956cdd1dec,bb24a21a-339d-058d-4d9b-7b508d4bcd52
+- **S023** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08815f71-6cf8-25fc-0351-99a78733e354,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539
+- **S024** present -> expected `answer-present`; claim_ids=0feaf644-5ab9-04b7-a346-8c5d3a6aa2c6,1afe72ec-79bb-8d4a-ce9b-a976a96fb47d,2c466f62-6ee0-b751-bf76-b19b00ba0cd7,33cb6ca8-d44f-73e4-721d-ac757a151b96,3c2acea4-3502-b13b-4197-3d317d65a5eb,5012dab9-d862-2f21-359b-51f822eedb25
+- **S025** present -> expected `answer-present`; claim_ids=181d7c84-5b5b-7d3c-e1f7-0029ec89230a,36e36046-8a82-c7be-b312-b2814e4cf04a,3c460458-6cdb-f123-20e3-557c30fc9c93,5012dab9-d862-2f21-359b-51f822eedb25,6438885d-bde2-46a3-94dc-7f18dd5c0f99,648b5e49-24d7-00bd-17b9-251bbd5130a0
+- **S026** present -> expected `answer-present`; claim_ids=052d935e-88a8-24af-7dd8-aadad7d48899,0637c340-355b-c031-bee4-1ae4937276d4,08815f71-6cf8-25fc-0351-99a78733e354,0e77bee5-e712-a904-09d0-3bc1e51faa4f,1766a335-55f2-8a1b-64ef-ab38cafe9b33,17f18708-2a67-fa35-f1d4-fb3172da5ca1
+- **S027** present -> expected `answer-present`; claim_ids=13d3a7c2-1e9c-a144-f882-78699857d7c1,1afe72ec-79bb-8d4a-ce9b-a976a96fb47d,26e44c85-0f30-e290-0ab2-285cd3d090c6,32586550-f2a2-c7ae-b6dd-0ae6a457830c,36f039f8-38d1-8992-626b-ddab6bd67a42,66c09cf4-7c53-9be9-2ccc-75c54ad379bc
+- **S028** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,1eb576df-d1d3-6e80-03cf-8e248d558663,23d4ceb2-da39-dfb6-5a4c-f7377aeeb4c9,28afd466-d632-cf8c-7bbf-72ba88d3b56f
+- **S029** present -> expected `answer-present`; claim_ids=baab1ede-47dd-0a41-33bb-2c8219f2ba94
+- **S030** insufficient-evidence -> expected `honest-insufficient`
+- **S031** insufficient-evidence -> expected `honest-insufficient`
+- **S032** insufficient-evidence -> expected `honest-insufficient`
+- **S033** present -> expected `answer-present`; claim_ids=159a2d8b-e73a-a5ba-21f9-59ffec4e064c,50c8ba82-e2ef-3c97-86db-c88b5afc1fa8,5e96e7e8-ce95-ef81-5868-ad4650eb0265,702be46b-e80f-d3f5-5f6e-f3d01a098697,753cce0a-0365-2329-460e-9cda6dc5f5e6,7963ede1-c8ad-0c4d-84e0-18b3dddf4bd7
+- **S034** present -> expected `answer-present`; claim_ids=1eb576df-d1d3-6e80-03cf-8e248d558663,33d009d1-247a-d0a2-6a45-2ccde37669d8,36e36046-8a82-c7be-b312-b2814e4cf04a,3c460458-6cdb-f123-20e3-557c30fc9c93,3d76e470-3be2-dc2c-3eb8-bfb81730690d,466c9248-ea69-0072-2475-f3e22b366113
+- **S035** insufficient-evidence -> expected `honest-insufficient`
+- **S036** present -> expected `answer-present`; claim_ids=0b78ae05-4ffc-e720-452d-35989724b539,112c2f08-9a74-446e-07d3-2db6b3206aeb,1356352a-e672-80af-eaff-133bad1089e3,466c9248-ea69-0072-2475-f3e22b366113,7d8fcc48-ee19-bcda-afd5-efa63d6b4f63,9ccd5aaf-0391-0703-7375-0940b195b59f
+- **S037** present -> expected `answer-present`; claim_ids=0067b4f6-0f18-7335-d755-bfaee0f8e4c0,0b756f60-4a4c-b875-d6fe-f044799460f7,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,12091aac-3efd-c13a-0925-66c1d6ce931c,1356352a-e672-80af-eaff-133bad1089e3,159a2d8b-e73a-a5ba-21f9-59ffec4e064c
+- **S038** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc
+- **S039** present -> expected `answer-present`; claim_ids=0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0efb9038-1366-796c-6b3c-7306ae728099,17f18708-2a67-fa35-f1d4-fb3172da5ca1,1eb576df-d1d3-6e80-03cf-8e248d558663
+- **S040** present -> expected `answer-present`; claim_ids=0de14778-458b-b4ca-04bb-01a9297e4051,21e29c75-c880-57e4-88d0-07a58d79c560,28179e0d-b99c-98ee-1de8-3ce2f84936c9,2dfb0dc9-81c7-7ce6-66bd-197f5f2d9f92,33d009d1-247a-d0a2-6a45-2ccde37669d8,466f8f58-cd5b-1bc4-a37f-3dbe1525ef4e
+- **M001** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851,11d8a249-d854-5fc0-672b-6e2277e3e2f4
+- **M002** present -> expected `answer-present`; claim_ids=1b39c522-b64f-c7e8-3a8f-b920a948fe51,2ecf6bf8-d2e0-5d8b-0d7c-0de960b3c4e2,76bd0671-14c9-d831-36b9-c607250ee73b,eb0c33ef-f5f3-32c1-2bb4-ed540a54da9a
+- **M003** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234
+- **M004** present -> expected `answer-present`; claim_ids=0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,11d8a249-d854-5fc0-672b-6e2277e3e2f4,13d3a7c2-1e9c-a144-f882-78699857d7c1,15bb123a-1935-59bb-c17c-8d799fde5ff4,165d3018-4079-fb4b-581b-873e44bdf963,1afe72ec-79bb-8d4a-ce9b-a976a96fb47d
+- **M005** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08815f71-6cf8-25fc-0351-99a78733e354,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539
+- **M006** present -> expected `answer-present`; claim_ids=0862eaca-87f4-224b-0f2d-2292a4908f86,08815f71-6cf8-25fc-0351-99a78733e354,0e77bee5-e712-a904-09d0-3bc1e51faa4f,1766a335-55f2-8a1b-64ef-ab38cafe9b33,17f18708-2a67-fa35-f1d4-fb3172da5ca1,1afe72ec-79bb-8d4a-ce9b-a976a96fb47d
+- **M007** present -> expected `answer-present`; claim_ids=0e77bee5-e712-a904-09d0-3bc1e51faa4f,1afe72ec-79bb-8d4a-ce9b-a976a96fb47d,2641d9f3-f8f2-813f-85a4-e3167c80fc8b,336effd0-b7b5-ca02-5620-e06e5173ebd1,54bbcfb9-8746-1f73-736d-bdf5034705af,6e874a61-2bed-d2ec-d5b2-b8db38ffcddc
+- **M008** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc
+- **M009** present -> expected `answer-present`; claim_ids=0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851,17f18708-2a67-fa35-f1d4-fb3172da5ca1,18954884-8cce-9e96-ff61-4a280c3bfb5d
+- **M010** present -> expected `answer-present`; claim_ids=0862eaca-87f4-224b-0f2d-2292a4908f86,08f57a3c-77f1-a692-63da-a913655a5600,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e77bee5-e712-a904-09d0-3bc1e51faa4f,27b0516b-331b-67c7-1fb2-e73425725b63,27fc3ad9-61e5-efb5-bc7e-18682e3c7e29
+- **M011** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,00ef2d16-9fa0-5329-d318-c43b781e2c98,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08815f71-6cf8-25fc-0351-99a78733e354,08f57a3c-77f1-a692-63da-a913655a5600
+- **M012** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08815f71-6cf8-25fc-0351-99a78733e354,0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234
+- **M013** present -> expected `answer-present`; claim_ids=26abb3ab-2a3e-d2d2-ce71-c3e740798400,33d009d1-247a-d0a2-6a45-2ccde37669d8,3c460458-6cdb-f123-20e3-557c30fc9c93,3d76e470-3be2-dc2c-3eb8-bfb81730690d,466c9248-ea69-0072-2475-f3e22b366113,4a164079-b29a-19ee-11d6-5a14b1f72622
+- **M014** present -> expected `answer-present`; claim_ids=23d4ceb2-da39-dfb6-5a4c-f7377aeeb4c9,bdbe1e17-ae4e-607b-14a1-022d5edc2b8b,f790c743-c3e2-d048-3bae-ae021fb6e436
+- **M015** present -> expected `answer-present`; claim_ids=2dfb0dc9-81c7-7ce6-66bd-197f5f2d9f92,3b693705-6582-8ab7-c8b6-d892281a47da,466c9248-ea69-0072-2475-f3e22b366113,466f8f58-cd5b-1bc4-a37f-3dbe1525ef4e,4a164079-b29a-19ee-11d6-5a14b1f72622,5cbabb06-d2ae-8c9f-95bf-71d7f4af869c
+- **M016** present -> expected `answer-present`; claim_ids=08815f71-6cf8-25fc-0351-99a78733e354,15bb123a-1935-59bb-c17c-8d799fde5ff4,1afe72ec-79bb-8d4a-ce9b-a976a96fb47d,26abb3ab-2a3e-d2d2-ce71-c3e740798400,281b1ed3-9bf5-77b6-47b2-2816649b897a,2b821ea9-e6ec-480c-ef98-88c6a2db6f83
+- **M017** present -> expected `answer-present`; claim_ids=0564f5b0-95a9-8b11-2b93-a4d97ed801f9,466f8f58-cd5b-1bc4-a37f-3dbe1525ef4e,4b5c0225-5272-e3a5-fc8b-b1d893da7073,6696e13d-d794-76d2-67c8-cdb2cb18b74e,6dac4b1b-4027-6059-d66a-85aaa05ec885,71339787-389b-1fa9-28e6-4c8d8640b0d8
+- **M018** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,1eb576df-d1d3-6e80-03cf-8e248d558663,26abb3ab-2a3e-d2d2-ce71-c3e740798400,2ab81fc2-29d2-a614-75f5-30ee844dc173,2b348eeb-f623-fdb3-cd12-b529a05a34e2,336effd0-b7b5-ca02-5620-e06e5173ebd1
+- **M019** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234
+- **M020** present -> expected `answer-present`; claim_ids=0de14778-458b-b4ca-04bb-01a9297e4051,11d8a249-d854-5fc0-672b-6e2277e3e2f4,181d7c84-5b5b-7d3c-e1f7-0029ec89230a,3c460458-6cdb-f123-20e3-557c30fc9c93,3d76e470-3be2-dc2c-3eb8-bfb81730690d,4a164079-b29a-19ee-11d6-5a14b1f72622
+- **M021** present -> expected `answer-present`; claim_ids=039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051,0feaf644-5ab9-04b7-a346-8c5d3a6aa2c6
+- **M022** present -> expected `answer-present`; claim_ids=0de14778-458b-b4ca-04bb-01a9297e4051,11d8a249-d854-5fc0-672b-6e2277e3e2f4,181d7c84-5b5b-7d3c-e1f7-0029ec89230a,249f3e70-81e6-c8b6-e124-b9e73e7ff7a5,2c466f62-6ee0-b751-bf76-b19b00ba0cd7,33cb6ca8-d44f-73e4-721d-ac757a151b96
+- **M023** present -> expected `answer-present`; claim_ids=0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0b756f60-4a4c-b875-d6fe-f044799460f7,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051,112c2f08-9a74-446e-07d3-2db6b3206aeb,112c9a25-f65f-36ba-9121-08bfbf2c0c60
+- **M024** present -> expected `answer-present`; claim_ids=0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,11d8a249-d854-5fc0-672b-6e2277e3e2f4,13d3a7c2-1e9c-a144-f882-78699857d7c1,15bb123a-1935-59bb-c17c-8d799fde5ff4
+- **M025** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0862eaca-87f4-224b-0f2d-2292a4908f86,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539
+- **M026** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0efb9038-1366-796c-6b3c-7306ae728099,17f18708-2a67-fa35-f1d4-fb3172da5ca1
+- **M027** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851,0efb9038-1366-796c-6b3c-7306ae728099
+- **M028** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,08f57a3c-77f1-a692-63da-a913655a5600,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051,112c2f08-9a74-446e-07d3-2db6b3206aeb,18b36a0e-bdb4-535a-acbf-f624c618a760
+- **M029** present -> expected `answer-present`; claim_ids=08f57a3c-77f1-a692-63da-a913655a5600,0de14778-458b-b4ca-04bb-01a9297e4051,112c2f08-9a74-446e-07d3-2db6b3206aeb,2dfb0dc9-81c7-7ce6-66bd-197f5f2d9f92,3432b4a6-f52d-d671-08ed-46700f8c282e,466f8f58-cd5b-1bc4-a37f-3dbe1525ef4e
+- **M030** present -> expected `answer-present`; claim_ids=1eb576df-d1d3-6e80-03cf-8e248d558663,31009bcb-9db8-74d3-13d6-78d6fcde82c9,36e36046-8a82-c7be-b312-b2814e4cf04a,3d76e470-3be2-dc2c-3eb8-bfb81730690d,54bbcfb9-8746-1f73-736d-bdf5034705af,77bf97e8-1e85-1e8a-c09b-da32228caa7f
+- **M031** present -> expected `answer-present`; claim_ids=0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3,1ec92c83-5808-d526-945f-c168e65977ac,276a1ea0-4b43-4413-ece6-070f417cdbfd,2e60401e-f433-1865-2771-e1772f8b943e,3205f7e9-7d18-efed-d02a-c096c726566c
+- **M032** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051,0e502384-b4d9-132a-2262-8dc126341851
+- **M033** present -> expected `answer-present`; claim_ids=34fbca03-c6f2-8484-96b3-eabb4e126a85,4b9c5e17-6947-3324-b858-a4d317f17236,653ee4e6-c3e9-4fb3-6c2d-093ea71b2454,65702bd3-c2cb-3029-2656-980a7b9f2695,69ab81c8-acb4-5321-4033-fa0158a53b27,9500ddeb-6ba9-4144-3deb-264854962fd1
+- **M034** present -> expected `answer-present`; claim_ids=0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3,17f18708-2a67-fa35-f1d4-fb3172da5ca1
+- **M035** present -> expected `answer-present`; claim_ids=0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3,1ec92c83-5808-d526-945f-c168e65977ac,276a1ea0-4b43-4413-ece6-070f417cdbfd,2e60401e-f433-1865-2771-e1772f8b943e
+- **M036** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc
+- **M037** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0d273dd3-d6af-8abe-fabc-08beb03b6234,0feaf644-5ab9-04b7-a346-8c5d3a6aa2c6,1afe72ec-79bb-8d4a-ce9b-a976a96fb47d,1eb576df-d1d3-6e80-03cf-8e248d558663
+- **M038** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc
+- **M039** present -> expected `answer-present`; claim_ids=0e502384-b4d9-132a-2262-8dc126341851,12091aac-3efd-c13a-0925-66c1d6ce931c,1356352a-e672-80af-eaff-133bad1089e3,159a2d8b-e73a-a5ba-21f9-59ffec4e064c,1e346261-a078-e318-8021-1ddbe7d032ca,1eb576df-d1d3-6e80-03cf-8e248d558663
+- **M040** present -> expected `answer-present`; claim_ids=0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3,1ec92c83-5808-d526-945f-c168e65977ac
+- **M041** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,052d935e-88a8-24af-7dd8-aadad7d48899,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08815f71-6cf8-25fc-0351-99a78733e354,0b78ae05-4ffc-e720-452d-35989724b539
+- **M042** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc
+- **M043** present -> expected `answer-present`; claim_ids=0067b4f6-0f18-7335-d755-bfaee0f8e4c0,039dd244-a9fb-116f-7c7a-111acb641f0b,0b756f60-4a4c-b875-d6fe-f044799460f7,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,12091aac-3efd-c13a-0925-66c1d6ce931c,1356352a-e672-80af-eaff-133bad1089e3
+- **M044** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051
+- **M045** present -> expected `answer-present`; claim_ids=0de14778-458b-b4ca-04bb-01a9297e4051,0e502384-b4d9-132a-2262-8dc126341851,11d8a249-d854-5fc0-672b-6e2277e3e2f4,1356352a-e672-80af-eaff-133bad1089e3,181d7c84-5b5b-7d3c-e1f7-0029ec89230a,1ec92c83-5808-d526-945f-c168e65977ac
+- **M046** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0637c340-355b-c031-bee4-1ae4937276d4,08f57a3c-77f1-a692-63da-a913655a5600,0d273dd3-d6af-8abe-fabc-08beb03b6234
+- **M047** present -> expected `answer-present`; claim_ids=039dd244-a9fb-116f-7c7a-111acb641f0b,0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3,159a2d8b-e73a-a5ba-21f9-59ffec4e064c,15bb123a-1935-59bb-c17c-8d799fde5ff4,17f18708-2a67-fa35-f1d4-fb3172da5ca1
+- **M048** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,08f57a3c-77f1-a692-63da-a913655a5600,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051,0e502384-b4d9-132a-2262-8dc126341851,0feaf644-5ab9-04b7-a346-8c5d3a6aa2c6
+- **M049** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3,234ab91a-fec5-8336-951a-c1ac2488c0da,276a1ea0-4b43-4413-ece6-070f417cdbfd
+- **M050** present -> expected `answer-present`; claim_ids=0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851
+- **M051** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851,0feaf644-5ab9-04b7-a346-8c5d3a6aa2c6,1356352a-e672-80af-eaff-133bad1089e3,1afe72ec-79bb-8d4a-ce9b-a976a96fb47d
+- **M052** present -> expected `answer-present`; claim_ids=0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e103228-b1b0-78ed-ae16-179ce01e5baa,0e502384-b4d9-132a-2262-8dc126341851,11d8a249-d854-5fc0-672b-6e2277e3e2f4
+- **M053** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08815f71-6cf8-25fc-0351-99a78733e354,0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234
+- **M054** present -> expected `answer-present`; claim_ids=112c2f08-9a74-446e-07d3-2db6b3206aeb,9baa115a-dd8c-dd0f-4285-e2e9ddc36589,b9ed4dc1-d033-accc-f8d6-fc9dff53f029,e2c686bf-6eac-f7ea-7568-58f9eee2875b
+- **M055** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc
+- **M056** present -> expected `answer-present`; claim_ids=0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0b78ae05-4ffc-e720-452d-35989724b539,0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3,17f18708-2a67-fa35-f1d4-fb3172da5ca1,1ec92c83-5808-d526-945f-c168e65977ac
+- **M057** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,08f57a3c-77f1-a692-63da-a913655a5600,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051,112c2f08-9a74-446e-07d3-2db6b3206aeb,18b36a0e-bdb4-535a-acbf-f624c618a760
+- **M058** present -> expected `answer-present`; claim_ids=0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3,1ec92c83-5808-d526-945f-c168e65977ac,276a1ea0-4b43-4413-ece6-070f417cdbfd,2e60401e-f433-1865-2771-e1772f8b943e,31009bcb-9db8-74d3-13d6-78d6fcde82c9
+- **M059** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,08f57a3c-77f1-a692-63da-a913655a5600,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051,112c2f08-9a74-446e-07d3-2db6b3206aeb,18b36a0e-bdb4-535a-acbf-f624c618a760
+- **M060** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051,0e502384-b4d9-132a-2262-8dc126341851
+- **C001** conflict -> expected `cite-both-sides`; sides=yes(41.8) / yes(41.0)
+- **C002** conflict -> expected `cite-both-sides`; sides=yes(41.8) / yes(41.0)
+- **C003** conflict -> expected `cite-both-sides`; sides=yes(abstract) / yes(41.8)
+- **C004** conflict -> expected `cite-both-sides`; sides=yes(41.0) / yes(41.8)
+- **C005** present -> expected `answer-present`; claim_ids=82789749-ad65-6291-3ad0-0979f226aa87,efda35d0-e6cc-b28c-2b2d-318186487fdf
+- **C006** present -> expected `answer-present`; claim_ids=82789749-ad65-6291-3ad0-0979f226aa87,efda35d0-e6cc-b28c-2b2d-318186487fdf
+- **C007** present -> expected `answer-present`; claim_ids=08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d273dd3-d6af-8abe-fabc-08beb03b6234,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851,112c9a25-f65f-36ba-9121-08bfbf2c0c60
+- **C008** present -> expected `answer-present`; claim_ids=e2c686bf-6eac-f7ea-7568-58f9eee2875b
+- **C009** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,039dd244-a9fb-116f-7c7a-111acb641f0b,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc
+- **C010** present -> expected `answer-present`; claim_ids=0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3,1ec92c83-5808-d526-945f-c168e65977ac,276a1ea0-4b43-4413-ece6-070f417cdbfd,2e60401e-f433-1865-2771-e1772f8b943e,3205f7e9-7d18-efed-d02a-c096c726566c
+- **C011** one-sided -> expected `cite-present-side-honest-note`; sides=yes(28.4) / no(18.4)
+- **C012** insufficient-evidence -> expected `honest-insufficient`; sides=no(18.4) / no(synthetic)
+- **C013** conflict -> expected `cite-both-sides`; sides=yes(28.4) / yes(over 2 bleu,2 bleu)
+- **C014** insufficient-evidence -> expected `honest-insufficient`; sides=no(18.4) / no(10 bleu)
+- **C015** present -> expected `answer-present`; claim_ids=0b78ae05-4ffc-e720-452d-35989724b539,0d42b6f8-299d-7b89-3bdf-72923a1b3ccc,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0efb9038-1366-796c-6b3c-7306ae728099,17f18708-2a67-fa35-f1d4-fb3172da5ca1,1eb576df-d1d3-6e80-03cf-8e248d558663
+- **C016** conflict -> expected `cite-both-sides`; sides=yes(over 2 bleu,2 bleu) / yes(did not improve,no improvement)
+- **C017** present -> expected `answer-present`; claim_ids=0067b4f6-0f18-7335-d755-bfaee0f8e4c0,0b756f60-4a4c-b875-d6fe-f044799460f7,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,12091aac-3efd-c13a-0925-66c1d6ce931c,1356352a-e672-80af-eaff-133bad1089e3,159a2d8b-e73a-a5ba-21f9-59ffec4e064c
+- **C018** present -> expected `answer-present`; claim_ids=0de14778-458b-b4ca-04bb-01a9297e4051,21e29c75-c880-57e4-88d0-07a58d79c560,28179e0d-b99c-98ee-1de8-3ce2f84936c9,2dfb0dc9-81c7-7ce6-66bd-197f5f2d9f92,33d009d1-247a-d0a2-6a45-2ccde37669d8,466f8f58-cd5b-1bc4-a37f-3dbe1525ef4e
+- **C019** one-sided -> expected `cite-present-side-honest-note`; sides=no(synthetic) / yes(attention is all you need)
+- **C020** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,08f57a3c-77f1-a692-63da-a913655a5600,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851,112c2f08-9a74-446e-07d3-2db6b3206aeb,181d7c84-5b5b-7d3c-e1f7-0029ec89230a
+- **C021** conflict -> expected `cite-both-sides`; sides=yes(shuohang wang) / yes(murray campbell,bowen zhou)
+- **C022** conflict -> expected `cite-both-sides`; sides=yes(shuohang wang) / yes(jing jiang)
+- **C023** conflict -> expected `cite-both-sides`; sides=yes(shuohang wang) / yes(murray campbell)
+- **C024** conflict -> expected `cite-both-sides`; sides=yes(gerry tesauro,gerald tesauro) / yes(murray campbell)
+- **C025** present -> expected `answer-present`; claim_ids=0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0637c340-355b-c031-bee4-1ae4937276d4,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051,112c2f08-9a74-446e-07d3-2db6b3206aeb,112c9a25-f65f-36ba-9121-08bfbf2c0c60
+- **C026** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,2ab81fc2-29d2-a614-75f5-30ee844dc173,54bbcfb9-8746-1f73-736d-bdf5034705af,66fb46e6-a172-d73a-79a8-6b482797e091,7ad7eab9-8b64-2c11-a840-dd94113f8676,7f1fd271-fc92-0892-8e52-bb12ef446384
+- **C027** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,08f57a3c-77f1-a692-63da-a913655a5600,0d273dd3-d6af-8abe-fabc-08beb03b6234,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0e502384-b4d9-132a-2262-8dc126341851,1356352a-e672-80af-eaff-133bad1089e3
+- **C028** present -> expected `answer-present`; claim_ids=002d59c9-45cc-27f0-527d-f123fd807ed1,0564f5b0-95a9-8b11-2b93-a4d97ed801f9,0637c340-355b-c031-bee4-1ae4937276d4,08f57a3c-77f1-a692-63da-a913655a5600,0b756f60-4a4c-b875-d6fe-f044799460f7,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f
+- **C029** present -> expected `answer-present`; claim_ids=0637c340-355b-c031-bee4-1ae4937276d4,08f57a3c-77f1-a692-63da-a913655a5600,0b78ae05-4ffc-e720-452d-35989724b539,0d81cf53-d064-e78d-e7b0-6b3ef7a0878f,0de14778-458b-b4ca-04bb-01a9297e4051,0e502384-b4d9-132a-2262-8dc126341851
+- **C030** conflict -> expected `cite-both-sides`; sides=yes(over 2 bleu,2 bleu) / yes(10 bleu,below)
+- **U001** absent -> expected `honest-insufficient`
+- **U002** absent -> expected `honest-insufficient`
+- **U003** absent -> expected `honest-insufficient`
+- **U004** absent -> expected `honest-insufficient`
+- **U005** absent -> expected `honest-insufficient`
+- **U006** absent -> expected `honest-insufficient`
+- **U007** absent -> expected `honest-insufficient`
+- **U008** absent -> expected `honest-insufficient`
+- **U009** absent -> expected `honest-insufficient`
+- **U010** absent -> expected `honest-insufficient`
+- **U011** absent -> expected `honest-insufficient`
+- **U012** absent -> expected `honest-insufficient`
+- **U013** absent -> expected `honest-insufficient`
+- **U014** absent -> expected `honest-insufficient`
+- **U015** absent -> expected `honest-insufficient`
+- **U016** absent -> expected `honest-insufficient`
+- **U017** absent -> expected `honest-insufficient`
+- **U018** absent -> expected `honest-insufficient`
+- **U019** absent -> expected `honest-insufficient`
+- **U020** absent -> expected `honest-insufficient`
+
+## Anomalies (see DEVIATIONS.md)
+
+- 18.4 BLEU / 'synthetic' statements of the contradiction note were not distilled into claims; related conflict questions are one-sided or insufficient-with-evidence.
+- RAG numbers 44.1 / 72.5 / 42.7 / 626 are absent from stored claims; marked insufficient-with-evidence.
