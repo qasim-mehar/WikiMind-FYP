@@ -6,7 +6,7 @@
     "tests/fixtures/papers/2005.11401-retro.pdf",
     "tests/fixtures/papers/contradiction-note.txt"
   ],
-  "note": "Questions derived from the locked parse-fixture corpus. expected_answer_elements are substrings expected in a correct answer; expected_source_documents are fixture filenames. seed_claims are claim texts (verbatim or lightly cleaned from the fixture text) used to seed template DBs in the acceptance tests. The contradiction case deliberately carries a false claim and a true claim from different documents.",
+  "note": "Questions derived from the locked parse-fixture corpus. expected_answer_elements are substrings expected in a correct answer; expected_source_documents are fixture filenames. seed_claims are claim texts (verbatim or lightly cleaned from the fixture text) used to seed template DBs in the acceptance tests. The contradiction case carries the four claim rows behind the two recorded contradicts edges: competing author lists from 2005.11401-retro.pdf and competing WMT 2014 English-to-French BLEU scores from 1706.03762-attention.pdf (W2a/Ruling 26).",
   "questions": [
     {
       "id": "attn-arch",
