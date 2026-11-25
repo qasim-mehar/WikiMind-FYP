@@ -147,3 +147,28 @@ def empty_db_dsn(base_dsn: str) -> Iterator[str]:
 def db_conn(test_dsn: str) -> Iterator[psycopg.Connection]:
     with psycopg.connect(test_dsn) as conn:
         yield conn
+
+
+# TEMPORARY lane-16 diagnostic: surface failing test details as GitHub Actions
+# annotations (plain pytest logs are not readable anonymously). Removed after
+# the CI failure is identified.
+_LANE16_FAILURES: list[tuple[str, str]] = []
+
+
+def pytest_runtest_logreport(report) -> None:
+    if report.failed:
+        _LANE16_FAILURES.append((report.nodeid, str(report.longrepr)[-900:]))
+
+
+def pytest_sessionfinish(session, exitstatus) -> None:
+    if not _LANE16_FAILURES:
+        return
+    capture = session.config.pluginmanager.getplugin("capturemanager")
+    if capture is not None:
+        capture.suspend_global_capture(in_=True)
+    try:
+        for nodeid, detail in _LANE16_FAILURES:
+            print(f"::error::LANE16_DIAG {nodeid} :: {detail}", flush=True)
+    finally:
+        if capture is not None:
+            capture.resume_global_capture()
