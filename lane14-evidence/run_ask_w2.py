@@ -21,7 +21,6 @@ import json
 import os
 import re
 import subprocess
-import sys
 import time
 from pathlib import Path
 
@@ -33,7 +32,7 @@ COSTS = EV / "costs.jsonl"
 EXE = ROOT / ".venv" / "Scripts" / "wikimind.exe"
 
 IS_429 = re.compile(
-    r'\b429\s+(?:RESOURCE_EXHAUSTED|Too Many Requests)\b'
+    r"\b429\s+(?:RESOURCE_EXHAUSTED|Too Many Requests)\b"
     r'|"code"\s*:\s*429\b|\bHTTP\s+429\b|\b429\s+rate\s+limit',
     re.IGNORECASE,
 )
@@ -114,8 +113,13 @@ def main() -> None:
             t0 = time.perf_counter()
             proc = subprocess.run(
                 [str(EXE), "ask", QTEXT[qid], "--dsn", dsn, "--costs-path", str(COSTS)],
-                env=env, check=False, capture_output=True, text=True,
-                encoding="utf-8", errors="replace", cwd=ROOT,
+                env=env,
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                cwd=ROOT,
             )
             elapsed = round(time.perf_counter() - t0, 3)
             combined = proc.stdout + "\n" + proc.stderr
@@ -145,7 +149,8 @@ def main() -> None:
                 write_manifest(rows)
                 (EV / "run_manifest_w2.json").write_text(
                     json.dumps(list(rows.values()), indent=2, ensure_ascii=False),
-                    encoding="utf-8", newline="\n",
+                    encoding="utf-8",
+                    newline="\n",
                 )
                 print(json.dumps({"halt": "HTTP 429 — Ruling 7; window 2 halt"}), flush=True)
                 return
@@ -173,7 +178,8 @@ def main() -> None:
         write_manifest(rows)
         (EV / "run_manifest_w2.json").write_text(
             json.dumps(list(rows.values()), indent=2, ensure_ascii=False),
-            encoding="utf-8", newline="\n",
+            encoding="utf-8",
+            newline="\n",
         )
     log.close()
 

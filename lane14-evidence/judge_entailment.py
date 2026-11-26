@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import json
 import random
-import re
 from pathlib import Path
 
 from wikimind.config import load_dotenv
@@ -69,8 +68,8 @@ def main() -> None:
             passage = c["anchor_quote"] or ""
             user = (
                 f"Question: {row['id']}\n"
-                f"Claim: <untrusted source=\"claim\">{esc(c['claim'] or '')}</untrusted>\n"
-                f"Passage: <untrusted source=\"passage\">{esc(passage)}</untrusted>\n"
+                f'Claim: <untrusted source="claim">{esc(c["claim"] or "")}</untrusted>\n'
+                f'Passage: <untrusted source="passage">{esc(passage)}</untrusted>\n'
                 "Does the passage support the claim? Answer with JSON."
             )
             try:
@@ -124,7 +123,15 @@ def main() -> None:
     (EV / "m3b_judgments.json").write_text(
         json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8", newline="\n"
     )
-    print(json.dumps({k: payload[k] for k in ("computable", "halt", "judgments", "entailment_rate", "shadow_cost_usd")}, indent=2))
+    print(
+        json.dumps(
+            {
+                k: payload[k]
+                for k in ("computable", "halt", "judgments", "entailment_rate", "shadow_cost_usd")
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

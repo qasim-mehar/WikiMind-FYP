@@ -1,0 +1,15 @@
+question: Which dataset did the adversarial nets paper use for fact verification?
+answer:   The adversarial nets paper was trained on the MNIST, Toronto Face Database (TFD), and CIFAR-10 datasets [c-23d4ceb2da39]. The provided claims do not mention a dataset used for fact verification in the context of the adversarial nets paper.
+sufficient: false
+citations:
+  [c-23d4ceb2da39] 1406-2661-gan — The authors trained adversarial nets on the MNIST, Toronto Face Database (TFD), and CIFAR-10 datasets.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002542000000 (3 ledger events)
+wall:     39.777s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  27%|██▋       | 54/199 [00:00<00:00, 534.73it/s]
+Loading weights:  54%|█████▍    | 108/199 [00:00<00:00, 409.06it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 735.56it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

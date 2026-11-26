@@ -17,6 +17,7 @@ import re
 from pathlib import Path
 
 from live import connect_live
+
 from wikimind.qa.pipeline import document_slug
 
 EV = Path(__file__).resolve().parent
@@ -32,15 +33,17 @@ key = {
     for e in json.loads((EV / "answer_key.json").read_text(encoding="utf-8"))["answer_key"]
 }
 run_manifest = {
-    r["id"]: r
-    for r in json.loads((EV / "run_manifest.json").read_text(encoding="utf-8"))
+    r["id"]: r for r in json.loads((EV / "run_manifest.json").read_text(encoding="utf-8"))
 }
 
 rows = []
 with connect_live() as conn:
-    assert conn.execute("SHOW default_transaction_read_only").fetchone()[
-        "default_transaction_read_only"
-    ] == "on"
+    assert (
+        conn.execute("SHOW default_transaction_read_only").fetchone()[
+            "default_transaction_read_only"
+        ]
+        == "on"
+    )
     claim_rows = conn.execute(
         """
         SELECT c.id AS claim_id, c.text, c.anchor_quote, ch.raw_text, d.source_uri,
@@ -77,9 +80,8 @@ with connect_live() as conn:
         prose_refs = REF.findall(prose)
         retrieval_match = re.search(r"^retrieval:\s+(.*)$", text, re.MULTILINE)
 
-        provider_failure = (
-            run_manifest.get(qid, {}).get("exit") != 0 or answer_match is None
-        )
+        problems: list[str] = []
+        provider_failure = run_manifest.get(qid, {}).get("exit") != 0 or answer_match is None
         if provider_failure:
             problems.append("provider failure: no successful answer (503 after 6 attempts)")
 

@@ -62,9 +62,12 @@ def counts(conn) -> dict[str, int]:
 
 def proof() -> dict:
     with connect_live() as conn:
-        assert conn.execute("SHOW default_transaction_read_only").fetchone()[
-            "default_transaction_read_only"
-        ] == "on"
+        assert (
+            conn.execute("SHOW default_transaction_read_only").fetchone()[
+                "default_transaction_read_only"
+            ]
+            == "on"
+        )
         out = counts(conn)
         out["max_nodes_created_at"] = str(
             conn.execute("SELECT max(created_at) AS t FROM nodes").fetchone()["t"]

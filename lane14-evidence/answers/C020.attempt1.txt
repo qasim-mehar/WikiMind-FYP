@@ -1,0 +1,15 @@
+question: How many distinct EN-DE BLEU numbers are associated with the Transformer across the corpus?
+answer:   The provided claims mention one specific BLEU score for the Transformer (big) model on the WMT 2014 English-to-German translation task, which is 28.4 [c-e2c686bf6eac]. Another claim notes that the Transformer model improved over existing best results on this task by over 2 BLEU, but it does not provide a specific numerical value [c-cc28fdac16c0].
+sufficient: true
+citations:
+  [c-e2c686bf6eac] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task.
+  [c-cc28fdac16c0] contradiction-note — The Transformer model improved over existing best results on the WMT 2014 English-to-German translation task by over 2 BLEU.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002791000000 (3 ledger events)
+wall:     43.710s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  51%|█████▏    | 102/199 [00:00<00:00, 1010.80it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1840.89it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

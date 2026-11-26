@@ -1,0 +1,14 @@
+question: What weight decay coefficient did the Transformer authors use with Adam?
+answer:   The provided claims do not contain information regarding the weight decay coefficient used by the Transformer authors with the Adam optimizer.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002550500000 (3 ledger events)
+wall:     29.035s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  56%|█████▌    | 111/199 [00:00<00:00, 1108.25it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1396.52it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

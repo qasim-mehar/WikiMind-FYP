@@ -1,0 +1,13 @@
+question: What is the maximum path length of a restricted self-attention layer in Big Bird?
+answer:   The provided claims do not contain information regarding the maximum path length of a restricted self-attention layer in Big Bird. While one claim mentions that restricting self-attention to a neighborhood of size r increases the maximum path length to O(n/r), this is discussed in the context of the Transformer architecture [c-c6aa4e5c4118].
+sufficient: false
+citations:
+  [c-c6aa4e5c4118] 1706-03762-attention — Restricting self-attention to a neighborhood of size r in the input sequence increases the maximum path length to O(n/r).
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002551500000 (3 ledger events)
+wall:     30.042s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  65%|██████▍   | 129/199 [00:00<00:00, 1288.70it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1900.88it/s]

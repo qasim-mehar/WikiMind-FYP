@@ -1,9 +1,14 @@
+question: Which parts of the Attention paper agree on 41.8 for EN-FR?
+answer:   The Transformer model achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task [c-82789749ad65].
+sufficient: true
+citations:
+  [c-82789749ad65] 1706-03762-attention — The Transformer model achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002549250000 (3 ledger events)
+wall:     31.516s
 
 
 Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
-Loading weights:   7%|▋         | 14/199 [00:00<00:01, 129.81it/s]
-Loading weights:  22%|██▏       | 43/199 [00:00<00:00, 172.49it/s]
-Loading weights:  35%|███▌      | 70/199 [00:00<00:00, 206.01it/s]
-Loading weights: 100%|██████████| 199/199 [00:00<00:00, 513.61it/s]
+Loading weights:  42%|████▏     | 84/199 [00:00<00:00, 796.90it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1312.07it/s]
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-error: answer generation failed: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}} (cause: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}})

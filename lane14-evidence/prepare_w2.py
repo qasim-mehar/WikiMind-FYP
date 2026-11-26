@@ -17,7 +17,9 @@ A = EV / "answers"
 ARCH = A / "window1"
 ARCH.mkdir(parents=True, exist_ok=True)
 
-qids = [q["id"] for q in json.loads((EV / "questions.json").read_text(encoding="utf-8"))["questions"]]
+qids = [
+    q["id"] for q in json.loads((EV / "questions.json").read_text(encoding="utf-8"))["questions"]
+]
 w1 = json.loads((EV / "run_manifest.json").read_text(encoding="utf-8"))
 w1map = {r["id"]: r for r in w1}
 
@@ -39,4 +41,6 @@ shutil.copy2(EV / "run_manifest.json", EV / "run_manifest_w1.json")
     encoding="utf-8",
     newline="\n",
 )
-print(f"targets={len(targets)} reopened={len(reopened)} unattempted={len(unattempted)} archived_files={len(moved)}")
+print(
+    f"targets={len(targets)} reopened={len(reopened)} unattempted={len(unattempted)} archived_files={len(moved)}"
+)

@@ -1,0 +1,14 @@
+question: Is 41.0 or 41.8 the value stated in section 6.1 'Machine Translation'?
+answer:   The provided claims contain conflicting information regarding the BLEU score achieved by the Transformer model on the WMT 2014 English-to-French translation task. One claim states the Transformer (big) model achieved a score of 41.0 [c-276a1ea04b43], while another claim states the Transformer model achieved a score of 41.8 [c-82789749ad65].
+sufficient: true
+citations:
+  [c-276a1ea04b43] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 41.0 on the WMT 2014 English-to-French translation task.
+  [c-82789749ad65] 1706-03762-attention — The Transformer model achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002869750000 (3 ledger events)
+wall:     31.301s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2700.18it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

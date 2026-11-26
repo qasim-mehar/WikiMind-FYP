@@ -1,0 +1,14 @@
+question: On what exact date was 'Attention Is All You Need' first submitted to arXiv?
+answer:   The provided claims do not contain information regarding the exact date that 'Attention Is All You Need' was first submitted to arXiv.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002482500000 (3 ledger events)
+wall:     36.819s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  65%|██████▍   | 129/199 [00:00<00:00, 1276.18it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1756.71it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

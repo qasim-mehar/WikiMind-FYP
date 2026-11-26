@@ -1,0 +1,15 @@
+question: Which named optimizer (e.g. Adam or SGD) was used to train adversarial nets?
+answer:   The provided claims do not contain information about a specific named optimizer (such as Adam or SGD) used to train adversarial nets. The claims state that adversarial nets using multilayer perceptrons can be trained using backpropagation [c-afb3970ed1dd, c-7eef8a8f1196].
+sufficient: false
+citations:
+  [c-afb3970ed1dd] 1406-2661-gan — Adversarial nets using multilayer perceptrons can be trained using backpropagation and dropout algorithms.
+  [c-7eef8a8f1196] 1406-2661-gan — When the generator and discriminator are defined by multilayer perceptrons, the system can be trained using backpropagation.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002531500000 (3 ledger events)
+wall:     61.500s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  26%|██▌       | 52/199 [00:00<00:00, 503.38it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1430.14it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

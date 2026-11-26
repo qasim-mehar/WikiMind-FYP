@@ -30,10 +30,41 @@ questions = {
 }
 
 STOP = {
-    "the", "and", "for", "with", "that", "this", "from", "are", "was", "were", "what",
-    "which", "does", "did", "how", "many", "much", "report", "reported", "states",
-    "stated", "according", "model", "paper", "corpus", "value", "values", "between",
-    "absent", "not", "stored", "target", "expected", "question", "answer",
+    "the",
+    "and",
+    "for",
+    "with",
+    "that",
+    "this",
+    "from",
+    "are",
+    "was",
+    "were",
+    "what",
+    "which",
+    "does",
+    "did",
+    "how",
+    "many",
+    "much",
+    "report",
+    "reported",
+    "states",
+    "stated",
+    "according",
+    "model",
+    "paper",
+    "corpus",
+    "value",
+    "values",
+    "between",
+    "absent",
+    "not",
+    "stored",
+    "target",
+    "expected",
+    "question",
+    "answer",
 }
 
 
@@ -53,6 +84,8 @@ for r in rows:
     cited_text = " ".join((c["claim"] or "") for c in r["cited"]).lower()
     blob = f"{ans} {cited_text}"
     suff = r["sufficient"]
+    if suff in ("true", "false"):
+        suff = suff == "true"
     reasons: list[str] = []
     verdict = None
 
@@ -77,9 +110,7 @@ for r in rows:
             reasons.append("asserted answer with citations despite absent target")
         verdict = "PASS" if not reasons else "REVIEW"
     elif expected == "cite-both-sides":
-        found = [
-            any(term.lower() in blob for term in side["probes"]) for side in k["sides"]
-        ]
+        found = [any(term.lower() in blob for term in side["probes"]) for side in k["sides"]]
         if not all(found):
             reasons.append(f"conflict sides not both present: {found}")
         if not r["verified"]:

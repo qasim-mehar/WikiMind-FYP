@@ -1,7 +1,20 @@
+question: Across all documents, list every explicit GPU count.
+answer:   The documents mention the following explicit GPU counts: 8 NVIDIA P100 GPUs [c-f049f0012af9], 8 NVIDIA V100 GPUs [c-0d81cf53d064], and 8 P100 GPUs [c-c24e9f63c086].
+sufficient: true
+citations:
+  [c-f049f0012af9] 1706-03762-attention — The models were trained on one machine equipped with 8 NVIDIA P100 GPUs.
+  [c-0d81cf53d064] 2005-11401-retro — RAG models and BART baselines are trained using 8, 32GB NVIDIA V100 GPUs.
+  [c-c24e9f63c086] 1706-03762-attention — Training the Transformer (big) model for the English-to-German task took 3.5 days on 8 P100 GPUs.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002695250000 (3 ledger events)
+wall:     50.396s
 
 
 Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
-Loading weights:  42%|████▏     | 84/199 [00:00<00:00, 838.18it/s]
-Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1266.38it/s]
+Loading weights:   8%|▊         | 15/199 [00:00<00:01, 93.80it/s]
+Loading weights:  13%|█▎        | 25/199 [00:00<00:02, 79.85it/s]
+Loading weights:  17%|█▋        | 33/199 [00:00<00:02, 71.31it/s]
+Loading weights:  35%|███▍      | 69/199 [00:00<00:00, 160.78it/s]
+Loading weights:  63%|██████▎   | 126/199 [00:00<00:00, 286.06it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 306.72it/s]
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-error: answer generation failed: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}} (cause: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}})

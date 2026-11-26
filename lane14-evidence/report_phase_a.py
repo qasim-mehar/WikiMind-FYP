@@ -23,9 +23,7 @@ lines = [
     "",
 ]
 for q in questions["questions"]:
-    lines.append(
-        f"- **{q['id']}** [{q['bucket']}; docs={'+'.join(q['docs'])}] {q['question']}"
-    )
+    lines.append(f"- **{q['id']}** [{q['bucket']}; docs={'+'.join(q['docs'])}] {q['question']}")
     lines.append(f"  - Target: {q['target']}")
     lines.append(f"  - Rubric: {q['rubric']}")
 lines += ["", "## Answer key (built from stored claims after freeze)", ""]
@@ -37,9 +35,7 @@ for e in key["answer_key"]:
         extra = "; sides=" + " / ".join(
             f"{'yes' if s['supported'] else 'no'}({','.join(s['probes'])})" for s in e["sides"]
         )
-    lines.append(
-        f"- **{e['id']}** {e['status']} -> expected `{e['expected']}`{extra}"
-    )
+    lines.append(f"- **{e['id']}** {e['status']} -> expected `{e['expected']}`{extra}")
 lines += [
     "",
     "## Anomalies (see DEVIATIONS.md)",

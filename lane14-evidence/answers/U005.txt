@@ -1,0 +1,14 @@
+question: What learning-rate schedule was used for the GAN discriminator?
+answer:   The provided claims do not contain information regarding the learning-rate schedule used for the GAN discriminator.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002373500000 (3 ledger events)
+wall:     32.582s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  37%|███▋      | 73/199 [00:00<00:00, 664.61it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1512.15it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

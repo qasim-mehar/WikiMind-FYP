@@ -13,9 +13,7 @@ from pathlib import Path
 EV = Path(__file__).resolve().parent
 draft = json.loads((EV / "verdicts_draft.json").read_text(encoding="utf-8"))
 override_path = EV / "verdict_overrides.json"
-overrides = (
-    json.loads(override_path.read_text(encoding="utf-8")) if override_path.exists() else {}
-)
+overrides = json.loads(override_path.read_text(encoding="utf-8")) if override_path.exists() else {}
 
 final = []
 for row in draft:

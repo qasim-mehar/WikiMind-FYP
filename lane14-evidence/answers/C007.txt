@@ -1,7 +1,14 @@
+question: What does the paper say about the big model's EN-FR training cost relative to previous state of the art?
+answer:   The provided claims do not contain information regarding the EN-FR training cost of the big model relative to previous state-of-the-art models.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002608000000 (3 ledger events)
+wall:     32.736s
 
 
 Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
-Loading weights:  61%|██████    | 121/199 [00:00<00:00, 1122.74it/s]
-Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1385.76it/s]
+Loading weights:  63%|██████▎   | 125/199 [00:00<00:00, 1241.97it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1535.06it/s]
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-error: answer generation failed: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}} (cause: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}})

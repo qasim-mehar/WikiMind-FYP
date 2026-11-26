@@ -1,0 +1,16 @@
+question: How many Wikipedia articles are in the December 2018 dump?
+answer:   The December 2018 Wikipedia dump consists of 21 million documents, where each document is a 100-word chunk of a Wikipedia article [c-d2677485567b, c-dca5f653dbbf]. Each Wikipedia article is split into disjoint 100-word chunks [c-e6b94b5be535]. The provided claims do not specify the total number of Wikipedia articles contained in the dump.
+sufficient: false
+citations:
+  [c-e6b94b5be535] 2005-11401-retro — Each Wikipedia article is split into disjoint 100-word chunks.
+  [c-d2677485567b] 2005-11401-retro — The experiments use the December 2018 Wikipedia dump.
+  [c-dca5f653dbbf] 2005-11401-retro — The Wikipedia dump consists of 21 million documents, where each document is a 100-word chunk of a Wikipedia article.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002945000000 (3 ledger events)
+wall:     41.900s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  49%|████▊     | 97/199 [00:00<00:00, 923.78it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1596.83it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

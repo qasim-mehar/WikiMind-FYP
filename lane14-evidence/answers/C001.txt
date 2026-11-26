@@ -1,7 +1,17 @@
+question: Does the corpus report one or more BLEU values for the Transformer on WMT14 English-to-French?
+answer:   The corpus reports conflicting BLEU values for the Transformer model on the WMT 2014 English-to-French translation task, citing both 41.0 [c-276a1ea04b43] and 41.8 [c-82789749ad65].
+sufficient: true
+citations:
+  [c-276a1ea04b43] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 41.0 on the WMT 2014 English-to-French translation task.
+  [c-82789749ad65] 1706-03762-attention — The Transformer model achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002803750000 (3 ledger events)
+wall:     51.891s
 
 
 Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
-Loading weights:  30%|███       | 60/199 [00:00<00:00, 570.55it/s]
-Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1605.54it/s]
+Loading weights:  12%|█▏        | 24/199 [00:00<00:00, 201.46it/s]
+Loading weights:  23%|██▎       | 45/199 [00:00<00:00, 192.84it/s]
+Loading weights:  35%|███▍      | 69/199 [00:00<00:00, 209.91it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 577.49it/s]
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-error: answer generation failed: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}} (cause: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}})

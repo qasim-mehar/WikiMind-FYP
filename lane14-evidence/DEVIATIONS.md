@@ -166,3 +166,71 @@ human approval.
   issued. Await governance direction (third window or explicit waiver) — the
   question set and key remain frozen and the 12 re-opened questions keep their
   W2 fresh-budget entitlement.
+
+## Ruling 30 — runaway-generation amendment (effective immediately)
+
+- **B-11 (Ruling 30 recorded).** The per-question cap is AMENDED, not waived:
+  a "runaway attempt" is a single `qa.answer` call emitting >10,000 output tokens;
+  it is a model anomaly, not an answer, is recorded in `runaway_events.json` and
+  here, does not count against the $0.02 per-question cap, and does not halt the
+  runner — its output is discarded and bounded attempts continue. M023's
+  65,520-token call (ledger index 559, $0.10074675) is the run's first anomaly;
+  its valid 434-token answer is retained, and its graded per-question cost is
+  $0.00312250 (all-inclusive $0.10386925). Hard halts unchanged: real 429,
+  non-anomalous per-question >$0.02, total >$5.00; NEW: cumulative anomaly
+  spend >$0.50 halts. All costs will be reported both excluding anomalies
+  (graded) and all-inclusive (real spend).
+- **B-12 (resume count).** Governance direction listed "41 questions" but its
+  enumerated IDs total **42** (M056, M058–M060 = 4; C001–C007 = 7; C020 = 1;
+  C021–C030 = 10; U001–U020 = 20). The runner uses the full enumerated list of
+  42 — nothing is shrunk. C020 retains its one W1 attempt (429) and receives 5
+  further attempts in this window; the 11 W1-exhausted questions receive the
+  fresh 6-attempt budget from W3; the 30 never-attempted questions receive 6.
+- **B-13 (Gate C deferred).** A generation max-output-token limit to prevent
+  runaways is recorded for a future lane (Gate C). No `src/` change is made on
+  this lane.
+
+## Phase B — completion and quality-pass corrections
+
+- **B-14 (completion).** The fixed `run_ask_w2b.py` completed all remaining 41
+  questions: **150/150 questions have a valid final answer**, no 429 and no
+  non-anomalous budget breach in the final segment. The earlier
+  `run_ask_w2b.py` crashed after M056 with `KeyError: 'C021'` in `write_manifest`
+  (it assumed every question had a W1 row); `recover_w2b.py` restored M056 from
+  the append-only `run_w2b.log`, the function was fixed to skip absent rows, and
+  the run resumed. U014 had one transient-503 retry (2 attempts). `verdicts.json`
+  is built from manual Ruling 25 review of all 56 auto-REVIEW rows plus a strict
+  re-grade of the draft-PASS rows (B-16).
+- **B-15 (halt report superseded).** `HALT-REPORT.md` described the W2 budget
+  halt (commit `c609e4f`) and is now explicitly marked SUPERSEDED by
+  `LANE14-REPORT.md`. It is retained as the historical halt record; its "no
+  verdict table" statement applies only to the halt moment, not the final state.
+- **B-16 (Ruling 16 quality-pass strict re-grade).** The read-only quality-pass
+  subagent (Ruling 16) found two high-severity scoring defects: (a) the frozen
+  key's S039/C020 targets treat the 18.4 BLEU value as present although A-3
+  recorded it was never distilled; and (b) the draft scorer's `need=1` numeric
+  rule let incomplete draft-PASS answers through without manual review. The key
+  and question set were **not edited** (governance freeze). Instead, 19 answers
+  were re-graded FAIL against the frozen rubrics with recorded reasons in
+  `verdict_overrides.json`: S022, S039, M019, M021, M023, M024, M026, M027,
+  M028, M034, M037, M041, M042, M044, C020, C025, C027, C028, C029. Final verdicts:
+  **78 PASS / 72 FAIL** (52.0%). `THRESHOLDS.md` and `LANE14-REPORT.md` use these
+  numbers. S039/C020 remain in the key as authored; the inconsistency with A-3
+  is recorded here rather than silently amended.
+- **B-17 (cost reconciliation).** `cost_report.py` totals come from the whole
+  ledger; per-question figures come from answer attempt files. One pre-batch
+  S001 smoke `qa.answer` event ($0.0026715) remains in the ledger but is not
+  attributed to a retained answer (the S001 final answer is the later batch
+  event). `unattributed_usd` is reported explicitly in `cost_report.json`; the
+  all-inclusive headline is the real spend and the graded headline excludes
+  only the Ruling 30 anomaly, not this smoke event. Gate conclusions are
+  unaffected (both totals ≪ caps).
+- **B-18 (caveats recorded).** M3a is reported over citing answers only
+  (zero-citation answers are graded FAIL, not vacuous passes). Retrieval
+  uniformity in B-4 is qualified: 146/150 answers report exactly
+  `20 seeds, 150/150 claims (capped)`; four report a different seed/claim count
+  (all production defaults, no forced settings). `m3b_judgments.json` declares
+  `random_order: true`; the implementation samples with seed 42 and judges in
+  fixed order — no answer-order shuffling; moot in a single-arm run, recorded
+  here rather than silently corrected. U004's PASS is retained with its
+  false-premise-correction rationale made explicit in `verdict_overrides.json`.

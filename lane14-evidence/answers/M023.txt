@@ -1,9 +1,21 @@
+question: Compare RAG with T5-11B and T5-large on Natural Questions including parameter counts.
+answer:   On the Natural Questions dataset, the RAG-Sequence model achieves an Exact Match (EM) score of 44.5 [c-baab1ede47dd], while the T5-large model achieves an EM score of 28.9 [c-c5b8701c2e1a]. Regarding parameter counts, the T5-large model has 770 million parameters [c-88698c8e43ec]. The RAG models contain 406 million trainable parameters derived from the BART-large model [c-69ab81c8acb4] and 110 million trainable parameters for the BERT-base query encoder [c-648b5e4924d7].
+sufficient: true
+citations:
+  [c-baab1ede47dd] 2005-11401-retro — The RAG-Sequence model achieves an Exact Match (EM) score of 44.5 on the Natural Questions dataset.
+  [c-c5b8701c2e1a] 2005-11401-retro — The T5-large model achieves a score of 28.9 EM on the Natural Questions dataset.
+  [c-88698c8e43ec] 2005-11401-retro — The T5-large model has 770 million parameters.
+  [c-69ab81c8acb4] 2005-11401-retro — The RAG models contain 406 million trainable parameters derived from the BART-large model.
+  [c-648b5e4924d7] 2005-11401-retro — The RAG models contain 110M trainable parameters for the BERT-base query encoder.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.103869250000 (4 ledger events)
+wall:     175.142s
 
 
 Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
-Loading weights:  30%|███       | 60/199 [00:00<00:00, 556.81it/s]
-Loading weights:  62%|██████▏   | 123/199 [00:00<00:00, 593.64it/s]
-Loading weights:  92%|█████████▏| 183/199 [00:00<00:00, 519.73it/s]
-Loading weights: 100%|██████████| 199/199 [00:00<00:00, 578.90it/s]
+Loading weights:  11%|█         | 22/199 [00:00<00:00, 199.50it/s]
+Loading weights:  25%|██▍       | 49/199 [00:00<00:00, 224.60it/s]
+Loading weights:  44%|████▎     | 87/199 [00:00<00:00, 275.57it/s]
+Loading weights:  58%|█████▊    | 115/199 [00:00<00:00, 195.41it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 357.57it/s]
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-error: answer generation failed: Gemini call failed: The read operation timed out (cause: Gemini call failed: The read operation timed out)

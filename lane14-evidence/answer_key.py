@@ -22,9 +22,34 @@ from live import connect_live
 EV = Path(__file__).resolve().parent
 
 STOP = {
-    "the", "and", "for", "with", "that", "this", "from", "are", "was", "were", "what",
-    "which", "does", "did", "how", "many", "much", "report", "reported", "states",
-    "stated", "according", "model", "paper", "corpus", "value", "values", "between",
+    "the",
+    "and",
+    "for",
+    "with",
+    "that",
+    "this",
+    "from",
+    "are",
+    "was",
+    "were",
+    "what",
+    "which",
+    "does",
+    "did",
+    "how",
+    "many",
+    "much",
+    "report",
+    "reported",
+    "states",
+    "stated",
+    "according",
+    "model",
+    "paper",
+    "corpus",
+    "value",
+    "values",
+    "between",
 }
 
 # Deliberately-unanswerable group: ALL listed probes must be absent, scoped to
@@ -101,9 +126,12 @@ def main() -> None:
     assert frozen == "bc0fd07c0148bc2452b1bca01aa946e093283967c47b116112b20d97a9648dc4"
 
     with connect_live() as conn:
-        assert conn.execute("SHOW default_transaction_read_only").fetchone()[
-            "default_transaction_read_only"
-        ] == "on"
+        assert (
+            conn.execute("SHOW default_transaction_read_only").fetchone()[
+                "default_transaction_read_only"
+            ]
+            == "on"
+        )
         rows = conn.execute(
             """
             SELECT c.id::text AS claim_id, c.text, c.anchor_quote,
@@ -161,9 +189,7 @@ def main() -> None:
             entry["status"] = "absent" if not hits else "present-unexpected"
             entry["absence_probes"] = ABSENCE[qid]
             entry["unexpected_hits"] = hits
-            entry["expected"] = (
-                "honest-insufficient" if not hits else "review-needed"
-            )
+            entry["expected"] = "honest-insufficient" if not hits else "review-needed"
         elif qid in CONFLICT:
             sides = []
             for side in CONFLICT[qid]:

@@ -11,8 +11,14 @@ import json
 from pathlib import Path
 
 EV = Path(__file__).resolve().parent
-QIDS = [q["id"] for q in json.loads((EV / "questions.json").read_text(encoding="utf-8"))["questions"]]
-log = [json.loads(line) for line in (EV / "run.log").read_text(encoding="utf-8").splitlines() if line.strip()]
+QIDS = [
+    q["id"] for q in json.loads((EV / "questions.json").read_text(encoding="utf-8"))["questions"]
+]
+log = [
+    json.loads(line)
+    for line in (EV / "run.log").read_text(encoding="utf-8").splitlines()
+    if line.strip()
+]
 mpath = EV / "run_manifest.json"
 manifest = json.loads(mpath.read_text(encoding="utf-8"))
 mmap = {row["id"]: row for row in manifest}
@@ -49,7 +55,5 @@ for qid, rows in by_qid.items():
     recovered.append(qid)
 
 ordered = [mmap[qid] for qid in QIDS if qid in mmap]
-mpath.write_text(
-    json.dumps(ordered, indent=2, ensure_ascii=False), encoding="utf-8", newline="\n"
-)
+mpath.write_text(json.dumps(ordered, indent=2, ensure_ascii=False), encoding="utf-8", newline="\n")
 print(f"recovered={recovered} manifest_rows={len(ordered)}")

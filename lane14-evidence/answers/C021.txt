@@ -1,0 +1,14 @@
+question: Does the corpus give conflicting author lists for any reference?
+answer:   The provided corpus does not contain conflicting author lists for any reference.
+sufficient: true
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002620250000 (3 ledger events)
+wall:     34.043s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  44%|████▎     | 87/199 [00:00<00:00, 829.28it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1433.20it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

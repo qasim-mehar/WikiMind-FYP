@@ -1,7 +1,13 @@
 # LANE 14 — HALT REPORT (two halts, Ruling 7 then W5 budget)
 
-**Status: HALTED. This is NOT a completed V0 evaluation. No verdict table, no
-threshold table, no accuracy claim is issued.**
+> **SUPERSEDED (2026-11-26).** This document records the state at the W2
+> budget-breach halt only. The run later resumed under Ruling 30 and completed
+> 150/150 questions. For the final verdict table, threshold table, accuracy
+> and manifest, see `LANE14-REPORT.md`. The "no verdict table" statement below
+> applies only to the halt moment, not to the final state.
+
+**Status at the time of this report: HALTED. This is NOT a completed V0 evaluation. No verdict table, no
+threshold table, no accuracy claim is issued (at that time).**
 
 ## Halt 1 — window 1 (real HTTP 429, Ruling 7)
 

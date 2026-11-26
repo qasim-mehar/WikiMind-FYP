@@ -1,0 +1,16 @@
+question: Who is the first author of the contradiction-note fixture?
+answer:   The provided claims do not contain information about a "contradiction-note fixture," and therefore do not identify its first author.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002792750000 (3 ledger events)
+wall:     101.610s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  20%|██        | 40/199 [00:00<00:00, 371.30it/s]
+Loading weights:  39%|███▉      | 78/199 [00:00<00:00, 344.31it/s]
+Loading weights:  61%|██████▏   | 122/199 [00:00<00:00, 372.21it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 569.29it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

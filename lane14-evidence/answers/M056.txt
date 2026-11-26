@@ -1,7 +1,20 @@
+question: Compare the state-of-the-art claims: Transformer on WMT14 and RAG on open-domain QA.
+answer:   The Transformer model achieved a new state of the art on the WMT 2014 English-to-German and English-to-French translation tasks [c-2e60401ef433]. Specifically, the Transformer (big) model achieved a BLEU score of 28.4 on the English-to-German task [c-e2c686bf6eac] and a BLEU score of 41.0 on the English-to-French task [c-276a1ea04b43]. In contrast, RAG models set the state of the art on three open-domain question answering tasks: Natural Questions, WebQuestions, and CuratedTrec [c-46bf5d504588, c-4b0e8a1eb511].
+sufficient: true
+citations:
+  [c-2e60401ef433] 1706-03762-attention — The Transformer achieved a new state of the art on the WMT 2014 English-to-German and WMT 2014 English-to-French translation tasks.
+  [c-e2c686bf6eac] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task.
+  [c-276a1ea04b43] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 41.0 on the WMT 2014 English-to-French translation task.
+  [c-46bf5d504588] 2005-11401-retro — RAG models set the state of the art on three open domain QA tasks.
+  [c-4b0e8a1eb511] 2005-11401-retro — RAG models achieve state-of-the-art results on the Natural Questions, WebQuestions, and CuratedTrec open-domain question answering tasks.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.003179000000 (3 ledger events)
+wall:     38.744s
 
 
 Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
-Loading weights:  73%|███████▎  | 145/199 [00:00<00:00, 1448.59it/s]
-Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1949.73it/s]
+Loading weights:  10%|▉         | 19/199 [00:00<00:00, 188.56it/s]
+Loading weights:  21%|██        | 41/199 [00:00<00:00, 174.43it/s]
+Loading weights:  30%|██▉       | 59/199 [00:00<00:00, 173.12it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 460.10it/s]
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-error: answer generation failed: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}} (cause: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}})

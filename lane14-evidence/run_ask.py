@@ -35,7 +35,7 @@ EXE = ROOT / ".venv" / "Scripts" / "wikimind.exe"
 # HTTP-pattern-only matching: the benign HF "higher rate limits" warning is NOT
 # a 429 (Lane 13 DEVIATIONS item 2). Require an actual HTTP error shape.
 IS_429 = re.compile(
-    r'\b429\s+(?:RESOURCE_EXHAUSTED|Too Many Requests)\b'
+    r"\b429\s+(?:RESOURCE_EXHAUSTED|Too Many Requests)\b"
     r'|"code"\s*:\s*429\b|\bHTTP\s+429\b|\b429\s+rate\s+limit',
     re.IGNORECASE,
 )
@@ -90,8 +90,17 @@ def main() -> None:
         qid = q["id"]
         if index < start:
             continue
-        if qid in prior and prior[qid].get("exit") != 0 and len(prior[qid].get("attempts", [])) >= len(BACKOFF) + 1:
-            print(json.dumps({"id": qid, "skip": "attempt cap reached (6) — provider failure retained"}), flush=True)
+        if (
+            qid in prior
+            and prior[qid].get("exit") != 0
+            and len(prior[qid].get("attempts", [])) >= len(BACKOFF) + 1
+        ):
+            print(
+                json.dumps(
+                    {"id": qid, "skip": "attempt cap reached (6) — provider failure retained"}
+                ),
+                flush=True,
+            )
             continue
         if qid in prior and prior[qid].get("exit") == 0 and not prior[qid].get("halt_429"):
             print(json.dumps({"id": qid, "skip": "already successful"}), flush=True)
@@ -142,7 +151,10 @@ def main() -> None:
         assert row is not None
         q_shadow = sum(shadows_for(qid))
         if q_shadow > PER_QUESTION_CAP:
-            print(json.dumps({"halt": "per-question budget breach", "id": qid, "shadow": q_shadow}), flush=True)
+            print(
+                json.dumps({"halt": "per-question budget breach", "id": qid, "shadow": q_shadow}),
+                flush=True,
+            )
             _write_manifest(prior, manifest + [row])
             return
         if total_spend() > TOTAL_CAP:

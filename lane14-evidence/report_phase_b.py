@@ -17,6 +17,7 @@ boundary = json.loads((EV / "window_boundary.json").read_text(encoding="utf-8"))
 before = json.loads((EV / "corpus_proof_before.json").read_text(encoding="utf-8"))
 after = json.loads((EV / "corpus_proof_after.json").read_text(encoding="utf-8"))
 m3b = json.loads((EV / "m3b_judgments.json").read_text(encoding="utf-8"))
+costs = json.loads((EV / "cost_report.json").read_text(encoding="utf-8"))
 thresholds = (EV / "THRESHOLDS.md").read_text(encoding="utf-8")
 
 N = 150
@@ -62,23 +63,36 @@ for table in before:
     if table in ("phase", "session", "read_only_session", "max_nodes_created_at"):
         continue
     lines.append(f"| {table} | {before[table]} | {after.get(table)} |")
-lines += [f"| max_nodes_created_at | {before['max_nodes_created_at']} | {after.get('max_nodes_created_at')} |", ""]
+lines += [
+    f"| max_nodes_created_at | {before['max_nodes_created_at']} | {after.get('max_nodes_created_at')} |",
+    "",
+]
 
 lines += [
     "## 5. Run, cost, attempts",
     "",
     f"- Answered: {n_answered}/150; unanswered after both windows: {150 - n_answered}.",
     f"- Attempt histogram (total attempts per question, both windows): {dict(sorted(attempt_hist.items()))}.",
-    f"- Total attempt wall time (excludes backoff sleeps): {wall:.1f} s ({wall/3600:.2f} h).",
+    f"- Total attempt wall time (excludes backoff sleeps): {wall:.1f} s ({wall / 3600:.2f} h).",
     f"- Retrieval lines reported: {dict(retr)} (production defaults).",
-    f"- Answer ledger shadow: ${shadows:.12f}; M3b judge ledger: ${judge_shadow:.12f}.",
-    f"- Combined shadow spend: ${shadows + judge_shadow:.12f} (cap $5.00).",
+    (
+        f"- Answer ledger graded (Ruling 30, anomalies excluded): ${costs['total_graded_usd']:.12f}; "
+        f"all-inclusive (real spend): ${costs['total_all_inclusive_usd']:.12f}."
+    ),
+    (
+        f"- Anomaly spend: ${costs['total_anomaly_usd']:.12f} across {costs['anomaly_events']} event(s); "
+        f"cap ${costs['anomaly_cap_usd']:.2f} = {costs['anomaly_cap_status']}."
+    ),
+    (
+        f"- M3b judge ledger: ${judge_shadow:.12f}; combined all-inclusive spend: "
+        f"${costs['total_all_inclusive_usd'] + judge_shadow:.12f} (cap $5.00)."
+    ),
     "- `WIKIMIND_COST_DB_MIRROR` unset throughout; ledger isolated; `cost_events` unchanged.",
     "",
     "## 6. Judging (Ruling 25 rubric against frozen key)",
     "",
-    f"- Conservative accuracy (all 150; unanswered = FAIL): {correct}/150 = {correct/150:.4f}.",
-    f"- Engine-capability accuracy (answered only): {correct}/{n_answered} = {correct/n_answered:.4f}.",
+    f"- Conservative accuracy (all 150; unanswered = FAIL): {correct}/150 = {correct / 150:.4f}.",
+    f"- Engine-capability accuracy (answered only): {correct}/{n_answered} = {correct / n_answered:.4f}.",
     "- Machine citation verification: `verification.json` (resolution, slug, anchor containment, prose refs).",
     f"- Non-Gemini judge sample (M3b): {m3b.get('judgments', 0)} judgments, rate={m3b.get('entailment_rate')}.",
     "",
@@ -92,7 +106,7 @@ lines += [
     "",
     "## 9. Evidence manifest",
     "",
-    f"- `lane14-evidence/SHA256SUMS.txt` (CRLF, Lane 13 procedure).",
+    "- `lane14-evidence/SHA256SUMS.txt` (CRLF, Lane 13 procedure).",
     f"- Manifest SHA256: `{manifest_hash}`.",
     "",
     "## 10. STOP",
