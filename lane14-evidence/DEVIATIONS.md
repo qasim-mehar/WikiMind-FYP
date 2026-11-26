@@ -133,3 +133,36 @@ human approval.
   or accuracy claim is issued for this incomplete run.** Await a fresh quota window
   (or human direction) before any resumption; the question set and key remain frozen
   and unedited.
+
+## Phase B — second window (governance direction after halt)
+
+- **B-6 (two-window run authorized).** Governance directed resumption after the
+  midnight-Pacific free-tier quota reset. Window boundary recorded in
+  `window_boundary.json`: halt 2026-11-25 23:54:19 PST (C020 HTTP 429), resume
+  2026-11-26 00:32:15 PST (38 minutes into the fresh quota day).
+- **B-7 (W1 posture re-established).** Fresh read-only corpus-count proof before
+  the first W2 question: `corpus_proof_w2_before.txt`, identical to the B1 proof;
+  `SHOW default_transaction_read_only = on`. Same `costs.jsonl` is appended to
+  (no new ledger); `WIKIMIND_COST_DB_MIRROR` unset.
+- **B-8 (amendment — 12 questions re-opened).** Per governance direction W3,
+  the 12 attempt-exhausted questions (`M023, M056, M058–M060, C001–C007`) are
+  re-opened unconditionally with a **fresh 6-attempt budget** in W2. Rationale:
+  the cap bounds retry storms within one provider availability window; it is
+  not a permanent failure when the provider's day ends. Their W1 history is
+  archived verbatim in `answers/window1/` and `run_manifest_w1.json`; the merged
+  manifest records `attempts_w1`, `attempts_w2` and `total_attempts` per question.
+  Scope W2 = 31 unanswered + 12 reopened = 43 questions; nothing shrunk.
+- **B-9 (if a second 429 occurs).** Halt again identically and report; take a
+  third window. The set is never reduced.
+- **B-10 (W2 halted on per-question budget breach — W5).** W2 ran exactly one
+  question (M023) before halting at 2026-11-26 00:37:56 PST. Its single successful
+  attempt produced a runaway generation: `qa.answer` emitted **65,520 output
+  tokens** (shadow $0.10074675) and a second 434-token retry, for a per-question
+  shadow of **$0.10386925 — above the $0.02 cap**. No second 429 occurred. The W2
+  runner halted immediately per governance W5 ("budget breach halts") and wrote
+  `{"halt": "per-question budget breach", "id": "M023"}`. `window_boundary.json`
+  records the timestamp and cause. State: 121 questions recorded (108 answered,
+  12 W1-exhausted, 1 W1-429), 30 still unattempted. No verdict/threshold table
+  issued. Await governance direction (third window or explicit waiver) — the
+  question set and key remain frozen and the 12 re-opened questions keep their
+  W2 fresh-budget entitlement.

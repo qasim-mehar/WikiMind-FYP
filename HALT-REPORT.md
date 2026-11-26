@@ -1,45 +1,54 @@
-# LANE 14 — HALT REPORT (Ruling 7, real HTTP 429)
+# LANE 14 — HALT REPORT (two halts, Ruling 7 then W5 budget)
 
 **Status: HALTED. This is NOT a completed V0 evaluation. No verdict table, no
 threshold table, no accuracy claim is issued.**
 
-## Halt condition
+## Halt 1 — window 1 (real HTTP 429, Ruling 7)
 
-- Date: 2026-11-26.
-- Question: **C020** ("How many distinct EN-DE BLEU numbers are associated with the Transformer across the corpus?"), attempt 1.
-- Error: `429 RESOURCE_EXHAUSTED`, HTTP body `code: 429`, quota metric
+- 2026-11-25 23:54:19 PST, question **C020** attempt 1: `429 RESOURCE_EXHAUSTED`,
+  HTTP body `code: 429`, quota metric
   `generativelanguage.googleapis.com/generate_content_free_tier_requests`,
   `limit: 500`, quota id `GenerateRequestsPerDayPerProjectPerModel-FreeTier`,
   `retryDelay: 343s`. Genuine Gemini free-tier daily quota exhaustion.
-- Action: runner halted immediately, wrote `{"halt": "HTTP 429 — Ruling 7; scope unchanged"}`.
-  No further questions were attempted. This follows the work card's "any real HTTP
-  429: halt immediately and report" and Ruling 7 ("take the extra days. Never cut
-  runs. Never reduce the question set").
+- Runner halted immediately; no further questions attempted in window 1.
+- Window-1 result: 107 answers, 12 questions exhausted 6 bounded attempts on
+  transient 503 (`M023, M056, M058–M060, C001–C007`), C020 halted, 30 unattempted.
 
-## Run state at halt (from `run_manifest.json`, 120 rows)
+## Halt 2 — window 2 (per-question budget breach, governance W5)
+
+- Resumed 2026-11-26 00:32:15 PST after midnight-Pacific quota reset, with a
+  fresh read-only corpus proof (`corpus_proof_w2_before.txt`, identical to B1),
+  the same isolated `costs.jsonl` appended, `WIKIMIND_COST_DB_MIRROR` unset.
+- Governance scope: 31 unanswered + 12 re-opened with a fresh 6-attempt budget
+  = 43 questions; full W1 history archived in `answers/window1/` and
+  `run_manifest_w1.json`.
+- W2 ran exactly one question, **M023**, which succeeded but at a per-question
+  shadow of **$0.10386925** (cap $0.02). Cause: one `qa.answer` call emitted
+  **65,520 output tokens** ($0.10074675) plus a 434-token retry; 4 ledger events.
+- Runner halted immediately at 2026-11-26 00:37:56 PST with
+  `{"halt": "per-question budget breach", "id": "M023"}`.
+- **No second 429 occurred** in window 2.
+
+## State at this halt (merged `run_manifest.json`, 120 rows)
 
 | Category | Count | IDs |
 | --- | ---: | --- |
-| Answers obtained (one pass, production defaults) | 107 | all except those below |
-| Exhausted 6 bounded attempts on transient 503 | 12 | M023, M056, M058, M059, M060, C001–C007 |
-| Halted on real HTTP 429 | 1 | C020 |
-| Never attempted | 30 | C021–C030, U001–U020 |
+| Answers obtained (one pass, production defaults) | 108 | all except below |
+| Exhausted 6 attempts in W1; W2 re-opened, unrun at halt | 11 | M056, M058, M059, M060, C001–C007 |
+| Halted on 429 in W1 | 1 | C020 |
+| Never attempted (either window) | 30 | C021–C030, U001–U020 |
 
-- Total attempts recorded: 222 (max 6 per question; the 12 exhausted rows were not re-attempted after the server-restart resume).
-- No retrieval flags were passed; every obtained answer reports production defaults:
-  `retrieval: 20 seeds, 150/150 claims (capped)`.
-- Isolated answer ledger: `lane14-evidence/costs.jsonl`; `WIKIMIND_COST_DB_MIRROR` unset.
-- Corpus proof at halt (`corpus_proof_halt.txt`, read-only session) is identical to the
-  before-proof: documents 4, claims 530, edges 1593, compile_units 229, cost_events 1427,
-  nodes 861, node_versions 1365, events 0, ledger_blocks 0, jobs 0, same max nodes.created_at.
+- Window-2 completed: M023 only (total attempts across both windows: 7).
+- Spend: answer ledger ~$0.397 shadow (see `wikimind llm costs --path
+  lane14-evidence/costs.jsonl`); total cap $5.00 not breached, but the
+  **per-question cap was** on M023.
+- Corpus proof identical to B1 (read-only session verified). Frozen question set
+  SHA256 `bc0fd07c0148bc2452b1bca01aa946e093283967c47b116112b20d97a9648dc4`
+  and answer key unchanged. No `src/`, `tests/`, or frozen-file edits.
 
-## Preservation and next step
+## Next step
 
-- Frozen question set SHA256 `bc0fd07c0148bc2452b1bca01aa946e093283967c47b116112b20d97a9648dc4`
-  and answer key are **unchanged**.
-- No source, test, or frozen-file edits on this lane.
-- Await a fresh Gemini quota window (or explicit human direction) before resuming.
-  On resumption: run only the 31 unanswered questions (C020 + C021–C030 + U001–U020),
-  keeping their existing attempt counts, then complete verification, Ruling 25 judging,
-  M3b, threshold table, B7 proof, manifest and report.
-- Merging into main and the V0 scoping decision remain human actions.
+Await governance direction: a third window (with an explicit decision on how to
+treat runaway-generation cost against the $0.02 per-question cap), or an explicit
+waiver permitting continuation. The set is never reduced and no question is
+silently dropped. Merging into main and the V0 scoping decision remain human.
