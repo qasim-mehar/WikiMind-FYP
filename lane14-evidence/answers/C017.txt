@@ -1,0 +1,14 @@
+question: Which source paper does the contradiction note cite?
+answer:   The provided claims do not contain information about a "contradiction note" or which source paper it might cite.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002708000000 (3 ledger events)
+wall:     39.913s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  32%|███▏      | 63/199 [00:00<00:00, 615.51it/s]
+Loading weights:  63%|██████▎   | 125/199 [00:00<00:00, 545.60it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 775.80it/s]

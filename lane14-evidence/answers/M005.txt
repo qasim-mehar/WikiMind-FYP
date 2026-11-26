@@ -1,0 +1,14 @@
+question: Table 1 lists maximum path lengths: how does the Transformer's path compare with ByteNet's and ConvS2S's?
+answer:   The provided claims state that Table 1 in the Transformer paper provides data on maximum path lengths [c-27643c6098d1]. However, the provided claims do not contain the specific data from Table 1 comparing the Transformer's maximum path length to those of ByteNet or ConvS2S.
+sufficient: false
+citations:
+  [c-27643c6098d1] 1706-03762-attention — Table 1 provides data on maximum path lengths, per-layer complexity, and the minimum number of sequential operations.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002593250000 (3 ledger events)
+wall:     31.374s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  75%|███████▌  | 150/199 [00:00<00:00, 1436.05it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1458.35it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

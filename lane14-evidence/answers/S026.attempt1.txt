@@ -1,0 +1,17 @@
+question: What are the two RAG formulations and how do they differ?
+answer:   The two RAG formulations are RAG-Sequence and RAG-Token [c-9c758c0f3b8b]. They differ in how they handle latent documents during generation: the RAG-Sequence model treats the retrieved document as a single latent variable that is marginalized to calculate the sequence probability, using the same document to predict each target token [c-7ad7eab98b64, c-7f1fd271fc92]. In contrast, the RAG-Token model draws a different latent document for each target token [c-0637c340355b].
+sufficient: true
+citations:
+  [c-9c758c0f3b8b] 2005-11401-retro — RAG-Token and RAG-Sequence outperform BART on the Q-BLEU-1 metric for Jeopardy question generation.
+  [c-0637c340355b] 2005-11401-retro — The RAG-Token model draws a different latent document for each target token.
+  [c-7ad7eab98b64] 2005-11401-retro — The RAG-Sequence model treats the retrieved document as a single latent variable that is marginalized to calculate the seq2seq probability p(y|x) using a top-K approximation.
+  [c-7f1fd271fc92] 2005-11401-retro — The RAG-Sequence model uses the same document to predict each target token.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002915500000 (3 ledger events)
+wall:     35.244s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  63%|██████▎   | 126/199 [00:00<00:00, 1209.05it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1502.40it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

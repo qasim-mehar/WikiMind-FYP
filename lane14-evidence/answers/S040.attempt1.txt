@@ -1,0 +1,16 @@
+question: According to the note, did the Transformer improve on the best ensembles?
+answer:   Yes, the Transformer model improved over existing best results on the WMT 2014 English-to-German translation task by over 2 BLEU [c-cc28fdac16c0]. Additionally, the Transformer achieved a new state of the art on both the WMT 2014 English-to-German and WMT 2014 English-to-French translation tasks [c-2e60401ef433].
+sufficient: true
+citations:
+  [c-cc28fdac16c0] contradiction-note — The Transformer model improved over existing best results on the WMT 2014 English-to-German translation task by over 2 BLEU.
+  [c-2e60401ef433] 1706-03762-attention — The Transformer achieved a new state of the art on the WMT 2014 English-to-German and WMT 2014 English-to-French translation tasks.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002746000000 (3 ledger events)
+wall:     33.208s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  47%|████▋     | 93/199 [00:00<00:00, 828.01it/s]
+Loading weights:  88%|████████▊ | 176/199 [00:00<00:00, 603.85it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 710.84it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

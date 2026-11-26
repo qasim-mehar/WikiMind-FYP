@@ -1,0 +1,17 @@
+question: What is the dimension d_model of the Transformer's sub-layer outputs and embeddings?
+answer:   All sub-layers and embedding layers in the Transformer model produce outputs of dimension 512 [c-42903554d1c5]. The model uses learned embeddings to convert input and output tokens into vectors of dimension dmodel [c-3c2acea43502], and positional encodings also share this same dimension [c-914959a24694].
+sufficient: true
+citations:
+  [c-42903554d1c5] 1706-03762-attention — All sub-layers and embedding layers in the model produce outputs of dimension 512.
+  [c-3c2acea43502] 1706-03762-attention — The model uses learned embeddings to convert input and output tokens to vectors of dimension dmodel.
+  [c-914959a24694] 1706-03762-attention — Positional encodings have the same dimension dmodel as the input embeddings.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002672000000 (3 ledger events)
+wall:     77.233s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  45%|████▍     | 89/199 [00:00<00:00, 859.33it/s]
+Loading weights:  88%|████████▊ | 175/199 [00:00<00:00, 776.94it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 876.51it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,15 @@
+question: With h=8 heads of d_k=d_v=64 and d_model=512, what is the concatenated head output dimension before the final projection?
+answer:   With h=8 heads and a value dimension of d_v=64, the concatenated output dimension of the multi-head attention is h * d_v = 8 * 64 = 512 [c-4720bca0595f, c-7fac685e3560].
+sufficient: true
+citations:
+  [c-4720bca0595f] 1706-03762-attention — In the Transformer architecture, each attention head uses a dimension of 64 for both the key dimension (dk) and the value dimension (dv).
+  [c-7fac685e3560] 1706-03762-attention — The model employs 8 parallel attention heads.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002579250000 (3 ledger events)
+wall:     31.153s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  45%|████▌     | 90/199 [00:00<00:00, 896.65it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1859.58it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

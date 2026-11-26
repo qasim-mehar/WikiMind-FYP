@@ -1,0 +1,18 @@
+question: How many parallel attention heads does the Transformer use, and what are d_k and d_v?
+answer:   The Transformer model employs 8 parallel attention heads [c-7fac685e3560]. In the architecture, each attention head uses a dimension of 64 for both the key dimension (dk) and the value dimension (dv) [c-4720bca0595f]. These dimensions, dk and dv, represent the dimensions of the queries, keys, and values used as inputs for the Scaled Dot-Product Attention mechanism [c-d37ba3d5d5fe].
+sufficient: true
+citations:
+  [c-7fac685e3560] 1706-03762-attention — The model employs 8 parallel attention heads.
+  [c-4720bca0595f] 1706-03762-attention — In the Transformer architecture, each attention head uses a dimension of 64 for both the key dimension (dk) and the value dimension (dv).
+  [c-d37ba3d5d5fe] 1706-03762-attention — Scaled Dot-Product Attention inputs consist of queries and keys of dimension dk and values of dimension dv.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002783500000 (3 ledger events)
+wall:     60.958s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  12%|█▏        | 24/199 [00:00<00:00, 221.06it/s]
+Loading weights:  28%|██▊       | 56/199 [00:00<00:00, 247.85it/s]
+Loading weights:  58%|█████▊    | 116/199 [00:00<00:00, 385.17it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 528.02it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

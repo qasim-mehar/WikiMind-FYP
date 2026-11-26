@@ -1,0 +1,14 @@
+question: For a fixed generator G, what is the optimal discriminator D*_G(x)?
+answer:   For a fixed generator G, the optimal discriminator D*_G(x) is defined as pdata(x) / (pdata(x) + pg(x)) [c-60882ed279a4].
+sufficient: true
+citations:
+  [c-60882ed279a4] 1406-2661-gan — For a fixed generator G, the optimal discriminator D*G(x) is defined as pdata(x) / (pdata(x) + pg(x)).
+retrieval: 20 seeds, 104/150 claims
+shadow:   $0.001817000000 (3 ledger events)
+wall:     94.598s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  38%|███▊      | 76/199 [00:00<00:00, 756.56it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1128.14it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,15 @@
+question: Quote the note's contradictory restatement containing 18.4 BLEU.
+answer:   The provided claims do not contain information regarding a note's contradictory restatement containing 18.4 BLEU.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002513250000 (3 ledger events)
+wall:     49.671s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  27%|██▋       | 53/199 [00:00<00:00, 494.94it/s]
+Loading weights:  52%|█████▏    | 104/199 [00:00<00:00, 490.45it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 880.18it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,17 @@
+question: How is RAG related to memory networks and to retrieve-and-edit approaches?
+answer:   Retrieval-augmented generation (RAG) is a fine-tuning approach that provides pre-trained parametric-memory generation models with non-parametric memory [c-97850108396d]. In RAG models, the parametric memory consists of a pre-trained seq2seq model, while the non-parametric memory is a dense vector index of Wikipedia [c-753cce0a0365]. Hybrid models that combine parametric and non-parametric memory, such as RAG, allow for the direct revision and expansion of knowledge [c-dcbac97e476e]. Regarding retrieve-and-edit approaches, they have been successful in fields such as Machine Translation and Semantic Parsing [c-a681930d1690]. The provided claims do not explicitly detail the relationship between RAG and memory networks.
+sufficient: false
+citations:
+  [c-97850108396d] 2005-11401-retro — Retrieval-augmented generation (RAG) is a fine-tuning approach that endows pre-trained parametric-memory generation models with non-parametric memory.
+  [c-753cce0a0365] 2005-11401-retro — In RAG models, the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia.
+  [c-dcbac97e476e] 2005-11401-retro — Hybrid models that combine parametric memory and non-parametric memory allow for the direct revision and expansion of knowledge.
+  [c-a681930d1690] 2005-11401-retro — Retrieve-and-edit approaches have been successful in Machine Translation and Semantic Parsing.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002954000000 (3 ledger events)
+wall:     43.022s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  63%|██████▎   | 125/199 [00:00<00:00, 1245.14it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1870.16it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

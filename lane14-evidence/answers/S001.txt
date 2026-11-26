@@ -1,0 +1,16 @@
+question: What new network architecture is proposed in 'Attention Is All You Need', and what two mechanisms does it dispense with?
+answer:   The 'Attention Is All You Need' paper proposes the Transformer architecture, which is the first sequence transduction model based entirely on attention [c-1ec92c835808]. This architecture dispenses with both recurrence and convolutions [c-4e3b59dda0ca, c-ab8bc01059c6].
+sufficient: true
+citations:
+  [c-1ec92c835808] 1706-03762-attention — The Transformer is the first sequence transduction model based entirely on attention.
+  [c-4e3b59dda0ca] 1706-03762-attention — The Transformer architecture is based solely on attention mechanisms and does not use recurrence or convolutions.
+  [c-ab8bc01059c6] 1706-03762-attention — The model contains no recurrence and no convolution.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002671500000 (3 ledger events)
+wall:     36.450s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  29%|██▊       | 57/199 [00:00<00:00, 533.54it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1203.33it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

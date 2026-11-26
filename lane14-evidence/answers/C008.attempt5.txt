@@ -1,0 +1,14 @@
+question: Give the EN-DE BLEU values for Transformer big and base from Table 2.
+answer:   The provided claims state that the Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task [c-e2c686bf6eac]. The provided claims do not contain the BLEU values for the Transformer base model on the English-to-German task.
+sufficient: false
+citations:
+  [c-e2c686bf6eac] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002553750000 (3 ledger events)
+wall:     16988.361s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  29%|██▊       | 57/199 [00:00<00:00, 513.52it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1552.70it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

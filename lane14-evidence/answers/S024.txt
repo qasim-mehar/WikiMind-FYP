@@ -1,0 +1,18 @@
+question: What is the non-parametric memory of RAG?
+answer:   In RAG models, the non-parametric memory is a dense vector index of Wikipedia [c-753cce0a0365]. This index consists of 21 million 728-dimensional vectors [c-702be46be80f] and is comprised of raw text rather than distributed representations [c-bfd0187f008a]. The experiments use a single Wikipedia dump as the non-parametric knowledge source [c-c5d774d8a587], where each article is split into disjoint 100-word chunks [c-e6b94b5be535].
+sufficient: true
+citations:
+  [c-753cce0a0365] 2005-11401-retro — In RAG models, the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia.
+  [c-702be46be80f] 2005-11401-retro — The non-parametric memory index consists of 21 million 728-dimensional vectors.
+  [c-bfd0187f008a] 2005-11401-retro — The document index memory is comprised of raw text rather than distributed representations.
+  [c-c5d774d8a587] 2005-11401-retro — The experiments use a single Wikipedia dump as the non-parametric knowledge source.
+  [c-e6b94b5be535] 2005-11401-retro — Each Wikipedia article is split into disjoint 100-word chunks.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.003095500000 (3 ledger events)
+wall:     44.457s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  48%|████▊     | 95/199 [00:00<00:00, 913.24it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1678.15it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

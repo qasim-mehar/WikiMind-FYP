@@ -1,0 +1,16 @@
+{
+  "phase": "before",
+  "session": "SET default_transaction_read_only = on (verified via SHOW)",
+  "documents": 4,
+  "claims": 530,
+  "edges": 1593,
+  "compile_units": 229,
+  "cost_events": 1427,
+  "nodes": 861,
+  "node_versions": 1365,
+  "events": 0,
+  "ledger_blocks": 0,
+  "jobs": 0,
+  "max_nodes_created_at": "2026-11-18 08:01:38.064878+05:00",
+  "read_only_session": "on"
+}

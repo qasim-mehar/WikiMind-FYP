@@ -1,0 +1,17 @@
+question: The encoder has two sub-layers and the decoder three; across six layers each, how many sub-layer applications occur?
+answer:   The encoder is composed of a stack of 6 identical layers [c-93df88c97b40], and the decoder is composed of a stack of 6 identical layers [c-23c34ccffce9]. Each encoder layer contains two sub-layers (a multi-head self-attention mechanism and a position-wise fully connected feed-forward network) [c-4388ea51386b], resulting in 12 sub-layer applications for the encoder. The decoder includes three sub-layers [c-419650c54491], resulting in 18 sub-layer applications for the decoder. Across both stacks, there are a total of 30 sub-layer applications.
+sufficient: true
+citations:
+  [c-93df88c97b40] 1706-03762-attention — The encoder is composed of a stack of 6 identical layers.
+  [c-23c34ccffce9] 1706-03762-attention — The decoder is composed of a stack of 6 identical layers.
+  [c-4388ea51386b] 1706-03762-attention — Each encoder layer in the Transformer architecture contains a multi-head self-attention mechanism and a position-wise fully connected feed-forward network.
+  [c-419650c54491] 1706-03762-attention — The decoder includes a third sub-layer that performs multi-head attention over the output of the encoder stack.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002923500000 (3 ledger events)
+wall:     27.505s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  89%|████████▉ | 177/199 [00:00<00:00, 1763.83it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1963.50it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

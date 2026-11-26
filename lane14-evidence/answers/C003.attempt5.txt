@@ -1,0 +1,9 @@
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  14%|█▎        | 27/199 [00:00<00:00, 218.33it/s]
+Loading weights:  25%|██▌       | 50/199 [00:00<00:00, 195.60it/s]
+Loading weights:  52%|█████▏    | 103/199 [00:00<00:00, 313.15it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 456.81it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+error: answer generation failed: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}} (cause: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}})

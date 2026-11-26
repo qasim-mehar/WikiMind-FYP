@@ -1,0 +1,15 @@
+question: Both papers use beam search: give the Transformer translation and RAG generation beam settings.
+answer:   The Transformer translation models used a beam size of 4 and a length penalty of 0.6. The RAG-Token model uses a standard beam decoder to decode sequences [c-b22c982e1a6f].
+sufficient: true
+citations:
+  [c-b22c982e1a6f] 2005-11401-retro — The RAG-Token model uses a standard beam decoder to decode sequences.
+  1 unverified citation(s) removed
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002789500000 (3 ledger events)
+wall:     33.368s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  63%|██████▎   | 126/199 [00:00<00:00, 1164.59it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1516.51it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

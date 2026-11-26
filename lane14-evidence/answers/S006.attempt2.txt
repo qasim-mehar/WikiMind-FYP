@@ -1,0 +1,17 @@
+question: What is the inner dimensionality d_ff of the position-wise feed-forward network?
+answer:   The inner-layer dimensionality of the position-wise feed-forward network is 2048 [c-e51f9c970b55].
+sufficient: true
+citations:
+  [c-e51f9c970b55] 1706-03762-attention — The inner-layer dimensionality of the feed-forward network is 2048.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002519750000 (3 ledger events)
+wall:     53.719s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  12%|█▏        | 23/199 [00:00<00:01, 164.78it/s]
+Loading weights:  29%|██▊       | 57/199 [00:00<00:00, 229.74it/s]
+Loading weights:  44%|████▍     | 88/199 [00:00<00:00, 257.16it/s]
+Loading weights:  59%|█████▉    | 118/199 [00:00<00:00, 271.56it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 421.27it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

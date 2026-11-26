@@ -83,6 +83,53 @@ human approval.
   "No cost events at ...". **Authoring spend = $0.00 shadow, within the ≤ $0.50 budget.**
   `WIKIMIND_COST_DB_MIRROR` was never set.
 
-## Phase B — pending human approval
+## Phase B — run record
 
-No Phase B work has run. This lane stops after Phase A per work card A5.
+- **B1 before-proof** recorded in `corpus_proof_before.json`: documents 4, claims 530,
+  edges 1593, compile_units 229, cost_events 1427, nodes 861, node_versions 1365,
+  events 0, ledger_blocks 0, jobs 0, max nodes.created_at 2026-11-18 08:01:38.064878+05:00.
+  Session forced `default_transaction_read_only = on` and verified with `SHOW`.
+- **B-1 (environment).** The fresh venv initially lacked the `embed` extra; the first
+  smoke attempt failed with `sentence-transformers is not installed`. Installed
+  `-e ".[dev,embed]"` (environment only — no source, test or frozen-file change).
+  A second smoke attempt exposed a runner bug (`total_spend` summing lists), fixed
+  before the batch. The third smoke (S001) succeeded at production defaults:
+  `retrieval: 20 seeds, 150/150 claims (capped)`, $0.0026715 shadow. Its result was
+  retained as the S001 final answer, as in Lane 13.
+- **B-2 (server restart).** The background batch was cancelled by a server restart
+  after 107 manifest rows. `run.log` (append-only, one line per attempt) showed that
+  C008 had actually succeeded on attempt 5 just before cancellation; `recover_after_restart.py`
+  restored its final answer and manifest row without adding any attempt. The runner
+  was then patched to skip any prior row with 6 recorded attempts so the 12 questions
+  that exhausted their bounded retries (`M023, M056, M058, M059, M060, C001–C007`,
+  all Gemini 503, never 429) are **not** re-attempted — the 6-attempt cap is preserved
+  cumulatively. The remaining 42 questions were resumed from the same manifest.
+- **B-3 (no 429).** No real HTTP 429 occurred in either batch segment; the Ruling 7
+  halt condition was never triggered. Transient 503s were retried within
+  20/40/60/90/120 s bounds. The benign Hugging Face "higher rate limits" warning was
+  explicitly excluded by the HTTP-pattern-only 429 detector (cf. Lane 13 item 2).
+- **B-4 (retrieval settings).** No retrieval flags were passed. Every answer reports
+  the production CLI profile: `20 seeds, 150/150 claims (capped)` — i.e. ANN k=20,
+  FTS k=20, hops=1, claim cap=150, per-node quota=8, hub ranking on. No answer ran
+  at forced maximal settings.
+- **B-5 (MANDATORY HALT — real HTTP 429, Ruling 7).** On 2026-11-26, at question
+  **C020 attempt 1**, the drafter returned `429 RESOURCE_EXHAUSTED` with HTTP body
+  `code: 429`, quota metric
+  `generativelanguage.googleapis.com/generate_content_free_tier_requests`,
+  `limit: 500`, `GenerateRequestsPerDayPerProjectPerModel-FreeTier`,
+  `retryDelay: 343s`. This is a genuine daily free-tier quota exhaustion, not the
+  benign HF "higher rate limits" warning. The runner halted immediately and wrote
+  `{"halt": "HTTP 429 — Ruling 7; scope unchanged"}`. **No further questions were
+  attempted.** Per the work card ("any real HTTP 429: halt immediately and report")
+  and Ruling 7 ("take the extra days. Never cut runs. Never reduce the question set"),
+  Lane 14 is HALTED at 120/150 questions recorded:
+  - 107 answers obtained (one pass, production defaults);
+  - 12 questions exhausted 6 bounded attempts on transient Gemini 503
+    (`M023, M056, M058, M059, M060, C001–C007`);
+  - 1 question halted on 429 (`C020`);
+  - 30 questions never attempted (`C021–C030`, `U001–U020`).
+  `record_429_halt.py` added the single omitted 429 row to the manifest from the
+  append-only `run.log`, with no new attempts. **No verdict table, threshold table,
+  or accuracy claim is issued for this incomplete run.** Await a fresh quota window
+  (or human direction) before any resumption; the question set and key remain frozen
+  and unedited.

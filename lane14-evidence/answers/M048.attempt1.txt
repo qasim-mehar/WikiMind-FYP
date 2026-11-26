@@ -1,0 +1,24 @@
+question: Which of the documents explicitly mention Wikipedia?
+answer:   The document '2005-11401-retro' explicitly mentions Wikipedia in multiple contexts, including its use as a knowledge source [c-dca5f653dbbf], [c-d2677485567b], [c-c5d774d8a587], [c-753cce0a0365], [c-c98b7f735367], [c-e972705d4d90], [c-e6b94b5be535], and as part of the titles of several papers [c-2c466f626ee0], [c-33cb6ca8d44f], [c-0feaf6445ab9], [c-9872dd65c264], [c-1afe72ec79bb]. The document '1706-03762-attention' does not explicitly mention Wikipedia.
+sufficient: true
+citations:
+  [c-dca5f653dbbf] 2005-11401-retro — The Wikipedia dump consists of 21 million documents, where each document is a 100-word chunk of a Wikipedia article.
+  [c-d2677485567b] 2005-11401-retro — The experiments use the December 2018 Wikipedia dump.
+  [c-c5d774d8a587] 2005-11401-retro — The experiments use a single Wikipedia dump as the non-parametric knowledge source.
+  [c-753cce0a0365] 2005-11401-retro — In RAG models, the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia.
+  [c-c98b7f735367] 2005-11401-retro — RAG can use parametric knowledge to generate responses for questions that cannot be answered using Wikipedia alone.
+  [c-e972705d4d90] 2005-11401-retro — The authors of the RAG study use a different Wikipedia dump than the one used by the FEVER task.
+  [c-e6b94b5be535] 2005-11401-retro — Each Wikipedia article is split into disjoint 100-word chunks.
+  [c-2c466f626ee0] 2005-11401-retro — The paper 'Reading Wikipedia to Answer Open-Domain Questions' was published in the Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics in July 2017.
+  [c-33cb6ca8d44f] 2005-11401-retro — The paper titled 'Reading Wikipedia to Answer Open-Domain Questions' was authored by Danqi Chen, Adam Fisch, Jason Weston, and Antoine Bordes.
+  [c-0feaf6445ab9] 2005-11401-retro — The paper titled 'Wizard of wikipedia: Knowledge-powered conversational agents' was authored by Emily Dinan, Stephen Roller, Kurt Shuster, Angela Fan, Michael Auli, and Jason Weston.
+  [c-9872dd65c264] 2005-11401-retro — Peter J. Liu, Mohammad Saleh, Etienne Pot, Ben Goodrich, Ryan Sepassi, Lukasz Kaiser, and Noam Shazeer authored the paper titled Generating wikipedia by summarizing long sequences.
+  [c-1afe72ec79bb] 2005-11401-retro — The paper Generating wikipedia by summarizing long sequences was published in the International Conference on Learning Representations in 2018.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.003794250000 (3 ledger events)
+wall:     54.641s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2032.06it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

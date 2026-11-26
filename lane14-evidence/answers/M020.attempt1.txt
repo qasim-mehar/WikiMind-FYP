@@ -1,0 +1,14 @@
+question: Why does BM25 outperform learned retrieval on FEVER but not on other tasks?
+answer:   The provided claims state that BM25 performs best for the FEVER task [c-e6548bb0b5da]. However, the claims do not provide an explanation for why BM25 outperforms learned retrieval on FEVER while learned retrieval improves results for all other tasks [c-61c48e4fe151].
+sufficient: false
+citations:
+  [c-e6548bb0b5da] 2005-11401-retro — BM25 performs best for the FEVER task.
+  [c-61c48e4fe151] 2005-11401-retro — Learned retrieval improves results for all tasks.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002749500000 (3 ledger events)
+wall:     66.758s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  36%|███▌      | 71/199 [00:00<00:00, 675.56it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1150.37it/s]

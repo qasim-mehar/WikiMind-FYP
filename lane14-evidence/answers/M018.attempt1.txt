@@ -1,0 +1,16 @@
+question: How does RAG-Sequence decoding approximate argmax and why need Thorough or Fast Decoding?
+answer:   The RAG-Sequence model approximates the argmax by treating the retrieved document as a single latent variable that is marginalized to calculate the seq2seq probability p(y|x) using a top-K approximation [c-7ad7eab98b64]. Thorough Decoding is a procedure for RAG-Sequence that involves additional forward passes to estimate hypothesis probability [c-c6a43b8b8b2f]. Fast Decoding is a procedure that approximates pθ(y|x,zi) as 0 for hypotheses not generated during beam search [c-ec5d0e88ba65].
+sufficient: true
+citations:
+  [c-7ad7eab98b64] 2005-11401-retro — The RAG-Sequence model treats the retrieved document as a single latent variable that is marginalized to calculate the seq2seq probability p(y|x) using a top-K approximation.
+  [c-c6a43b8b8b2f] 2005-11401-retro — The decoding procedure for RAG-Sequence that involves additional forward passes to estimate hypothesis probability is called Thorough Decoding.
+  [c-ec5d0e88ba65] 2005-11401-retro — The decoding procedure for RAG-Sequence that approximates pθ(y|x,zi) as 0 for hypotheses not generated during beam search is called Fast Decoding.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002792000000 (3 ledger events)
+wall:     34.025s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  72%|███████▏  | 144/199 [00:00<00:00, 1420.61it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1801.31it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

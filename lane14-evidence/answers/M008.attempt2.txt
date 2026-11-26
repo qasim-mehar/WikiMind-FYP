@@ -1,0 +1,14 @@
+question: Which checkpoint-averaging and beam settings were used for base versus big translation models?
+answer:   The provided claims do not contain information regarding the checkpoint-averaging or beam settings used for base versus big translation models.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002571250000 (3 ledger events)
+wall:     33.692s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  30%|██▉       | 59/199 [00:00<00:00, 424.42it/s]
+Loading weights:  51%|█████▏    | 102/199 [00:00<00:00, 415.87it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 591.67it/s]

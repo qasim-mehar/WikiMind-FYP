@@ -1,0 +1,20 @@
+question: Transformer cites Bahdanau et al. [2] and RAG cites BART [32]; what common task family do these belong to?
+answer:   The Transformer is a sequence transduction model [c-1ec92c835808], and BART is a denoising sequence-to-sequence pre-training model [c-8d9d87fad43b, c-d66b88f5ddb7]. Both belong to the sequence-to-sequence (seq2seq) model family [c-d66b88f5ddb7, c-95e8682dcd5c].
+sufficient: true
+citations:
+  [c-1ec92c835808] 1706-03762-attention — The Transformer is the first sequence transduction model based entirely on attention.
+  [c-8d9d87fad43b] 2005-11401-retro — The paper BART: Denoising sequence-to-sequence pre-training for natural language generation, translation, and comprehension was published in 2019.
+  [c-d66b88f5ddb7] 2005-11401-retro — Mike Lewis, Yinhan Liu, Naman Goyal, Marjan Ghazvininejad, Abdelrahman Mohamed, Omer Levy, Veselin Stoyanov, and Luke Zettlemoyer are the authors of the paper titled BART: Denoising sequence-to-sequence pre-training for natural language generation, translation, and comprehension.
+  [c-95e8682dcd5c] 2005-11401-retro — BART and T5 are pre-trained encoder-decoder models that utilize bi-directional attention.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.003047750000 (3 ledger events)
+wall:     68.327s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  14%|█▍        | 28/199 [00:00<00:00, 246.47it/s]
+Loading weights:  27%|██▋       | 54/199 [00:00<00:00, 235.69it/s]
+Loading weights:  52%|█████▏    | 103/199 [00:00<00:00, 339.41it/s]
+Loading weights:  70%|███████   | 140/199 [00:00<00:00, 350.27it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 456.93it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

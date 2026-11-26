@@ -1,0 +1,16 @@
+question: How many GPUs did the Transformer and RAG papers use for training, and which GPU models?
+answer:   The Transformer (big) model was trained on 8 NVIDIA P100 GPUs [c-c24e9f63c086, c-f049f0012af9]. RAG models and BART baselines were trained using 8 NVIDIA V100 GPUs (32GB) [c-0d81cf53d064].
+sufficient: true
+citations:
+  [c-0d81cf53d064] 2005-11401-retro — RAG models and BART baselines are trained using 8, 32GB NVIDIA V100 GPUs.
+  [c-c24e9f63c086] 1706-03762-attention — Training the Transformer (big) model for the English-to-German task took 3.5 days on 8 P100 GPUs.
+  [c-f049f0012af9] 1706-03762-attention — The models were trained on one machine equipped with 8 NVIDIA P100 GPUs.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002899250000 (3 ledger events)
+wall:     45.265s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  73%|███████▎  | 145/199 [00:00<00:00, 1344.94it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1652.56it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

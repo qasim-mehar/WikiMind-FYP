@@ -1,0 +1,13 @@
+question: Per Table 2, how do adversarial nets compare with MCMC-based models on sampling and p(x) evaluation?
+answer:   Table 2 summarizes the difficulties encountered by different generative modeling approaches [c-71c82ab4d8cf]. The provided claims do not contain the specific content of Table 2, and therefore do not provide a comparison between adversarial nets and MCMC-based models regarding sampling and p(x) evaluation.
+sufficient: false
+citations:
+  [c-71c82ab4d8cf] 1406-2661-gan — Table 2 summarizes the difficulties encountered by different generative modeling approaches.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002536250000 (3 ledger events)
+wall:     57.300s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  83%|████████▎ | 165/199 [00:00<00:00, 1597.95it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1811.92it/s]

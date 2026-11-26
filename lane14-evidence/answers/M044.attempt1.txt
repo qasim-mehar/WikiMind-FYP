@@ -1,0 +1,14 @@
+question: Which papers report using eight GPUs and which GPU models?
+answer:   The models in the paper 'Attention is all you need' were trained on one machine equipped with 8 NVIDIA P100 GPUs [c-f049f0012af9]. Additionally, RAG models and BART baselines are trained using 8, 32GB NVIDIA V100 GPUs [c-0d81cf53d064].
+sufficient: true
+citations:
+  [c-f049f0012af9] 1706-03762-attention — The models were trained on one machine equipped with 8 NVIDIA P100 GPUs.
+  [c-0d81cf53d064] 2005-11401-retro — RAG models and BART baselines are trained using 8, 32GB NVIDIA V100 GPUs.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002854000000 (3 ledger events)
+wall:     28.796s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2144.08it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

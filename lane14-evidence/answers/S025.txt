@@ -1,0 +1,15 @@
+question: Which retriever do RAG models use?
+answer:   The RAG retriever is initialized using the DPR (Dense Passage Retrieval) retriever [c-b099cb509913]. The DPR retrieval component utilizes a bi-encoder architecture [c-181d7c845b5b].
+sufficient: true
+citations:
+  [c-b099cb509913] 2005-11401-retro — The RAG retriever is initialized using the DPR retriever.
+  [c-181d7c845b5b] 2005-11401-retro — The DPR retrieval component uses a bi-encoder architecture.
+retrieval: 23 seeds, 150/150 claims (capped)
+shadow:   $0.002749000000 (3 ledger events)
+wall:     36.559s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  42%|████▏     | 84/199 [00:00<00:00, 838.30it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1228.61it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

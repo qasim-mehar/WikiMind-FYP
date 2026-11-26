@@ -1,0 +1,15 @@
+question: How many trainable parameters do RAG models have in total?
+answer:   RAG models contain 110 million trainable parameters for the BERT-base query encoder [c-648b5e4924d7] and 406 million trainable parameters derived from the BART-large model [c-69ab81c8acb4].
+sufficient: true
+citations:
+  [c-648b5e4924d7] 2005-11401-retro — The RAG models contain 110M trainable parameters for the BERT-base query encoder.
+  [c-69ab81c8acb4] 2005-11401-retro — The RAG models contain 406 million trainable parameters derived from the BART-large model.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002764500000 (3 ledger events)
+wall:     32.834s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  53%|█████▎    | 106/199 [00:00<00:00, 1032.41it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1583.64it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
