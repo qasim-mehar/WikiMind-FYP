@@ -4,7 +4,9 @@ The three prompts are governance-authored and stored verbatim in
 ``wikimind.compile.prompts``.  Any rewording, translation, or "improvement"
 — including whitespace changes — breaks these digest checks.  Changing a
 prompt requires a new governance instruction, which updates both the
-constant and its digest here.
+constant and its digest here. Lane 20's quote-scoped wording change is
+authorized by Ruling 32B and logged in PROMPT-CHANGELOG.md; JUDGE_PROMPT
+is unchanged.
 """
 
 from __future__ import annotations
@@ -22,8 +24,8 @@ from wikimind.compile.prompts import (
 )
 
 GOLDEN_PROMPT_DIGESTS = {
-    "ANALYZE_PROMPT": "35f738617661874031477b8564b3e21e33c602480ea1ee70f71f725b1efff4a6",
-    "WRITE_PROMPT": "32ed89ddb0f060c164ba555a72c6803aab5c4166825846e801e434fe72895fd6",
+    "ANALYZE_PROMPT": "f3fdb519fc9e75909d24e4eebac77ad6cd5a8d899ffd7329af0ea356da9416a8",
+    "WRITE_PROMPT": "d6454affb4a5ef05bc482353db2a41874223ba2e1d07b4c839e221a6e3eea558",
     "JUDGE_PROMPT": "2b56cc42b1e895a44ee532d79674ab6eb0eee1393f39b73d82308ae6a1a40589",
 }
 

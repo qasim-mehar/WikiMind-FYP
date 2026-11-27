@@ -1,0 +1,17 @@
+{
+  "arm": "before",
+  "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "family": "nvidia (non-Gemini)",
+  "blind": true,
+  "random_order": true,
+  "seed": 42,
+  "pairs_drafted": 51,
+  "judgments": 0,
+  "entailed": 0,
+  "entailment_rate": null,
+  "draft_shadow_usd": 0.08110425,
+  "judge_shadow_usd": 0,
+  "halt": "HTTP 429 — Ruling 7 halt: OpenRouter judge call failed after 3 attempts: HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remaining\":\"0\",\"X-RateLimit-Reset\":\"1795824000000\"},\"limit_source\":\"openrouter_free_tier_daily\",\"remedy_hint\":\"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.\",\"provider_name\":null}},\"user_id\":\"user_3KlwHeT6lZCxNAsvn7P2gQ76FRP\"}",
+  "draft_halt": null,
+  "details": []
+}

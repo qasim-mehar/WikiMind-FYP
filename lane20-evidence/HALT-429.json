@@ -1,0 +1,22 @@
+{
+  "incident": "real HTTP 429 from OpenRouter judge endpoint",
+  "ruling": "Ruling 7 — rate limits are schedule, not scope; real 429 halts the run",
+  "guard_honored": true,
+  "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "call_site": "judge.m3b_entailment",
+  "provider_error_code": 429,
+  "provider_message": "Rate limit exceeded: free-models-per-day",
+  "limit_source": "openrouter_free_tier_daily",
+  "x_ratelimit_limit": "50",
+  "x_ratelimit_remaining": "0",
+  "reset_utc": "2026-11-28T00:00:00+00:00",
+  "observed_utc": "2026-11-27T08:39:18+00:00",
+  "judge_calls_completed_this_lane": 16,
+  "judge_shadow_usd_before_halt": 0.0172812,
+  "judge_ceiling_usd": 0.5,
+  "action": "All further judge calls halted. No retry, no model substitution, no paid-tier escalation. Re-measurement of the repaired arm is BLOCKED until the daily quota resets or a funded key is issued by a human.",
+  "affected_artifacts": [
+    "lane20-evidence/judgments_before.json (halt recorded; n=15 partial, non-compliant sample)",
+    "lane20-evidence/claims_before.json (51 drafted pairs, unjudged)"
+  ]
+}
