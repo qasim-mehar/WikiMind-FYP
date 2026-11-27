@@ -53,6 +53,19 @@ Common commands: `wikimind project create`, `wikimind document add`,
 and the `wikimind integrity` group (`check`, `contradictions`, `verify-ledger`,
 `remove`, `leaks`).
 
+For a single-step ingest, use `wikimind add <project> <files...>` (also requires
+`WIKIMIND_LIVE=1`). It shows extract / estimate / compile stages, prints a
+conservative shadow-cost preview before any LLM call, and asks for confirmation;
+pass `--yes` for non-interactive runs. Re-adding an already-compiled file is a
+no-op — deterministic claim IDs and unit markers prevent duplicate work or
+claims. A compile pass brings the whole project up to date (other pending
+files are included; already-compiled units are skipped). Pass `--force` to
+clear those markers and re-run distillation (regeneration, not replay; dedup
+still suppresses duplicate claims). Use
+`--no-compile` to extract and register only, and `--create-project` to create a
+missing project. The low-level `document add` + `compile` pair remains available
+for scripted control.
+
 ## Documentation ladder
 
 1. **`AGENTS.md`** — start here: orientation, invariants, vocabulary, hard rules.
