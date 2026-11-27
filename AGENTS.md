@@ -245,8 +245,11 @@ prices; R7 rate limits are schedule, not scope; R9 V0 gate retired (D14); **R10/
 never be a Gemini family model (anti-self-preference bias) — enforced by a guard test that MUST
 NOT be deleted or weakened; **R11** `:free` routes are always priced at their paid twin, never $0;
 **R12** drafter pinned to a model proven live through our own client; **R14** compile must
-materialize node versions (`render/`, commit `9b72aba`). Any model-pin change requires a new ruling
-naming its predecessor.
+materialize node versions (`render/`, commit `9b72aba`). **R25** fixed the V0
+acceptance rubric; **R28** reconciled push scope (agent pushes lane branches only;
+human merges and pushes main); **R30** amended runaway-generation cost accounting;
+**R31** added the Gate C evidence-manifest rule (every listed path must be
+git-tracked). Any model-pin change requires a new ruling naming its predecessor.
 
 **Current pins (`src/wikimind/prices.py` — single source of truth):**
 
@@ -260,9 +263,12 @@ naming its predecessor.
 
 ## 7. Implementation status and repository map
 
-**Honest status:** Gate A (foundation) is done; the engine is largely built; `src/wikimind/integrity/`
-landed with Lane 8 (CI #35). Gate B remains incomplete because `serve/` does not exist yet. The
-`v0-fixtures` corpus is mid-compile.
+**Honest status:** Gate A (foundation) is done; the engine is largely built and Lanes 7–17 have
+landed on `main`. Gate B remains incomplete: `src/wikimind/serve/` does not exist yet. The
+`v0-fixtures` corpus compile is complete (229/229 units). Lanes 13/14 produced the mini-check and
+single-arm V0 evaluation evidence; the full two-arm evaluation under `V0_PROTOCOL.md` is still ahead
+(D14). Lane 17 added a **local-only** web prototype (`src/wikimind/webapp/`) — no auth, loopback-bound,
+not the Stage 1 product interface.
 
 ### What is implemented
 
@@ -276,30 +282,39 @@ landed with Lane 8 (CI #35). Gate B remains incomplete because `serve/` does not
 | `index/` | Embedding store, incremental current-version indexer, ANN/FTS/k-hop/hybrid retrieval **substrates** (no ranking/fusion policy yet), CLI. |
 | `render/` | Deterministic node rendering, append-only version materialization (Ruling 14), backfill with repair, CLI. |
 | `integrity/` | Lint, contradiction/staleness checks, removal workflow (tombstone / retracted / guarded duplicate), post-removal leak scan, entailment sampling, reconciliation, CLI (Lane 8, CI #35; removal from Lane 12). |
+| `qa/` | Answer path: hub-aware retrieval, composition and quote verification, `ask` CLI, golden set (Lanes 7 and 9). |
+| `ingest/` | One-command `wikimind add` flow (extract → estimate → confirm → compile), idempotent unit markers, shadow-cost preview (Lane 16). |
+| `webapp/` | Local-only FastAPI prototype: documents/add/ask pages, loopback bind, isolated cost ledger (Lane 17). |
 
 **Planned / not implemented:** `src/wikimind/serve/` (query traversal, page reading, answer
-synthesis, export/import) exists only in `docs/lanes/PLAN.md`. `node_redirects` exists in the schema
+synthesis, export/import) exists only in `docs/lanes/PLAN.md`; `src/wikimind/webapp/` is a local
+developer prototype, not `serve/`. `node_redirects` exists in the schema
 but has no application write path yet. `llm/cost.py::DbCostSink` is an explicit `NotImplementedError`
 stub — the cost ledger today is `costs.jsonl` on disk, not the `cost_events` table. The `integrity/`
 package is **implemented**, not planned: it landed with Lane 8 (CI #35), writes `jobs`,
 `ledger_blocks`, and `events`, and now hosts the end-to-end removal workflow.
 
-**Lane plan (`docs/lanes/PLAN.md`)** — note the actual merge history renumbered the area lanes:
-`lane/0-trunk` (deps, DB, CI) → `lane/1-parse` → `lane/2-models` → `lane/3-compile` → `lane/4-index`
-→ `lane/5-versions` (the `render/` package) → `lane/6-hygiene`. The plan document still describes the
-earlier L4=serve / L5=integrity split; treat the code and git history as authoritative for what has
-landed, and the plan for what remains. Lanes own their files: stay inside your lane, read anything,
-write only your lane's files, never edit another lane's `pyproject.toml`.
+**Lane plan (`docs/lanes/PLAN.md`)** — the actual merge history extended the original area lanes:
+`lane/0-trunk` → `lane/1-parse` → `lane/2-models` → `lane/3-compile` → `lane/4-index` →
+`lane/5-versions` (`render/`) → `lane/6-hygiene` → `lane/7-qa` → `lane/8-integrity` →
+`lane/9-remediation` → `lane/10-standing-docs-sync` → `lane/11-qa-recall` → `lane/12-removal` →
+`lane/13-mini-check` → `lane/14-v0-eval` → `lane/15-hygiene` → `lane/16-ingestion` →
+`lane/17-interface`. The plan document still describes the earlier L4=serve / L5=integrity split;
+treat the code and git history as authoritative for what has landed, and the plan for what remains.
+Lanes own their files: stay inside your lane, read anything, write only your lane's files, never
+edit another lane's `pyproject.toml`.
 
 ### Other top-level content
 
 - `migrations/` — `000_enable_vector.sql`, `001_schema_v1.sql`, `002_channels_per_document.sql`,
   `003_compile_runs.sql`, `004_compile_units.sql`. Migrations keep LF endings on Windows.
-- `tests/` — 33 test files (~330 tests) covering DB/config/migrations/locks/checks, parse contract and
-  golden fixtures, LLM secrets/cost/retry/judge/fakes, compile pipeline, index, render. DB tests skip
-  cleanly when `WIKIMIND_DB` is unset or unreachable; tests never need keys or network.
+- `tests/` — 57 test files (536 DB tests; no-DB: 371 passed + 165 skipped) covering DB/config/migrations/locks/checks, parse contract and
+  golden fixtures, LLM secrets/cost/retry/judge/fakes, compile pipeline, index, render, QA, ingest,
+  webapp. DB tests skip cleanly when `WIKIMIND_DB` is unset or unreachable; tests never need keys or network.
 - `docs/contracts/` — frozen `schema.md`, `parsed-document.md`, `llm-client.md`.
 - `docs/lanes/PLAN.md`, `docs/runbooks/morning-run.md`, `docs/v0/interview-script.md`.
+- `lane13-evidence/`, `lane14-evidence/` — mini-check and single-arm V0 evaluation evidence;
+  `lane14-evidence/SHA256SUMS.txt` is the CRLF manifest (Gate C rule, Ruling 31).
 - `data/` — morning-run logs, archived cost ledgers, and the ~68 MB Retraction Watch CSV plus a
   Semantic Scholar probe (V0 corpus material, legal sources only).
 - `costs.jsonl` — append-only shadow-cost ledger (~1,384 events, ≈ $1.50 shadow, $0 actual).
@@ -451,6 +466,13 @@ Standalone module entry points also exist: `python -m wikimind.parse.cli`, `.ind
 | L8 integrity | — (merged) | `lane/8-integrity` | `src/wikimind/integrity/` — checks, ledger, events, jobs |
 | L9 remediation | — (merged, fast-forward) | `lane/9-remediation` | QA recall/ranking and golden set (`src/wikimind/qa/`, `tests/golden/`) |
 | L10 standing docs | — (merged) | `lane/10-standing-docs-sync` | `AGENTS.md`, `V0-NOTES.md`, QA pipeline sync |
+| L11 QA recall | — (merged) | `lane/11-qa-recall` | QA hub-ranking and probe (`src/wikimind/qa/`) |
+| L12 removal | — (merged) | `lane/12-removal` | `src/wikimind/integrity/` removal workflow |
+| L13 mini-check | — (merged) | `lane/13-mini-check` | `lane13-evidence/` (doc-only) |
+| L14 V0 eval | — (merged) | `lane/14-v0-eval` | `lane14-evidence/`, `LANE14-REPORT.md` (doc-only) |
+| L15 hygiene | — (merged) | `lane/15-hygiene` | cost-mirror guard, `.gitignore` anchor, golden-set note |
+| L16 ingestion | — (merged) | `lane/16-ingestion` | `src/wikimind/ingest/`, `wikimind add` CLI |
+| L17 interface | — (merged) | `lane/17-interface` | `src/wikimind/webapp/` local-only prototype |
 
 Rules for every lane: stay inside your owned files (read anything, write only your lane's files); never edit another lane's `pyproject.toml` (L0 declares all dependencies); use your own database (`wikimind_l0` for L0; test databases are per-session); make small present-tense commits (e.g. `db: add migration runner`); the agent may commit and push lane branches, but **never force-push** or rewrite published history (Ruling 28(1)/(3)); merges into main and pushes of main are human actions (Ruling 28(1)); if blocked for about 30 minutes, commit WIP, report `BLOCKED`, and stop.
 
@@ -465,7 +487,7 @@ Rules for every lane: stay inside your owned files (read anything, write only yo
 **Governance & scope**
 - Never edit frozen documents from a lane branch (`DECISIONS.md`, `PROJECT.md`, `V0_PROTOCOL.md`, `PRE_REGISTRATION.md`, `docs/contracts/`). `V0-NOTES.md` is append-only. A change needs explicit human authorization and a new dated entry naming what it replaces.
 - Stay inside your lane's files. Do not touch another lane's code or `pyproject.toml`. The agent may commit and push lane branches (Ruling 28(1)); never force-push or rewrite published history (Ruling 28(3)). Merges into main and pushes of main are human actions only.
-- If asked to build a web UI, auth, or graph view, note that these are out of Stage 1 scope and require a human decision.
+- If asked to build a web UI, auth, or graph view, note that these are out of Stage 1 scope and require a human decision. The Lane 17 `src/wikimind/webapp/` prototype is the narrow exception already authorized: local-only, loopback-bound, no auth; it is a developer tool, not the Stage 1 product interface.
 
 **Terminology**
 - Never call a node a "chunk." Use the vocabulary in §5 exactly. Do not say "replay" when you mean regeneration.
@@ -492,11 +514,12 @@ Rules for every lane: stay inside your owned files (read anything, write only yo
 
 ---
 
-## 12. Operational state (as of 2026-11-24)
+## 12. Operational state (as of 2026-11-27)
 
-- Branch `main` tracks `origin/main`; the tree is clean except untracked `.vscode/` and `data/`.
-- The `v0-fixtures` corpus compile is **complete: 229/229 units**. Verified read-only against `wikimind_live_l3`: documents 4, claims 530, edges 1593, compile_units 229, cost_events 1427. `costs.jsonl` holds **1,434 events** (~$1.51 shadow cost, $0 actual), dominated by `compile.write` / `compile.judge` / `compile.analyze`. Daily OpenRouter `:free` caps produced HTTP 429 stops and Gemini 503 retries recorded in `data/morning-run-*.log`.
-- Full evaluation under `V0_PROTOCOL.md` is still ahead (D14). A ~30-question directional mini-check runs once the engine answers end-to-end; CI thresholds apply only to the full run.
+- Branch `main` tracks `origin/main`; tip `c798dda` after the human `--no-ff` merges of lanes 13–17 in that order. CI green: DB pytest 536 passed; no-DB pytest 371 passed + 165 skipped; ruff check and format check clean.
+- The `v0-fixtures` corpus compile is **complete: 229/229 units** (unchanged by the evidence lanes). Verified read-only against `wikimind_live_l3`: documents 4, claims 530, edges 1593, compile_units 229, cost_events 1427. `costs.jsonl` holds **1,434 events** (~$1.51 shadow cost, $0 actual), dominated by `compile.write` / `compile.judge` / `compile.analyze`. Daily OpenRouter `:free` caps produced HTTP 429 stops and Gemini 503 retries recorded in `data/morning-run-*.log`.
+- Lane 13 archived the ~30-question mini-check in `lane13-evidence/`; Lane 14 completed the single-arm two-window V0 evidence run in `lane14-evidence/` (150 answers; 78 PASS / 72 FAIL; M3b 0.825; M1/M2 N/A). The full two-arm evaluation under `V0_PROTOCOL.md` is still ahead (D14); CI thresholds apply only to the full run.
+- `lane14-evidence/costs.jsonl` is now git-tracked at digest `6fef9a4f…dcdbf068`; its CRLF manifest SHA-256 is `dbaeae79…cea1cc` (Ruling 31).
 - Corpus material in `data/v0/` must stay legal sources only (Semantic Scholar, arXiv, Retraction Watch).
 
 ## 13. Reading paths — pick by task
@@ -508,8 +531,11 @@ Rules for every lane: stay inside your owned files (read anything, write only yo
 | Work on parsers or prompt wrapping | `docs/contracts/parsed-document.md` → `src/wikimind/parse/` |
 | Change model clients, pins, cost, retries | `V0-NOTES.md` rulings → `src/wikimind/prices.py` → `docs/contracts/llm-client.md` → `src/wikimind/llm/` |
 | Work on ingestion/distillation | DECISIONS D1–D4, D7 → `src/wikimind/compile/` → `src/wikimind/render/` |
-| Work on retrieval/QA | D10, `PROJECT.md` §10.2 → `src/wikimind/index/` (note: `serve/` not yet built) |
+| Work on retrieval/QA | D10, `PROJECT.md` §10.2 → `src/wikimind/index/` and `src/wikimind/qa/` (`ask` CLI; note: `serve/` not yet built) |
 | Work on lint/removal | D5–D9, `PROJECT.md` §10.3–10.4 → `src/wikimind/integrity/` (landed with Lane 8, CI #35) |
+| Work on one-command ingest | D1–D4 → `src/wikimind/ingest/` and `src/wikimind/compile/` (`wikimind add`) |
+| Work on the local web prototype | `README.dev.md` §"Local web interface prototype" → `src/wikimind/webapp/` (local-only; no auth) |
+| Inspect V0 evidence | `LANE14-REPORT.md`, `lane13-evidence/`, `lane14-evidence/` (manifest: Ruling 31) |
 | Set up or run verification | `README.dev.md` → `pyproject.toml` → `.github/workflows/ci.yml` |
 
 ## 14. First-session checklist
