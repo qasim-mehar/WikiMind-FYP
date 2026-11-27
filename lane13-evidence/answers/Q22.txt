@@ -1,0 +1,14 @@
+question: What happens when retrieval collapses during RAG training, and how does the model then compare to BART?
+answer:   When retrieval collapses during RAG training, the generator learns to ignore the retrieved documents [c-3d76e4703be2]. In this state, the RAG model performs equivalently to BART [c-eb911606dcd5].
+sufficient: true
+citations:
+  [c-3d76e4703be2] 2005-11401-retro — After retrieval collapse, the generator learns to ignore the retrieved documents.
+  [c-eb911606dcd5] 2005-11401-retro — When retrieval collapses, the RAG model performs equivalently to BART.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002762000000 (3 ledger events)
+wall:     34.719s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2332.85it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

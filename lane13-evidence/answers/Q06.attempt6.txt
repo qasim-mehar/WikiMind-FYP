@@ -1,0 +1,17 @@
+question: How does the per-layer computational complexity of self-attention compare with recurrent and convolutional layers in the Transformer paper?
+answer:   In the Transformer paper, the per-layer computational complexity of self-attention is O(n^2 * d) [c-437f8bf253d8]. In comparison, the per-layer computational complexity for recurrent layers is O(n * d^2) [c-70b23deb28aa], and for convolutional layers, it is O(k * n * d^2) [c-738f90c4e5ba].
+sufficient: true
+citations:
+  [c-437f8bf253d8] 1706-03762-attention — The computational complexity per layer for self-attention is O(n^2 * d).
+  [c-70b23deb28aa] 1706-03762-attention — The computational complexity per layer for recurrent layers is O(n * d^2).
+  [c-738f90c4e5ba] 1706-03762-attention — The computational complexity per layer for convolutional layers is O(k * n * d^2).
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002791000000 (3 ledger events)
+wall:     63.145s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  27%|██▋       | 54/199 [00:00<00:00, 539.27it/s]
+Loading weights:  54%|█████▍    | 108/199 [00:00<00:00, 326.98it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 528.70it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

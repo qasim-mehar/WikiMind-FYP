@@ -1,0 +1,14 @@
+question: How often does RAG retrieve a gold article within its top 10 documents and within the top-ranked document?
+answer:   RAG retrieves a gold article within its top 10 documents in 90% of cases [c-1eb576dfd1d3]. In 71% of cases, the top-ranked document retrieved by RAG is from a gold article [c-ef8761fd8a03].
+sufficient: true
+citations:
+  [c-1eb576dfd1d3] 2005-11401-retro — In 90% of cases, RAG retrieves a gold article within the top 10 documents.
+  [c-ef8761fd8a03] 2005-11401-retro — The top document retrieved by RAG is from a gold article in 71% of cases.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002776500000 (3 ledger events)
+wall:     36.841s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 15726.47it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

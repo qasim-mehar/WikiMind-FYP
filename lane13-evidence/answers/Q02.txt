@@ -1,0 +1,15 @@
+question: What BLEU score did the Transformer model achieve on the WMT 2014 English-to-French translation task, and does the corpus report more than one value?
+answer:   The provided claims contain conflicting information regarding the BLEU score achieved by the Transformer model on the WMT 2014 English-to-French translation task. One claim states the Transformer (big) model achieved a BLEU score of 41.0 [c-276a1ea04b43], while another claim states the Transformer model achieved a BLEU score of 41.8 [c-82789749ad65]. Therefore, the corpus reports more than one value for this task.
+sufficient: true
+citations:
+  [c-276a1ea04b43] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 41.0 on the WMT 2014 English-to-French translation task.
+  [c-82789749ad65] 1706-03762-attention — The Transformer model achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002882750000 (3 ledger events)
+wall:     53.250s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  31%|███       | 62/199 [00:00<00:00, 595.44it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1789.81it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,13 @@
+question: Why does training the generator to maximize log D(G(z)) give stronger gradients early in learning than minimizing log(1-D(G(z)))?
+answer:   Training the generative model G to maximize log D(G(z)) provides stronger gradients early in learning compared to minimizing log(1 - D(G(z))) [c-bdddb63561b5].
+sufficient: true
+citations:
+  [c-bdddb63561b5] 1406-2661-gan — Training the generative model G to maximize logD(G(z)) provides stronger gradients early in learning compared to minimizing log(1−D(G(z))).
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002455000000 (3 ledger events)
+wall:     36.563s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 4715.34it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

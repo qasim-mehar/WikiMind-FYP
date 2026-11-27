@@ -1,0 +1,153 @@
+
+===== Q01 [sufficient] suff=true cites=1 =====
+A: The Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task [c-e2c686bf6eac].
+  C: The Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task.
+
+===== Q02 [conflict] suff=true cites=2 =====
+A: The provided claims contain conflicting information regarding the BLEU score achieved by the Transformer model on the WMT 2014 English-to-French translation task. One claim states the Transformer (big) model achieved a BLEU score of 41.0 [c-276a1ea04b43], while another claim states the Transformer model achieved a BLEU score of 41.8 [c-82789749ad65]. Therefore, the corpus reports more than one value for this task.
+  C: The Transformer (big) model achieved a BLEU score of 41.0 on the WMT 2014 English-to-French translation task.
+  C: The Transformer model achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task.
+
+===== Q03 [sufficient] suff=true cites=2 =====
+A: The Transformer model employs 8 parallel attention heads [c-7fac685e3560]. Each attention head uses a dimension of 64 for both the key dimension (dk) and the value dimension (dv) [c-4720bca0595f].
+  C: The model employs 8 parallel attention heads.
+  C: In the Transformer architecture, each attention head uses a dimension of 64 for both the key dimension (dk) and the value dimension (dv).
+
+===== Q04 [sufficient] suff=true cites=4 =====
+A: The Transformer uses positional encodings added to input embeddings to provide information about the relative or absolute position of tokens in a sequence [c-bb24a21a339d]. These encodings have the same dimension as the input embeddings [c-914959a24694]. The model uses sine and cosine functions of different frequencies for this purpose [c-052d935e88a8]. Additionally, the authors noted that learned positional embeddings and sinusoidal positional encodings produced nearly identical results [c-4eaf30cf91a9].
+  C: Positional encodings are added to input embeddings to provide information about the relative or absolute position of tokens in a sequence.
+  C: Positional encodings have the same dimension dmodel as the input embeddings.
+  C: The model uses sine and cosine functions of different frequencies for positional encoding.
+  C: Learned positional embeddings and sinusoidal positional encodings produced nearly identical results.
+
+===== Q05 [sufficient] suff=true cites=3 =====
+A: For the Transformer model, the Adam optimizer parameters are set as follows: beta1 is 0.9 [c-774be8a63d5c], beta2 is 0.98 [c-a909387fba98], and epsilon is 10^-9 [c-90451fd4eb6b].
+  C: The Adam optimizer beta1 parameter is set to 0.9.
+  C: The Adam optimizer beta2 parameter is set to 0.98.
+  C: The Adam optimizer epsilon parameter is set to 10^-9.
+
+===== Q06 [sufficient] suff=true cites=3 =====
+A: In the Transformer paper, the per-layer computational complexity of self-attention is O(n^2 * d) [c-437f8bf253d8]. In comparison, the per-layer computational complexity for recurrent layers is O(n * d^2) [c-70b23deb28aa], and for convolutional layers, it is O(k * n * d^2) [c-738f90c4e5ba].
+  C: The computational complexity per layer for self-attention is O(n^2 * d).
+  C: The computational complexity per layer for recurrent layers is O(n * d^2).
+  C: The computational complexity per layer for convolutional layers is O(k * n * d^2).
+
+===== Q07 [sufficient] suff=true cites=2 =====
+A: The Transformer encoder is composed of a stack of 6 identical layers [c-93df88c97b40]. Similarly, the decoder is composed of a stack of 6 identical layers [c-23c34ccffce9].
+  C: The encoder is composed of a stack of 6 identical layers.
+  C: The decoder is composed of a stack of 6 identical layers.
+
+===== Q08 [sufficient] suff=true cites=1 =====
+A: The output of the Scaled Dot-Product Attention mechanism is computed using the formula: softmax(QK^T / sqrt(dk))V [c-76bd067114c9].
+  C: The output of the Scaled Dot-Product Attention function is computed as softmax(QK^T / sqrt(dk))V.
+
+===== Q09 [sufficient] suff=true cites=1 =====
+A: The attention-head ablation reported that single-head attention performs 0.9 BLEU points lower than the optimal configuration of attention heads [c-eb90f687d8a1].
+  C: Single-head attention performs 0.9 BLEU points lower than the optimal configuration of attention heads.
+
+===== Q10 [sufficient] suff=true cites=5 =====
+A: The generative adversarial nets framework is formulated as a minimax two-player game [c-189548848cce]. In this framework, a generative model is pitted against a discriminative model [c-c7bc935b7e9b]. The generator G maps input noise variables to data space, while the discriminator D estimates the probability that a sample came from the training data rather than from the generator [c-2347e3c2ef24, c-4a164079b29a]. The training procedure alternates between optimizing the discriminator and the generator [c-4dac525b5af6].
+  C: The proposed framework corresponds to a minimax two-player game.
+  C: Adversarial nets are a framework where a generative model is pitted against a discriminative model that determines if a sample is from the model distribution or the data distribution.
+  C: The training procedure for the discriminative model D and the generative model G alternates between k steps of optimizing D and one step of optimizing G.
+  C: The discriminative model D estimates the probability that a sample came from the training data rather than from the generative model G.
+  C: The generator G maps input noise variables z to data space using a multilayer perceptron with parameters θg.
+
+===== Q11 [sufficient] suff=true cites=1 =====
+A: For a fixed generator G, the optimal discriminator D*G(x) is defined as pdata(x) / (pdata(x) + pg(x)) [c-60882ed279a4].
+  C: For a fixed generator G, the optimal discriminator D*G(x) is defined as pdata(x) / (pdata(x) + pg(x)).
+
+===== Q12 [sufficient] suff=true cites=1 =====
+A: The global minimum of the virtual training criterion C(G) is -log(4) [c-99356c4bfe57]. This minimum is achieved if and only if the generator distribution pg equals the data distribution pdata [c-99356c4bfe57].
+  C: The global minimum of the virtual training criterion C(G) is -log(4), which is achieved if and only if the generator distribution pg equals the data distribution pdata.
+
+===== Q13 [sufficient] suff=true cites=1 =====
+A: The authors of the Generative Adversarial Nets paper trained their adversarial nets on the MNIST, Toronto Face Database (TFD), and CIFAR-10 datasets [c-23d4ceb2da39].
+  C: The authors trained adversarial nets on the MNIST, Toronto Face Database (TFD), and CIFAR-10 datasets.
+
+===== Q14 [sufficient] suff=true cites=1 =====
+A: Training the generative model G to maximize log D(G(z)) provides stronger gradients early in learning compared to minimizing log(1 - D(G(z))) [c-bdddb63561b5].
+  C: Training the generative model G to maximize logD(G(z)) provides stronger gradients early in learning compared to minimizing log(1−D(G(z))).
+
+===== Q15 [sufficient] suff=true cites=2 =====
+A: No, the adversarial nets framework does not require Markov chains for sampling or unrolled approximate inference networks during training or sample generation [c-466f8f58cd5b, c-2dfb0dc981c7].
+  C: The framework does not require Markov chains or unrolled approximate inference networks during training or sample generation.
+  C: The adversarial nets framework does not require a Markov chain for sampling.
+
+===== Q16 [sufficient] suff=true cites=3 =====
+A: In the evaluation of generative adversarial nets, the probability of test set data under the distribution pg is estimated by fitting a Gaussian Parzen window to samples generated by the generator G [c-466c9248ea69]. Log-likelihood estimates calculated using this Parzen window method are presented in Table 1 [c-d8eb4dd04fb5], with reported numbers specifically for the MNIST dataset [c-bdbe1e17ae4e].
+  C: The probability of test set data under the distribution pg is estimated by fitting a Gaussian Parzen window to samples generated by the generator G.
+  C: Table 1 presents log-likelihood estimates calculated using the Parzen window method.
+  C: The reported numbers for the Parzen window-based log-likelihood estimates are on the MNIST dataset.
+
+===== Q17 [sufficient] suff=true cites=4 =====
+A: The RAG-Sequence and RAG-Token models differ in how they utilize retrieved documents during generation. The RAG-Sequence model treats the retrieved document as a single latent variable that is marginalized to calculate the sequence-to-sequence probability, meaning it uses the same document to predict each target token [c-7ad7eab98b64, c-7f1fd271fc92]. In contrast, the RAG-Token model draws a different latent document for each target token, which allows it to generate responses that combine content from several documents [c-0637c340355b, c-54bbcfb98746].
+  C: The RAG-Sequence model treats the retrieved document as a single latent variable that is marginalized to calculate the seq2seq probability p(y|x) using a top-K approximation.
+  C: The RAG-Sequence model uses the same document to predict each target token.
+  C: The RAG-Token model draws a different latent document for each target token.
+  C: The RAG-Token model may perform best on Jeopardy questions because it can generate responses that combine content from several documents.
+
+===== Q18 [sufficient] suff=true cites=4 =====
+A: In RAG models, the parametric memory consists of a pre-trained seq2seq model [c-753cce0a0365]. The non-parametric memory is a dense vector index of Wikipedia [c-753cce0a0365], which is composed of 21 million 728-dimensional vectors [c-702be46be80f]. This index is created from a single Wikipedia dump where each article is split into disjoint 100-word chunks [c-c5d774d8a587, c-e6b94b5be535].
+  C: In RAG models, the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia.
+  C: The non-parametric memory index consists of 21 million 728-dimensional vectors.
+  C: The experiments use a single Wikipedia dump as the non-parametric knowledge source.
+  C: Each Wikipedia article is split into disjoint 100-word chunks.
+
+===== Q19 [sufficient] suff=true cites=2 =====
+A: The RAG models contain 110 million trainable parameters for the BERT-base query encoder [c-648b5e4924d7]. Additionally, the RAG models contain 406 million trainable parameters derived from the BART-large model, which serves as the generator [c-69ab81c8acb4].
+  C: The RAG models contain 110M trainable parameters for the BERT-base query encoder.
+  C: The RAG models contain 406 million trainable parameters derived from the BART-large model.
+
+===== Q20 [sufficient] suff=true cites=2 =====
+A: RAG models achieve state-of-the-art results on three open-domain question answering tasks: Natural Questions, WebQuestions, and CuratedTrec [c-46bf5d504588, c-4b0e8a1eb511].
+  C: RAG models set the state of the art on three open domain QA tasks.
+  C: RAG models achieve state-of-the-art results on the Natural Questions, WebQuestions, and CuratedTrec open-domain question answering tasks.
+
+===== Q21 [sufficient] suff=true cites=1 =====
+A: The RAG-Sequence model achieves an Exact Match (EM) score of 44.5 on the Natural Questions dataset [c-baab1ede47dd].
+  C: The RAG-Sequence model achieves an Exact Match (EM) score of 44.5 on the Natural Questions dataset.
+
+===== Q22 [sufficient] suff=true cites=2 =====
+A: When retrieval collapses during RAG training, the generator learns to ignore the retrieved documents [c-3d76e4703be2]. In this state, the RAG model performs equivalently to BART [c-eb911606dcd5].
+  C: After retrieval collapse, the generator learns to ignore the retrieved documents.
+  C: When retrieval collapses, the RAG model performs equivalently to BART.
+
+===== Q23 [sufficient] suff=true cites=2 =====
+A: RAG retrieves a gold article within its top 10 documents in 90% of cases [c-1eb576dfd1d3]. In 71% of cases, the top-ranked document retrieved by RAG is from a gold article [c-ef8761fd8a03].
+  C: In 90% of cases, RAG retrieves a gold article within the top 10 documents.
+  C: The top document retrieved by RAG is from a gold article in 71% of cases.
+
+===== Q24 [sufficient] suff=true cites=1 =====
+A: The non-parametric memory index for RAG consists of 21 million 728-dimensional vectors [c-702be46be80f].
+  C: The non-parametric memory index consists of 21 million 728-dimensional vectors.
+
+===== Q25 [sufficient] suff=true cites=2 =====
+A: The world knowledge of a RAG model can be updated by replacing its non-parametric memory [c-bf1df9657014]. Specifically, the retrieval index can be hot-swapped to update the model without requiring retraining [c-5e96e7e8ce95].
+  C: RAG's world knowledge can be updated by replacing its non-parametric memory.
+  C: The retrieval index can be hot-swapped to update the model without requiring retraining.
+
+===== Q26 [conflict] suff=true cites=2 =====
+A: The corpus provides conflicting author lists for the paper 'R3: Reinforced ranker-reader for open-domain question answering'. One claim lists the authors as Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, and Jing Jiang [c-e38bbcd6852b]. A second claim lists the authors as Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, and Murray Campbell [c-f0b5b2356517].
+  C: Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, and Jing Jiang are the authors of the paper titled R3: Reinforced ranker-reader for open-domain question answering.
+  C: The authors of the paper are Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, and Murray Campbell.
+
+===== Q27 [sufficient] suff=true cites=1 =====
+A: The contradiction note claims that the Transformer model improved over existing best results on the WMT 2014 English-to-German translation task by over 2 BLEU [c-cc28fdac16c0].
+  C: The Transformer model improved over existing best results on the WMT 2014 English-to-German translation task by over 2 BLEU.
+
+===== Q28 [insufficient] suff=false cites=0 =====
+A: The provided claims do not contain information regarding the exact inference latency in milliseconds of the Transformer big model on the WMT 2014 test set.
+
+===== Q29 [insufficient] suff=false cites=3 =====
+A: The provided claims do not contain information regarding the weight decay coefficient used with the Adam optimizer in the Transformer architecture. The claims only specify that the Adam optimizer's beta1 parameter is 0.9 [c-774be8a63d5c], the beta2 parameter is 0.98 [c-a909387fba98], and the epsilon parameter is 10^-9 [c-90451fd4eb6b].
+  C: The Adam optimizer beta1 parameter is set to 0.9.
+  C: The Adam optimizer beta2 parameter is set to 0.98.
+  C: The Adam optimizer epsilon parameter is set to 10^-9.
+
+===== Q30 [insufficient] suff=false cites=0 =====
+A: The provided claims do not contain information regarding the number of NVIDIA V100 GPUs used to train the generative adversarial nets model.
+
+===== Q31 [insufficient] suff=true cites=1 =====
+A: The experiments described in the provided claims use the December 2018 Wikipedia dump as the non-parametric knowledge source [c-d2677485567b].
+  C: The experiments use the December 2018 Wikipedia dump.

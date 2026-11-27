@@ -1,0 +1,18 @@
+question: How is the generative adversarial nets framework formulated as a game between the generator and the discriminator?
+answer:   The generative adversarial nets framework is formulated as a minimax two-player game [c-189548848cce]. In this framework, a generative model is pitted against a discriminative model [c-c7bc935b7e9b]. The generator G maps input noise variables to data space, while the discriminator D estimates the probability that a sample came from the training data rather than from the generator [c-2347e3c2ef24, c-4a164079b29a]. The training procedure alternates between optimizing the discriminator and the generator [c-4dac525b5af6].
+sufficient: true
+citations:
+  [c-189548848cce] 1406-2661-gan — The proposed framework corresponds to a minimax two-player game.
+  [c-c7bc935b7e9b] 1406-2661-gan — Adversarial nets are a framework where a generative model is pitted against a discriminative model that determines if a sample is from the model distribution or the data distribution.
+  [c-4dac525b5af6] 1406-2661-gan — The training procedure for the discriminative model D and the generative model G alternates between k steps of optimizing D and one step of optimizing G.
+  [c-2347e3c2ef24] 1406-2661-gan — The discriminative model D estimates the probability that a sample came from the training data rather than from the generative model G.
+  [c-4a164079b29a] 1406-2661-gan — The generator G maps input noise variables z to data space using a multilayer perceptron with parameters θg.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002921250000 (3 ledger events)
+wall:     40.582s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  25%|██▍       | 49/199 [00:00<00:00, 447.33it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1531.54it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

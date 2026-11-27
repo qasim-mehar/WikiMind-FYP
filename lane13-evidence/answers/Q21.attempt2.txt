@@ -1,0 +1,14 @@
+question: What Exact Match score does the RAG-Sequence model achieve on the Natural Questions dataset?
+answer:   The RAG-Sequence model achieves an Exact Match (EM) score of 44.5 on the Natural Questions dataset [c-baab1ede47dd].
+sufficient: true
+citations:
+  [c-baab1ede47dd] 2005-11401-retro — The RAG-Sequence model achieves an Exact Match (EM) score of 44.5 on the Natural Questions dataset.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002665250000 (3 ledger events)
+wall:     38.074s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  36%|███▌      | 72/199 [00:00<00:00, 707.53it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1643.22it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,15 @@
+question: Who are the authors of the paper 'R3: Reinforced ranker-reader for open-domain question answering', and does the corpus give conflicting author lists?
+answer:   The corpus provides conflicting author lists for the paper 'R3: Reinforced ranker-reader for open-domain question answering'. One claim lists the authors as Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, and Jing Jiang [c-e38bbcd6852b]. A second claim lists the authors as Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, and Murray Campbell [c-f0b5b2356517].
+sufficient: true
+citations:
+  [c-e38bbcd6852b] 2005-11401-retro — Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, and Jing Jiang are the authors of the paper titled R3: Reinforced ranker-reader for open-domain question answering.
+  [c-f0b5b2356517] 2005-11401-retro — The authors of the paper are Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, and Murray Campbell.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002967000000 (3 ledger events)
+wall:     42.036s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  65%|██████▌   | 130/199 [00:00<00:00, 1298.02it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1917.69it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

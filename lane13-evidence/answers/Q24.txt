@@ -1,0 +1,13 @@
+question: What are the size and dimensionality of RAG's non-parametric memory index?
+answer:   The non-parametric memory index for RAG consists of 21 million 728-dimensional vectors [c-702be46be80f].
+sufficient: true
+citations:
+  [c-702be46be80f] 2005-11401-retro — The non-parametric memory index consists of 21 million 728-dimensional vectors.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002506750000 (3 ledger events)
+wall:     35.827s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2125.83it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

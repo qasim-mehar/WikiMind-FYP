@@ -1,0 +1,15 @@
+question: Does the adversarial nets framework require Markov chains for sampling or unrolled approximate inference during training?
+answer:   No, the adversarial nets framework does not require Markov chains for sampling or unrolled approximate inference networks during training or sample generation [c-466f8f58cd5b, c-2dfb0dc981c7].
+sufficient: true
+citations:
+  [c-466f8f58cd5b] 1406-2661-gan — The framework does not require Markov chains or unrolled approximate inference networks during training or sample generation.
+  [c-2dfb0dc981c7] 1406-2661-gan — The adversarial nets framework does not require a Markov chain for sampling.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002591750000 (3 ledger events)
+wall:     128.053s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  34%|███▎      | 67/199 [00:00<00:00, 668.24it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1333.95it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
