@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any
 
 from pydantic import BaseModel
@@ -13,9 +14,11 @@ from .cost import CostMeter, validate_call_site
 from .errors import (
     GeminiError,
     MissingAPIKeyError,
+    OutputCapExceededError,
     ResponseFormatError,
     RetryExhaustedError,
 )
+from .guard import enforce_output_cap, meter_cap_hit, normalize_output_cap
 from .json_utils import json_safe_value, parse_json_object
 from .protocols import LLMResult, ResponseSchema, Usage
 from .retry import call_with_retries
@@ -40,14 +43,32 @@ def _error_code(exc: Exception) -> int | None:
 
 
 def is_retryable_gemini_error(exc: Exception) -> bool:
+    # A cap breach is a failed attempt, not a truncated answer: retry it.
+    if isinstance(exc, OutputCapExceededError):
+        return True
     code = _error_code(exc)
     return code == 429 or (code is not None and 500 <= code <= 599)
+
+
+@dataclass(frozen=True, slots=True)
+class _GeminiAttempt:
+    """One provider response plus the usage needed for the cap check and meter."""
+
+    response: Any
+    usage: Usage
+    thinking_tokens: int
+    usage_reported: bool
+    usage_invalid: bool
 
 
 class GeminiClient:
     """Metered Gemini JSON client.
 
     ``max_retries`` passed to ``complete`` is the total attempt count.
+    ``output_token_cap`` is the hard generation cap (default 4096, configurable
+    with ``WIKIMIND_MAX_OUTPUT_TOKENS``).  The legacy ``max_output_tokens``
+    argument is accepted as an alias for that local cap; it is deliberately not
+    forwarded to the provider, because provider-side truncation is forbidden.
     """
 
     def __init__(
@@ -58,6 +79,7 @@ class GeminiClient:
         model: str = GEMINI_MODEL,
         temperature: float | None = 0.0,
         max_output_tokens: int | None = None,
+        output_token_cap: int | None = None,
         client: Any | None = None,
         timeout: float = 120.0,
         sleep: Callable[[float], None] = time.sleep,
@@ -69,6 +91,9 @@ class GeminiClient:
         self.model = model
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
+        self.output_token_cap = normalize_output_cap(
+            output_token_cap if output_token_cap is not None else max_output_tokens
+        )
         self._api_key = api_key
         self._client = client
         self.timeout = timeout
@@ -106,8 +131,7 @@ class GeminiClient:
         }
         if self.temperature is not None:
             kwargs["temperature"] = self.temperature
-        if self.max_output_tokens is not None:
-            kwargs["max_output_tokens"] = self.max_output_tokens
+        # No provider-side max_output_tokens: truncation must never be silent.
         if response_schema is not None:
             if isinstance(response_schema, dict):
                 kwargs["response_json_schema"] = response_schema
@@ -118,6 +142,25 @@ class GeminiClient:
                     "response_schema must be a JSON-schema dict or a Pydantic model class"
                 )
         return types.GenerateContentConfig(**kwargs)
+
+    def _usage_from_response(self, response: Any) -> _GeminiAttempt:
+        usage_metadata = getattr(response, "usage_metadata", None)
+        in_tokens, in_ok = token_count(getattr(usage_metadata, "prompt_token_count", None))
+        candidates_tokens, candidates_ok = token_count(
+            getattr(usage_metadata, "candidates_token_count", None)
+        )
+        thinking_tokens, _ = token_count(getattr(usage_metadata, "thoughts_token_count", None))
+        usage_reported = usage_metadata is not None
+        # thoughts_token_count is optional (non-thinking models omit it), so a
+        # missing thought count does not invalidate otherwise-complete usage.
+        usage_invalid = not usage_reported or not (in_ok and candidates_ok)
+        return _GeminiAttempt(
+            response=response,
+            usage=Usage(in_tokens=in_tokens, out_tokens=candidates_tokens + thinking_tokens),
+            thinking_tokens=thinking_tokens,
+            usage_reported=usage_reported,
+            usage_invalid=usage_invalid,
+        )
 
     def complete(
         self,
@@ -142,15 +185,41 @@ class GeminiClient:
         except ImportError as exc:  # pragma: no cover - depends on optional extra
             raise GeminiError("google-genai is not installed; install the 'llm' extra") from exc
 
-        def attempt() -> Any:
-            return self._ensure_client().models.generate_content(
+        def attempt() -> _GeminiAttempt:
+            response = self._ensure_client().models.generate_content(
                 model=self.model,
                 contents=user,
                 config=config,
             )
+            parts = self._usage_from_response(response)
+            try:
+                enforce_output_cap(
+                    out_tokens=parts.usage.out_tokens,
+                    cap=self.output_token_cap,
+                    call_site=call_site,
+                    model=self.model,
+                )
+            except OutputCapExceededError:
+                meter_cap_hit(
+                    self.meter,
+                    call_site=call_site,
+                    model=self.model,
+                    in_tokens=parts.usage.in_tokens,
+                    out_tokens=parts.usage.out_tokens,
+                    cap=self.output_token_cap,
+                    meta={
+                        **event_meta,
+                        "provider": "google-genai",
+                        "thinking_tokens": parts.thinking_tokens,
+                        "usage_reported": parts.usage_reported,
+                        "usage_invalid": parts.usage_invalid,
+                    },
+                )
+                raise
+            return parts
 
         try:
-            response = call_with_retries(
+            attempt_result = call_with_retries(
                 attempt,
                 max_attempts=max_retries,
                 is_retryable=is_retryable_gemini_error,
@@ -166,20 +235,11 @@ class GeminiClient:
                 ) from None
             raise GeminiError(self._redact(f"Gemini call failed: {exc}")) from None
 
-        usage_metadata = getattr(response, "usage_metadata", None)
-        in_tokens, in_ok = token_count(getattr(usage_metadata, "prompt_token_count", None))
-        candidates_tokens, candidates_ok = token_count(
-            getattr(usage_metadata, "candidates_token_count", None)
-        )
-        thinking_tokens, _ = token_count(getattr(usage_metadata, "thoughts_token_count", None))
-        usage_reported = usage_metadata is not None
-        # thoughts_token_count is optional (non-thinking models omit it), so a
-        # missing thought count does not invalidate otherwise-complete usage.
-        usage_invalid = not usage_reported or not (in_ok and candidates_ok)
-        usage = Usage(
-            in_tokens=in_tokens,
-            out_tokens=candidates_tokens + thinking_tokens,
-        )
+        response = attempt_result.response
+        usage = attempt_result.usage
+        thinking_tokens = attempt_result.thinking_tokens
+        usage_reported = attempt_result.usage_reported
+        usage_invalid = attempt_result.usage_invalid
 
         parse_error: Exception | None = None
         payload: dict[str, Any] | None = None

@@ -15,6 +15,7 @@ __all__ = [
     "GeminiError",
     "JudgeError",
     "MissingAPIKeyError",
+    "OutputCapExceededError",
     "PricingError",
     "ProviderError",
     "ResponseFormatError",
@@ -46,6 +47,10 @@ class JudgeError(ProviderError):
 
 class RetryExhaustedError(ProviderError):
     pass
+
+
+class OutputCapExceededError(ProviderError):
+    """A generation attempt exceeded the hard output-token cap (retryable)."""
 
 
 class ResponseFormatError(ProviderError):

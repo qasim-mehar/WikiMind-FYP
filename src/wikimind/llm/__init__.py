@@ -34,6 +34,7 @@ from .errors import (
     GeminiError,
     JudgeError,
     MissingAPIKeyError,
+    OutputCapExceededError,
     PricingError,
     ProviderError,
     ResponseFormatError,
@@ -42,16 +43,24 @@ from .errors import (
 )
 from .fakes import FakeCall, FakeLLM
 from .gemini import GeminiClient
+from .guard import (
+    DEFAULT_MAX_OUTPUT_TOKENS,
+    MAX_OUTPUT_TOKENS_ENV,
+    max_output_tokens_from_env,
+    normalize_output_cap,
+)
 from .judge import JudgeClient
 from .protocols import Embedder, LLMClient, LLMResult, ResponseSchema, Usage
 
 __all__ = [
     "CALL_SITE_PREFIXES",
+    "DEFAULT_MAX_OUTPUT_TOKENS",
     "EMBED_DIM",
     "EMBED_MODEL",
     "GEMINI_MODEL",
     "JUDGE_MODEL",
     "JUDGE_SHADOW_MODEL",
+    "MAX_OUTPUT_TOKENS_ENV",
     "CostAggregate",
     "CostEvent",
     "CostMeter",
@@ -73,6 +82,7 @@ __all__ = [
     "LLMResult",
     "MissingAPIKeyError",
     "ModelPrice",
+    "OutputCapExceededError",
     "PricingError",
     "ProviderError",
     "ResponseFormatError",
@@ -85,6 +95,8 @@ __all__ = [
     "default_costs_path",
     "format_cost_report",
     "format_usd",
+    "max_output_tokens_from_env",
+    "normalize_output_cap",
     "price_for",
     "read_cost_events",
     "validate_call_site",

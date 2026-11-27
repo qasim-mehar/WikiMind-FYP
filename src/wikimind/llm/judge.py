@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import time
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any
 
 import httpx
@@ -15,9 +16,11 @@ from .cost import CostMeter, validate_call_site
 from .errors import (
     JudgeError,
     MissingAPIKeyError,
+    OutputCapExceededError,
     ResponseFormatError,
     RetryExhaustedError,
 )
+from .guard import enforce_output_cap, meter_cap_hit, normalize_output_cap
 from .json_utils import json_safe_value, parse_json_object
 from .protocols import LLMResult, ResponseSchema, Usage
 from .retry import call_with_retries
@@ -35,9 +38,26 @@ class _RetryableHTTPStatus(Exception):
 
 
 def is_retryable_http_status(exc: Exception) -> bool:
+    # A cap breach is a failed attempt, not a truncated answer: retry it.
+    if isinstance(exc, OutputCapExceededError):
+        return True
     return isinstance(exc, _RetryableHTTPStatus) and (
         exc.status_code == 429 or 500 <= exc.status_code <= 599
     )
+
+
+@dataclass(frozen=True, slots=True)
+class _JudgeAttempt:
+    """One provider response plus the usage needed for the cap check and meter."""
+
+    response: httpx.Response
+    data: Any
+    parse_error: Exception | None
+    usage: Usage
+    reasoning_tokens: int
+    reasoning_ok: bool
+    usage_reported: bool
+    usage_invalid: bool
 
 
 def _schema_json(response_schema: ResponseSchema) -> dict[str, Any] | None:
@@ -55,6 +75,10 @@ class JudgeClient:
 
     The endpoint is a free model; shadow cost is priced at the paid twin.
     ``max_retries`` is the total attempt count.
+    ``output_token_cap`` is the hard generation cap (default 4096, configurable
+    with ``WIKIMIND_MAX_OUTPUT_TOKENS``).  The legacy ``max_tokens`` argument is
+    accepted as an alias for that local cap; it is deliberately not forwarded
+    to the provider, because provider-side truncation is forbidden.
     """
 
     def __init__(
@@ -68,6 +92,7 @@ class JudgeClient:
         timeout: float = 60.0,
         temperature: float | None = 0.0,
         max_tokens: int | None = None,
+        output_token_cap: int | None = None,
         sleep: Callable[[float], None] = time.sleep,
         base_delay: float = 0.5,
         meta: dict[str, Any] | None = None,
@@ -83,6 +108,9 @@ class JudgeClient:
         self.timeout = timeout
         self.temperature = temperature
         self.max_tokens = max_tokens
+        self.output_token_cap = normalize_output_cap(
+            output_token_cap if output_token_cap is not None else max_tokens
+        )
         self._sleep = sleep
         self._base_delay = base_delay
         self.meta = dict(meta or {})
@@ -121,9 +149,45 @@ class JudgeClient:
         }
         if self.temperature is not None:
             payload["temperature"] = self.temperature
-        if self.max_tokens is not None:
-            payload["max_tokens"] = self.max_tokens
+        # No provider-side max_tokens: truncation must never be silent.
         return payload
+
+    @staticmethod
+    def _parse_response(response: httpx.Response) -> _JudgeAttempt:
+        data: Any = None
+        parse_error: Exception | None = None
+        try:
+            data = response.json()
+        except Exception as exc:  # noqa: BLE001
+            parse_error = exc
+
+        usage_data: dict[str, Any] = {}
+        usage_reported = False
+        if isinstance(data, dict):
+            raw_usage = data.get("usage")
+            if isinstance(raw_usage, dict):
+                usage_data = raw_usage
+                usage_reported = True
+        in_tokens, in_ok = token_count(usage_data.get("prompt_tokens"))
+        out_tokens, out_ok = token_count(usage_data.get("completion_tokens"))
+        usage_invalid = not usage_reported or not (in_ok and out_ok)
+        usage = Usage(in_tokens=in_tokens, out_tokens=out_tokens)
+
+        completion_details = usage_data.get("completion_tokens_details")
+        if not isinstance(completion_details, dict):
+            completion_details = {}
+        reasoning_tokens, reasoning_ok = token_count(completion_details.get("reasoning_tokens"))
+
+        return _JudgeAttempt(
+            response=response,
+            data=data,
+            parse_error=parse_error,
+            usage=usage,
+            reasoning_tokens=reasoning_tokens,
+            reasoning_ok=reasoning_ok,
+            usage_reported=usage_reported,
+            usage_invalid=usage_invalid,
+        )
 
     def complete(
         self,
@@ -151,7 +215,7 @@ class JudgeClient:
             "X-Title": "WikiMind",
         }
 
-        def attempt() -> httpx.Response:
+        def attempt() -> _JudgeAttempt:
             try:
                 response = self._post(payload, headers)
             except httpx.HTTPError as exc:
@@ -160,10 +224,38 @@ class JudgeClient:
                 raise _RetryableHTTPStatus(
                     response.status_code, redact(response.text[:2000], [key])
                 )
-            return response
+            parts = self._parse_response(response)
+            try:
+                enforce_output_cap(
+                    out_tokens=parts.usage.out_tokens,
+                    cap=self.output_token_cap,
+                    call_site=call_site,
+                    model=self.model,
+                )
+            except OutputCapExceededError:
+                meter_cap_hit(
+                    self.meter,
+                    call_site=call_site,
+                    model=self.model,
+                    in_tokens=parts.usage.in_tokens,
+                    out_tokens=parts.usage.out_tokens,
+                    cap=self.output_token_cap,
+                    meta={
+                        **event_meta,
+                        "provider": "openrouter",
+                        "endpoint": json_safe_value(self.base_url),
+                        "pricing_basis": "paid_twin",
+                        "paid_twin": JUDGE_SHADOW_MODEL,
+                        "reasoning_tokens": parts.reasoning_tokens if parts.reasoning_ok else None,
+                        "usage_reported": parts.usage_reported,
+                        "usage_invalid": parts.usage_invalid,
+                    },
+                )
+                raise
+            return parts
 
         try:
-            response = call_with_retries(
+            attempt_result = call_with_retries(
                 attempt,
                 max_attempts=max_retries,
                 is_retryable=is_retryable_http_status,
@@ -175,6 +267,12 @@ class JudgeClient:
                 f"OpenRouter judge call failed after {max_retries} attempts: "
                 f"HTTP {exc.status_code}: {exc.body}"
             ) from None
+        except OutputCapExceededError as exc:
+            raise RetryExhaustedError(
+                f"OpenRouter judge call failed after {max_retries} attempts: {exc}"
+            ) from None
+
+        response = attempt_result.response
 
         if not 200 <= response.status_code < 300:
             body = redact(response.text[:2000], [key])
@@ -182,29 +280,13 @@ class JudgeClient:
                 f"OpenRouter judge call failed with HTTP {response.status_code}: {body}"
             )
 
-        data: Any = None
-        parse_error: Exception | None = None
-        try:
-            data = response.json()
-        except Exception as exc:  # noqa: BLE001
-            parse_error = exc
-
-        usage_data: dict[str, Any] = {}
-        usage_reported = False
-        if isinstance(data, dict):
-            raw_usage = data.get("usage")
-            if isinstance(raw_usage, dict):
-                usage_data = raw_usage
-                usage_reported = True
-        in_tokens, in_ok = token_count(usage_data.get("prompt_tokens"))
-        out_tokens, out_ok = token_count(usage_data.get("completion_tokens"))
-        usage_invalid = not usage_reported or not (in_ok and out_ok)
-        usage = Usage(in_tokens=in_tokens, out_tokens=out_tokens)
-
-        completion_details = usage_data.get("completion_tokens_details")
-        if not isinstance(completion_details, dict):
-            completion_details = {}
-        reasoning_tokens, reasoning_ok = token_count(completion_details.get("reasoning_tokens"))
+        data = attempt_result.data
+        parse_error = attempt_result.parse_error
+        usage = attempt_result.usage
+        reasoning_tokens = attempt_result.reasoning_tokens
+        reasoning_ok = attempt_result.reasoning_ok
+        usage_reported = attempt_result.usage_reported
+        usage_invalid = attempt_result.usage_invalid
 
         response_model = json_safe_value(data.get("model") if isinstance(data, dict) else None)
         generation_id = json_safe_value(data.get("id") if isinstance(data, dict) else None)
