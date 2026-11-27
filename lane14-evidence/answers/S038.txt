@@ -1,0 +1,14 @@
+question: What 28.4 BLEU claim does the note quote from the Attention paper's abstract?
+answer:   The provided claims do not contain information about a 28.4 BLEU claim quoted from the Attention paper's abstract.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002492250000 (3 ledger events)
+wall:     157.061s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  60%|██████    | 120/199 [00:00<00:00, 1189.78it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1213.44it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,15 @@
+question: What do the two papers say about code availability?
+answer:   The code to run experiments with RAG is open-sourced as part of the HuggingFace Transformers Library [c-462d8ccbeebe]. HuggingFace provided assistance in open-sourcing the code required to execute RAG models [c-74d27f213705]. The provided claims do not contain information regarding code availability for the other papers mentioned.
+sufficient: false
+citations:
+  [c-462d8ccbeebe] 2005-11401-retro — The code to run experiments with RAG is open-sourced as part of the HuggingFace Transformers Library.
+  [c-74d27f213705] 2005-11401-retro — HuggingFace provided assistance in open-sourcing the code required to execute RAG models.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002872500000 (3 ledger events)
+wall:     34.032s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  46%|████▌     | 91/199 [00:00<00:00, 844.05it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1418.95it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

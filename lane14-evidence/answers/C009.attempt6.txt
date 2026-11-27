@@ -1,0 +1,14 @@
+question: List all single-model EN-DE BLEU scores in Table 2 of the Attention paper.
+answer:   The provided claims do not contain the information necessary to list the single-model EN-DE BLEU scores from Table 2 of the Attention paper. While one claim mentions that the Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task [c-e2c686bf6eac], the claims do not explicitly reference Table 2 or provide a comprehensive list of single-model EN-DE BLEU scores from that table.
+sufficient: false
+citations:
+  [c-e2c686bf6eac] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002638500000 (3 ledger events)
+wall:     27.838s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  11%|█         | 22/199 [00:00<00:00, 212.80it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1759.06it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

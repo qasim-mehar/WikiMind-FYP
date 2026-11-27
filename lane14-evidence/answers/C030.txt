@@ -1,0 +1,17 @@
+question: Are the claims of a greater-than-2-BLEU improvement and a 10-BLEU deficit consistent?
+answer:   The provided claims do not contain information regarding a 10-BLEU deficit or a greater-than-2-BLEU improvement, and therefore it is not possible to determine if such claims are consistent based on the available data. The claims do state that the Transformer model achieves higher BLEU scores than previous state-of-the-art models [c-e02ff7434fc3] and that single-head attention performs 0.9 BLEU points lower than the optimal configuration [c-eb90f687d8a1].
+sufficient: false
+citations:
+  [c-e02ff7434fc3] 1706-03762-attention — The Transformer model achieves higher BLEU scores than previous state-of-the-art models.
+  [c-eb90f687d8a1] 1706-03762-attention — Single-head attention performs 0.9 BLEU points lower than the optimal configuration of attention heads.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002701000000 (3 ledger events)
+wall:     61.121s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  17%|█▋        | 33/199 [00:00<00:00, 260.62it/s]
+Loading weights:  38%|███▊      | 76/199 [00:00<00:00, 319.09it/s]
+Loading weights:  55%|█████▍    | 109/199 [00:00<00:00, 297.93it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 499.46it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

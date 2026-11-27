@@ -1,0 +1,16 @@
+question: Which model has a generator and discriminator, and which has a retriever and generator?
+answer:   Generative adversarial nets consist of a generative model (generator) and a discriminative model (discriminator) [c-c7bc935b7e9b]. Retrieval-augmented generation (RAG) models consist of a retriever and a generator [c-3c4604586cdb, c-97850108396d].
+sufficient: true
+citations:
+  [c-c7bc935b7e9b] 1406-2661-gan — Adversarial nets are a framework where a generative model is pitted against a discriminative model that determines if a sample is from the model distribution or the data distribution.
+  [c-3c4604586cdb] 2005-11401-retro — The retriever and generator components are trained jointly without direct supervision on document retrieval.
+  [c-97850108396d] 2005-11401-retro — Retrieval-augmented generation (RAG) is a fine-tuning approach that endows pre-trained parametric-memory generation models with non-parametric memory.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002738000000 (3 ledger events)
+wall:     29.743s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  66%|██████▋   | 132/199 [00:00<00:00, 1318.41it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1901.87it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

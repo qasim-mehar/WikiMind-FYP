@@ -1,0 +1,14 @@
+question: What deliberately contradictory BLEU value does the note assert?
+answer:   The provided claims contain contradictory information regarding the BLEU score achieved by the Transformer model on the WMT 2014 English-to-French translation task, citing both 41.0 [c-276a1ea04b43] and 41.8 [c-82789749ad65].
+sufficient: true
+citations:
+  [c-276a1ea04b43] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 41.0 on the WMT 2014 English-to-French translation task.
+  [c-82789749ad65] 1706-03762-attention — The Transformer model achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002687000000 (3 ledger events)
+wall:     49.518s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  58%|█████▊    | 116/199 [00:00<00:00, 1144.64it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1729.94it/s]

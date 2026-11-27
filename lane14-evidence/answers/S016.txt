@@ -1,0 +1,14 @@
+question: C(G) equals -log 4 plus twice which divergence?
+answer:   The virtual training criterion C(G) is defined as -log(4) plus twice the Jensen–Shannon divergence (JSD) between the data distribution and the generator distribution [c-2b821ea9e6ec].
+sufficient: true
+citations:
+  [c-2b821ea9e6ec] 1406-2661-gan — The virtual training criterion C(G) is defined as -log(4) + 2 * JSD(pdata || pg), where JSD represents the Jensen–Shannon divergence.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002496000000 (3 ledger events)
+wall:     119.294s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  58%|█████▊    | 116/199 [00:00<00:00, 1128.49it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1853.23it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

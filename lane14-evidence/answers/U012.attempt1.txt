@@ -1,0 +1,13 @@
+question: What sampling temperature was used for Transformer beam search?
+answer:   The provided claims do not contain information regarding the sampling temperature used for Transformer beam search. The claims only state that the Transformer models used beam search with a beam size of 4 and a length penalty of 0.6 [c-c13070b19012].
+sufficient: false
+citations:
+  [c-c13070b19012] 1706-03762-attention — The models used beam search with a beam size of 4 and a length penalty of 0.6.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002656750000 (3 ledger events)
+wall:     29.550s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  64%|██████▍   | 128/199 [00:00<00:00, 1263.30it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1473.38it/s]

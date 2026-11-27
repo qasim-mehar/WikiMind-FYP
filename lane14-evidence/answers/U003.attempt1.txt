@@ -1,0 +1,13 @@
+question: How many NVIDIA V100 GPUs were used to train the generative adversarial nets model?
+answer:   The provided claims do not contain information regarding the number of NVIDIA V100 GPUs used to train the generative adversarial nets model.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002368250000 (3 ledger events)
+wall:     31.705s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2997.94it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

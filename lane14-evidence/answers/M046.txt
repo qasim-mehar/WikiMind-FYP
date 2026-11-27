@@ -1,0 +1,16 @@
+question: Which model has the smallest and which the largest parameter count across the Transformer and RAG tables?
+answer:   The provided claims do not contain enough information to determine the smallest and largest parameter counts across the Transformer and RAG models. While the claims state that BART-large has 400 million parameters [c-9500ddeb6ba9] and RAG models contain 406 million trainable parameters [c-69ab81c8acb4] or 110 million trainable parameters for the BERT-base query encoder [c-648b5e4924d7], there is no information provided regarding the total parameter counts for the various Transformer model configurations.
+sufficient: false
+citations:
+  [c-9500ddeb6ba9] 2005-11401-retro — BART-large has 400 million parameters.
+  [c-69ab81c8acb4] 2005-11401-retro — The RAG models contain 406 million trainable parameters derived from the BART-large model.
+  [c-648b5e4924d7] 2005-11401-retro — The RAG models contain 110M trainable parameters for the BERT-base query encoder.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002781250000 (3 ledger events)
+wall:     38.215s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  39%|███▊      | 77/199 [00:00<00:00, 728.60it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1725.69it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

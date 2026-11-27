@@ -1,0 +1,15 @@
+question: What is the Transformer parsing model's F1 on the development set?
+answer:   The 4-layer Transformer model achieved an F1 score of 91.3 in the WSJ-only discriminative setting [c-525893d9c3e8] and an F1 score of 92.7 in the semi-supervised setting [c-7319fedd60e8].
+sufficient: true
+citations:
+  [c-525893d9c3e8] 1706-03762-attention — The 4-layer Transformer model achieved an F1 score of 91.3 in the WSJ-only discriminative setting.
+  [c-7319fedd60e8] 1706-03762-attention — The 4-layer Transformer model achieved an F1 score of 92.7 in the semi-supervised setting.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002770250000 (3 ledger events)
+wall:     35.228s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  42%|████▏     | 83/199 [00:00<00:00, 762.11it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1265.41it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

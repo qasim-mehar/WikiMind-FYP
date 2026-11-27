@@ -1,0 +1,15 @@
+question: What BLEU values are given for EN-FR in the abstract versus section 6.1?
+answer:   The provided claims do not contain information regarding the BLEU values for English-to-French translation specifically in the abstract versus section 6.1. The claims state that the Transformer (big) model achieved a BLEU score of 41.0 [c-276a1ea04b43] and the Transformer model achieved a BLEU score of 41.8 [c-82789749ad65] on the WMT 2014 English-to-French translation task, but they do not specify where these values appear in the document.
+sufficient: false
+citations:
+  [c-276a1ea04b43] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 41.0 on the WMT 2014 English-to-French translation task.
+  [c-82789749ad65] 1706-03762-attention — The Transformer model achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002955250000 (3 ledger events)
+wall:     31.888s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  24%|██▍       | 48/199 [00:00<00:00, 367.42it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1213.28it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,14 @@
+question: Which December 2019 Wikipedia dump was used as the RAG knowledge source?
+answer:   The experiments for the RAG model use the December 2018 Wikipedia dump [c-d2677485567b].
+sufficient: true
+citations:
+  [c-d2677485567b] 2005-11401-retro — The experiments use the December 2018 Wikipedia dump.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002644750000 (3 ledger events)
+wall:     36.025s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  73%|███████▎  | 145/199 [00:00<00:00, 1303.94it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1530.81it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

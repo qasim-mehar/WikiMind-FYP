@@ -1,0 +1,16 @@
+question: How do the two papers handle long sequences: restricted attention versus retrieval?
+answer:   The provided claims state that the computational complexity per layer for restricted self-attention is O(r * n * d) [c-cbb3e89fc1a6]. Restricting self-attention to a neighborhood of size r in the input sequence increases the maximum path length to O(n/r) [c-c6aa4e5c4118]. Regarding retrieval, the claims note that retrieval improves performance across a variety of NLP tasks when considered in isolation [c-6e1e0d9342b6], but the provided documents do not contain information comparing how these two specific approaches handle long sequences.
+sufficient: false
+citations:
+  [c-cbb3e89fc1a6] 1706-03762-attention — The computational complexity per layer for restricted self-attention is O(r * n * d).
+  [c-c6aa4e5c4118] 1706-03762-attention — Restricting self-attention to a neighborhood of size r in the input sequence increases the maximum path length to O(n/r).
+  [c-6e1e0d9342b6] 2005-11401-retro — Retrieval improves performance across a variety of NLP tasks when considered in isolation.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002829250000 (3 ledger events)
+wall:     40.345s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  73%|███████▎  | 146/199 [00:00<00:00, 1458.36it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1919.60it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

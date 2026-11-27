@@ -1,0 +1,14 @@
+question: What token-level batch size did RAG use during training?
+answer:   The provided claims do not contain information regarding the token-level batch size used during the training of RAG models.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002375750000 (3 ledger events)
+wall:     42.164s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  81%|████████  | 161/199 [00:00<00:00, 1457.24it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1663.08it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

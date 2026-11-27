@@ -1,0 +1,16 @@
+question: What BLEU score did the Transformer (big) model achieve on WMT 2014 English-to-German?
+answer:   The Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task [c-e2c686bf6eac].
+sufficient: true
+citations:
+  [c-e2c686bf6eac] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002694000000 (3 ledger events)
+wall:     111.781s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  19%|█▉        | 38/199 [00:00<00:00, 292.65it/s]
+Loading weights:  36%|███▌      | 71/199 [00:00<00:00, 305.51it/s]
+Loading weights:  65%|██████▍   | 129/199 [00:00<00:00, 420.85it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 495.98it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

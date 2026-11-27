@@ -1,0 +1,18 @@
+question: How large is the non-parametric index in vectors, dimensions, values and memory?
+answer:   The non-parametric memory index consists of 21 million 728-dimensional vectors [c-702be46be80f]. Compressing this document index using FAISS reduces the CPU memory requirement to 36GB [c-a2d13d9e364d].
+sufficient: true
+citations:
+  [c-702be46be80f] 2005-11401-retro — The non-parametric memory index consists of 21 million 728-dimensional vectors.
+  [c-a2d13d9e364d] 2005-11401-retro — Compressing the document index using FAISS reduces the CPU memory requirement to 36GB.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002606000000 (3 ledger events)
+wall:     92.444s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  13%|█▎        | 26/199 [00:00<00:00, 242.66it/s]
+Loading weights:  31%|███       | 62/199 [00:00<00:00, 303.78it/s]
+Loading weights:  52%|█████▏    | 103/199 [00:00<00:00, 290.61it/s]
+Loading weights:  67%|██████▋   | 133/199 [00:00<00:00, 293.49it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 424.00it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

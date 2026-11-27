@@ -1,0 +1,15 @@
+question: How does RAG's FEVER accuracy compare with state of the art and BART on 3-way and 2-way?
+answer:   On the FEVER 2-way classification task, RAG achieves an accuracy within 2.7% of the RoBERTa model [c-112c2f089a74]. For the 3-way classification task on the FEVER dataset, RAG scores are within 4.3% of state-of-the-art models [c-fb626d19a578].
+sufficient: true
+citations:
+  [c-112c2f089a74] 2005-11401-retro — On the FEVER 2-way classification task, RAG achieves an accuracy within 2.7% of the RoBERTa model.
+  [c-fb626d19a578] 2005-11401-retro — RAG scores for 3-way classification on the FEVER dataset are within 4.3% of state-of-the-art models.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002817250000 (3 ledger events)
+wall:     43.899s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  63%|██████▎   | 125/199 [00:00<00:00, 1249.62it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1400.13it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,13 @@
+question: What is the global minimum value of the virtual training criterion C(G)?
+answer:   The global minimum of the virtual training criterion C(G) is -log(4) [c-99356c4bfe57]. This minimum is achieved if and only if the generator distribution pg equals the data distribution pdata [c-99356c4bfe57].
+sufficient: true
+citations:
+  [c-99356c4bfe57] 1406-2661-gan — The global minimum of the virtual training criterion C(G) is -log(4), which is achieved if and only if the generator distribution pg equals the data distribution pdata.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002560250000 (3 ledger events)
+wall:     49.764s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2253.86it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

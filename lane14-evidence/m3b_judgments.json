@@ -1,0 +1,257 @@
+{
+  "computable": true,
+  "halt": null,
+  "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "family": "nvidia (non-Gemini)",
+  "blind": true,
+  "random_order": true,
+  "seed": 42,
+  "sample_questions": 30,
+  "note": "30 rows were sampled, 25 yielded judgments (5 sampled rows were zero-citation).",
+  "judgments": 40,
+  "entailed": 33,
+  "entailment_rate": 0.825,
+  "shadow_cost_usd": 0.0370974,
+  "details": [
+    {
+      "question": "S029",
+      "ref": "c-baab1ede47dd",
+      "entailed": false,
+      "reason": "The passage mentions that RAG-Sequence achieves 44.5 but does not specify that this is an Exact Match score on the Natural Questions dataset."
+    },
+    {
+      "question": "S007",
+      "ref": "c-bb24a21a339d",
+      "entailed": true,
+      "reason": "The passage explicitly states that positional encodings are added to the input embeddings to inject information about the relative or absolute position of tokens in the sequence, which directly supports the claim."
+    },
+    {
+      "question": "S007",
+      "ref": "c-914959a24694",
+      "entailed": true,
+      "reason": "The passage explicitly states that positional encodings have the same dimension dmodel as the embeddings, which directly supports the claim."
+    },
+    {
+      "question": "M031",
+      "ref": "c-1e346261a078",
+      "entailed": true,
+      "reason": "The passage lists the exact same authors and title as the claim, confirming the authorship of the paper 'Attention is all you need'."
+    },
+    {
+      "question": "M023",
+      "ref": "c-baab1ede47dd",
+      "entailed": false,
+      "reason": "The passage states 'substantially below the 44.5 that RAG-Sequence achieves' but does not specify the dataset (Natural Questions) or the metric (Exact Match). The claim includes these specific details, which are not present in the passage."
+    },
+    {
+      "question": "M023",
+      "ref": "c-c5b8701c2e1a",
+      "entailed": true,
+      "reason": "The passage explicitly states that T5-large achieves a score of 28.9 EM on Natural Questions, which directly matches the claim."
+    },
+    {
+      "question": "M018",
+      "ref": "c-7ad7eab98b64",
+      "entailed": true,
+      "reason": "The passage states the same technical description as the claim, with only minor phrasing differences (e.g., 'get' vs 'calculate', 'via' vs 'using'), and the pronoun 'it' in context refers to the RAG-Sequence model."
+    },
+    {
+      "question": "M018",
+      "ref": "c-c6a43b8b8b2f",
+      "entailed": false,
+      "reason": "The passage only states that a decoding procedure is called \"Thorough Decoding\" but does not mention RAG-Sequence, additional forward passes, or hypothesis probability estimation, so it does not support the specific claim."
+    },
+    {
+      "question": "S027",
+      "ref": "c-c5d774d8a587",
+      "entailed": true,
+      "reason": "The passage explicitly states that a single Wikipedia dump is used as the non-parametric knowledge source for all experiments, which directly matches the claim."
+    },
+    {
+      "question": "S027",
+      "ref": "c-d2677485567b",
+      "entailed": false,
+      "reason": "The passage states 'we use the December 2018 dump' but does not specify that the dump is from Wikipedia. The claim adds 'Wikipedia' which is not present in the passage, so the passage does not fully support the claim."
+    },
+    {
+      "question": "U010",
+      "ref": "c-23d4ceb2da39",
+      "entailed": true,
+      "reason": "The passage explicitly states that the authors trained adversarial nets on a range of datasets including MNIST, the Toronto Face Database (TFD), and CIFAR-10, which directly supports the claim."
+    },
+    {
+      "question": "S023",
+      "ref": "c-753cce0a0365",
+      "entailed": true,
+      "reason": "The passage explicitly states that in RAG models, the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, which matches the claim exactly."
+    },
+    {
+      "question": "C009",
+      "ref": "c-e2c686bf6eac",
+      "entailed": true,
+      "reason": "The passage explicitly states that the big transformer model established a new state-of-the-art BLEU score of 28.4 on the WMT 2014 English-to-German translation task."
+    },
+    {
+      "question": "S009",
+      "ref": "c-774be8a63d5c",
+      "entailed": true,
+      "reason": "The passage states β1 = 0.9, which directly supports the claim that the Adam optimizer beta1 parameter is set to 0.9."
+    },
+    {
+      "question": "S009",
+      "ref": "c-a909387fba98",
+      "entailed": true,
+      "reason": "The passage explicitly states β2 = 0.98, which directly corresponds to the Adam optimizer's beta2 parameter being set to 0.98."
+    },
+    {
+      "question": "S008",
+      "ref": "c-d37ba3d5d5fe",
+      "entailed": true,
+      "reason": "The passage explicitly states that the input consists of queries and keys of dimension dk and values of dimension dv, which directly matches the claim."
+    },
+    {
+      "question": "S008",
+      "ref": "c-76bd067114c9",
+      "entailed": false,
+      "reason": "The passage formula 'softmax(QK T√dk )V' does not explicitly include the transpose (^T) on K nor the division by sqrt(dk) that the claim states. The notation 'T√dk' is ambiguous and does not clearly represent '/ sqrt(dk)'. Therefore the passage does not support the exact claim."
+    },
+    {
+      "question": "S024",
+      "ref": "c-753cce0a0365",
+      "entailed": true,
+      "reason": "The passage explicitly states that in RAG models the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, which directly matches the claim."
+    },
+    {
+      "question": "S024",
+      "ref": "c-702be46be80f",
+      "entailed": true,
+      "reason": "The passage explicitly states that the non-parametric memory index consists of 21M 728-dimensional vectors, which matches the claim's assertion of 21 million 728-dimensional vectors."
+    },
+    {
+      "question": "M016",
+      "ref": "c-bdddb63561b5",
+      "entailed": true,
+      "reason": "The passage explicitly states that training G to maximize log D(G(z)) instead of minimizing log(1−D(G(z))) provides much stronger gradients early in learning, which directly supports the claim."
+    },
+    {
+      "question": "M020",
+      "ref": "c-e6548bb0b5da",
+      "entailed": true,
+      "reason": "The passage explicitly states 'For FEVER, BM25 performs best', which directly supports the claim that BM25 performs best for the FEVER task."
+    },
+    {
+      "question": "M020",
+      "ref": "c-61c48e4fe151",
+      "entailed": true,
+      "reason": "The passage explicitly states that learned retrieval improves results for all tasks, which directly matches the claim."
+    },
+    {
+      "question": "C030",
+      "ref": "c-e02ff7434fc3",
+      "entailed": true,
+      "reason": "The passage states that the Transformer achieves better BLEU scores than previous state-of-the-art models, which directly supports the claim that it achieves higher BLEU scores."
+    },
+    {
+      "question": "C030",
+      "ref": "c-eb90f687d8a1",
+      "entailed": true,
+      "reason": "The passage states that single-head attention is 0.9 BLEU worse than the best setting, which directly supports the claim that it performs 0.9 BLEU points lower than the optimal configuration."
+    },
+    {
+      "question": "C008",
+      "ref": "c-e2c686bf6eac",
+      "entailed": true,
+      "reason": "The passage explicitly states that the big transformer model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task."
+    },
+    {
+      "question": "C015",
+      "ref": "c-e2c686bf6eac",
+      "entailed": true,
+      "reason": "The passage explicitly states that the big transformer model (Transformer (big)) established a new state-of-the-art BLEU score of 28.4 on the WMT 2014 English-to-German translation task."
+    },
+    {
+      "question": "M032",
+      "ref": "c-0d81cf53d064",
+      "entailed": true,
+      "reason": "The passage explicitly states that all RAG models and BART baselines are trained by distributing training across 8, 32GB NVIDIA V100 GPUs."
+    },
+    {
+      "question": "M032",
+      "ref": "c-c24e9f63c086",
+      "entailed": false,
+      "reason": "The passage states only the training duration and hardware ('Training took 3.5 days on 8 P100 GPUs') but does not mention the model (Transformer big) or the task (English-to-German). Therefore, the passage does not fully support the more specific claim."
+    },
+    {
+      "question": "S002",
+      "ref": "c-e2c686bf6eac",
+      "entailed": true,
+      "reason": "The passage explicitly states that the big transformer model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task."
+    },
+    {
+      "question": "M058",
+      "ref": "c-ebfce1167c41",
+      "entailed": true,
+      "reason": "The passage explicitly states 'we ... report Exact Match (EM) scores,' which directly supports the claim that the authors report EM scores as an evaluation metric."
+    },
+    {
+      "question": "M058",
+      "ref": "c-4a5f1287b1ee",
+      "entailed": true,
+      "reason": "The passage explicitly states that the technique (label smoothing) hurts perplexity but improves accuracy and BLEU score, which directly matches the claim."
+    },
+    {
+      "question": "C004",
+      "ref": "c-276a1ea04b43",
+      "entailed": true,
+      "reason": "The passage explicitly states that the big model achieves a BLEU score of 41.0 on the WMT 2014 English-to-French translation task, which directly supports the claim."
+    },
+    {
+      "question": "C004",
+      "ref": "c-82789749ad65",
+      "entailed": true,
+      "reason": "The passage explicitly states that the model (the Transformer) achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task, which directly supports the claim."
+    },
+    {
+      "question": "S021",
+      "ref": "c-466f8f58cd5b",
+      "entailed": true,
+      "reason": "The passage explicitly states that there is no need for Markov chains or unrolled approximate inference networks during either training or generation of samples, which directly supports the claim."
+    },
+    {
+      "question": "S021",
+      "ref": "c-2dfb0dc981c7",
+      "entailed": true,
+      "reason": "The passage explicitly states that the adversarial nets framework does not require a Markov chain for sampling, directly supporting the claim."
+    },
+    {
+      "question": "M050",
+      "ref": "c-0d81cf53d064",
+      "entailed": true,
+      "reason": "The passage explicitly states that all RAG models and BART baselines are trained by distributing training across 8, 32GB NVIDIA V100 GPUs."
+    },
+    {
+      "question": "M050",
+      "ref": "c-69ab81c8acb4",
+      "entailed": false,
+      "reason": "The passage only states '406M trainable parameters from BART-large' without mentioning RAG models, so it does not support the claim that RAG models contain those parameters."
+    },
+    {
+      "question": "M015",
+      "ref": "c-71c82ab4d8cf",
+      "entailed": true,
+      "reason": "The passage states that Table 2 is a summary of the difficulties encountered by different approaches in generative modeling, which directly supports the claim."
+    },
+    {
+      "question": "M004",
+      "ref": "c-4720bca0595f",
+      "entailed": true,
+      "reason": "The passage explicitly states that dk = dv = dmodel/h = 64, confirming that each attention head uses a dimension of 64 for both the key dimension (dk) and the value dimension (dv)."
+    },
+    {
+      "question": "M004",
+      "ref": "c-7fac685e3560",
+      "entailed": true,
+      "reason": "The passage explicitly states 'we employ h = 8 parallel attention layers, or heads,' which directly supports the claim that the model employs 8 parallel attention heads."
+    }
+  ]
+}

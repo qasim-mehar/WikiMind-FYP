@@ -1,0 +1,18 @@
+question: What is the attention function of Scaled Dot-Product Attention?
+answer:   The Scaled Dot-Product Attention function takes inputs consisting of queries and keys of dimension dk and values of dimension dv [c-d37ba3d5d5fe]. The output of this function is computed as softmax(QK^T / sqrt(dk))V [c-76bd067114c9]. Scaling the dot products by 1/sqrt(dk) is used to counteract the effect of dot products growing large in magnitude for large values of dk, which would otherwise push the softmax function into regions with extremely small gradients [c-2ecf6bf8d2e0].
+sufficient: true
+citations:
+  [c-d37ba3d5d5fe] 1706-03762-attention — Scaled Dot-Product Attention inputs consist of queries and keys of dimension dk and values of dimension dv.
+  [c-76bd067114c9] 1706-03762-attention — The output of the Scaled Dot-Product Attention function is computed as softmax(QK^T / sqrt(dk))V.
+  [c-2ecf6bf8d2e0] 1706-03762-attention — Scaling dot products by 1/sqrt(dk) counteracts the effect of dot products growing large in magnitude for large values of dk, which otherwise pushes the softmax function into regions with extremely small gradients.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002794500000 (3 ledger events)
+wall:     52.195s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:   5%|▍         | 9/199 [00:00<00:03, 61.82it/s]
+Loading weights:  12%|█▏        | 24/199 [00:00<00:01, 105.27it/s]
+Loading weights:  22%|██▏       | 44/199 [00:00<00:01, 135.04it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 534.16it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

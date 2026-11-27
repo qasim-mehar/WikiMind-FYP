@@ -1,0 +1,17 @@
+question: Which document introduces 'Retrieval-Augmented Generation' and which discusses 'adversarial nets'?
+answer:   Retrieval-Augmented Generation (RAG) is introduced in the document '2005-11401-retro' [c-97850108396d]. The document '1406-2661-gan' discusses adversarial nets [c-fc6abf326c0b, c-c7bc935b7e9b].
+sufficient: true
+citations:
+  [c-97850108396d] 2005-11401-retro — Retrieval-augmented generation (RAG) is a fine-tuning approach that endows pre-trained parametric-memory generation models with non-parametric memory.
+  [c-fc6abf326c0b] 1406-2661-gan — The title of the document is Generative Adversarial Nets.
+  [c-c7bc935b7e9b] 1406-2661-gan — Adversarial nets are a framework where a generative model is pitted against a discriminative model that determines if a sample is from the model distribution or the data distribution.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002787500000 (3 ledger events)
+wall:     38.778s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  43%|████▎     | 86/199 [00:00<00:00, 781.04it/s]
+Loading weights:  83%|████████▎ | 165/199 [00:00<00:00, 684.20it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 829.01it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

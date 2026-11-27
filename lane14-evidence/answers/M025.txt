@@ -1,0 +1,18 @@
+question: How does RAG produce correct answers when the answer is absent from retrieved documents?
+answer:   RAG models can answer questions using free-form, abstractive text generation [c-e81670231b63]. When the correct answer is not present in any retrieved document, RAG achieves 11.8% accuracy on the Natural Questions dataset [c-4f0f067e74ad]. Additionally, RAG can use parametric knowledge to generate responses for questions that cannot be answered using Wikipedia alone [c-c98b7f735367].
+sufficient: true
+citations:
+  [c-e81670231b63] 2005-11401-retro — RAG models can answer questions using free-form, abstractive text generation.
+  [c-4f0f067e74ad] 2005-11401-retro — RAG achieves 11.8% accuracy on the Natural Questions (NQ) dataset when the correct answer is not present in any retrieved document.
+  [c-c98b7f735367] 2005-11401-retro — RAG can use parametric knowledge to generate responses for questions that cannot be answered using Wikipedia alone.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002836250000 (3 ledger events)
+wall:     100.305s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  16%|█▌        | 32/199 [00:00<00:00, 299.92it/s]
+Loading weights:  46%|████▌     | 91/199 [00:00<00:00, 432.71it/s]
+Loading weights:  80%|███████▉  | 159/199 [00:00<00:00, 524.46it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 529.58it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

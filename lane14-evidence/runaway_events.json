@@ -1,0 +1,20 @@
+{
+  "ruling": "Ruling 30 — runaway-generation attempts vs the per-question cap",
+  "definition": "single qa.answer call emitting more than 10000 output tokens; model anomaly, not an answer",
+  "baseline": [
+    {
+      "question": "M023",
+      "window": 2,
+      "ledger_index_1based": 559,
+      "call_site": "qa.answer",
+      "in_tokens": 9867,
+      "out_tokens": 65520,
+      "shadow_cost_usd": 0.10074675,
+      "treatment": "recorded and excluded from the per-question cap; M023's valid 434-token answer retained"
+    }
+  ],
+  "cumulative_anomaly_spend_usd": 0.10074675,
+  "anomaly_spend_cap_usd": 0.5,
+  "graded_cost_excludes_anomalies": true,
+  "attempts": []
+}

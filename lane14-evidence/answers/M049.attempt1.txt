@@ -1,0 +1,13 @@
+question: Which length-penalty settings are reported for Transformer translation and for parsing?
+answer:   The Transformer models used beam search with a beam size of 4 and a length penalty of 0.6 for translation tasks [c-c13070b19012]. The provided claims do not contain information regarding length-penalty settings for parsing.
+sufficient: false
+citations:
+  [c-c13070b19012] 1706-03762-attention — The models used beam search with a beam size of 4 and a length penalty of 0.6.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002567500000 (3 ledger events)
+wall:     30.649s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2405.26it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

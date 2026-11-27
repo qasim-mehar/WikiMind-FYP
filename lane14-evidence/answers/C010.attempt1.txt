@@ -1,0 +1,15 @@
+question: Which model in Table 2 has the highest EN-FR BLEU?
+answer:   The provided claims do not contain the content of Table 2, and therefore do not specify which model in that table has the highest EN-FR BLEU score. The claims do note that the Transformer model achieved a BLEU score of 41.8 [c-82789749ad65] and the Transformer (big) model achieved a BLEU score of 41.0 [c-276a1ea04b43] on the WMT 2014 English-to-French translation task.
+sufficient: false
+citations:
+  [c-82789749ad65] 1706-03762-attention — The Transformer model achieved a BLEU score of 41.8 on the WMT 2014 English-to-French translation task.
+  [c-276a1ea04b43] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 41.0 on the WMT 2014 English-to-French translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002733500000 (3 ledger events)
+wall:     31.206s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  87%|████████▋ | 173/199 [00:00<00:00, 1727.08it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1644.27it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,302 @@
+{
+  "S016": {
+    "verdict": "PASS",
+    "reason": "Correct: Jensen-Shannon divergence stated with an en-dash; token mismatch only."
+  },
+  "S019": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['225', '2'] -> hits [] (need 1); sufficient=False, expected true"
+  },
+  "S021": {
+    "verdict": "PASS",
+    "reason": "Correct: 'No, no Markov chains or unrolled inference', with two verified claims."
+  },
+  "S035": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=True, expected false; asserted answer with citations despite absent target"
+  },
+  "S036": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['deliberately', 'synthetic', 'citation', 'fixture', 'false'] -> hits ['fixture'] (need 2); sufficient=False, expected true"
+  },
+  "S037": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['1706.03762', 'attention', 'vaswani', 'arxiv', 'need'] -> hits [] (need 1); sufficient=False, expected true"
+  },
+  "S038": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "S040": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['says', 'note'] -> hits [] (need 2)"
+  },
+  "M005": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M006": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['representation', 'dimension', 'sequence', 'smaller', 'length'] -> hits [] (need 2)"
+  },
+  "M007": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['extrapolation', 'sequences', 'longer', 'allow', 'they'] -> hits [] (need 2); sufficient=False, expected true"
+  },
+  "M008": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['5', '10', '20', '4', '0.6', 'checkpoints', 'intervals', 'penalty', 'length', 'last'] -> hits [] (need 1); sufficient=False, expected true"
+  },
+  "M009": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['4', '1024', '21', '0.3', '300', 'output', 'layers', 'length', 'alpha', 'beam'] -> hits [] (need 1); sufficient=False, expected true"
+  },
+  "M010": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M011": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M014": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M015": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['approximation', 'represented', 'explicitly', 'sampling', 'parzen'] -> hits ['sampling'] (need 2); sufficient=False, expected true"
+  },
+  "M016": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['distributions', 'degenerate', 'components', 'parameters', 'generator'] -> hits [] (need 2)"
+  },
+  "M017": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['semi-supervised', 'improvements', 'conditional', 'approximate', 'efficiency'] -> hits [] (need 2); sufficient=False, expected true"
+  },
+  "M020": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['entity-centric', 'differentiable', 'retrieval', 'crucial', 'overlap'] -> hits ['retrieval'] (need 2); sufficient=False, expected true"
+  },
+  "M022": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['questions', 'mechanism', 'retrieval', 'ms-marco', 'improved'] -> hits ['mechanism'] (need 2)"
+  },
+  "M029": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M030": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['human-readable', 'aggregates', 'documents', 'external', 'writable'] -> hits [] (need 2); sufficient=False, expected true"
+  },
+  "M031": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['28.4', '41.8', '41.0', 'transformer', 'en-de', 'en-fr', 'bleu'] -> hits [] (need 1); sufficient=False, expected true"
+  },
+  "M033": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M035": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['transformer', 'precision', 'schedule', 'fairseq', 'warmup'] -> hits ['transformer'] (need 2); sufficient=False, expected true"
+  },
+  "M036": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M038": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M039": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M040": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M043": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['2017', 'attention', 'vaswani', 'neurips', 'need'] -> hits [] (need 1); sufficient=False, expected true"
+  },
+  "M045": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M046": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M049": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M050": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M051": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M054": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "M058": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['transformer', 'specificity', 'evaluation', 'factuality', 'pairwise'] -> hits ['evaluation'] (need 2); sufficient=False, expected true"
+  },
+  "C003": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: conflict sides not both present: [False, True]"
+  },
+  "C005": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['41.8'] -> hits [] (need 1); sufficient=False, expected true"
+  },
+  "C006": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "C007": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "C008": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "C009": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "C010": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "C013": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: conflict sides not both present: [True, False]"
+  },
+  "C015": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=False, expected true"
+  },
+  "C016": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: conflict sides not both present: [True, False]"
+  },
+  "C017": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['1706.03762', 'attention', 'arxiv', 'need'] -> hits [] (need 1); sufficient=False, expected true"
+  },
+  "C018": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['cite', 'file'] -> hits [] (need 2); sufficient=False, expected true"
+  },
+  "C019": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: stored side not present in answer"
+  },
+  "C021": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: conflict sides not both present: [False, False]"
+  },
+  "C026": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: target tokens ['rag-sequence', 'rag-token'] -> hits [] (need 2); sufficient=False, expected true"
+  },
+  "C030": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: conflict sides not both present: [False, False]"
+  },
+  "U004": {
+    "verdict": "PASS",
+    "reason": "Honest: corrects the false-premise question with the stored December 2018 dump; no 2019 fabrication. Ruling 25(2)."
+  },
+  "U009": {
+    "verdict": "FAIL",
+    "reason": "Manual Ruling 25 review: sufficient=True, expected false; asserted answer with citations despite absent target"
+  },
+  "S039": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: answer gives 41.0/41.8 EN-FR, neither 18.4 nor the 10-point deficit required by frozen target."
+  },
+  "M019": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: only relative percentages, none of the six required FEVER/NQ accuracy values."
+  },
+  "M021": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: conclusion only; none of 82/70/68/12/4 hot-swap figures."
+  },
+  "M023": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: RAG-Seq 44.5 and T5-large 28.9/770M only; omits T5-11B 34.5/11B and the 626M total."
+  },
+  "M024": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: 21M/728/36GB present; omits 15.3B values and ~100GB pre-compression."
+  },
+  "M026": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: answers a different question (5 vs 10 training docs); no monotonic/peak/trade-off."
+  },
+  "M027": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: 15 and 50 docs given; omits 10 for generation tasks."
+  },
+  "M028": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: qualitative only; no 42.7/37.4/7.1/16.8 human-eval figures."
+  },
+  "M034": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: Transformer 4/0.6 and RAG beam decoder; omits RAG beam 4 for generation and greedy QA."
+  },
+  "M037": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: no 4.5M/36M/21M corpus-size figures."
+  },
+  "M041": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: only Q-BLEU-1; no Transformer BLEU values or GAN Parzen contrast."
+  },
+  "M042": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: omits T5 and the named Transformer baselines (GNMT/ConvS2S/ByteNet/Deep-Att)."
+  },
+  "M044": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: both GPU counts given but GAN absence omitted, which the frozen rubric requires."
+  },
+  "C020": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: only 28.4; omits 27.3 and 18.4 required by the frozen target."
+  },
+  "C025": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: only two NQ scores, one outside the target set; rubric requires at least four."
+  },
+  "C027": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: 0.1/0.3 given but required RAG dropout-absence statement omitted."
+  },
+  "C028": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: fewer than three target-list parameter counts; Transformer counts absent."
+  },
+  "C029": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: both GPU counts given but GAN absence omitted, which the frozen rubric requires."
+  },
+  "S022": {
+    "verdict": "FAIL",
+    "reason": "Ruling 16 quality-pass strict re-grade: Strict re-grade: states synchronization but not the mode-collapse definition (many z to same x)."
+  }
+}

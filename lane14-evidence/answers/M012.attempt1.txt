@@ -1,0 +1,13 @@
+question: Why not optimize D to completion in the inner loop, and what is the practical alternative?
+answer:   Optimizing the discriminative model D to completion in the inner loop is computationally prohibitive and would result in overfitting on finite datasets [c-4dac525b5af6]. The practical alternative is to alternate between k steps of optimizing D and one step of optimizing G, which allows D to remain near its optimal solution as G is updated [c-4dac525b5af6].
+sufficient: true
+citations:
+  [c-4dac525b5af6] 1406-2661-gan — The training procedure for the discriminative model D and the generative model G alternates between k steps of optimizing D and one step of optimizing G.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002587500000 (3 ledger events)
+wall:     38.193s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2054.32it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,18 @@
+question: What Adam settings (beta1, beta2, epsilon) are reported for the Transformer?
+answer:   For the Transformer model, the Adam optimizer parameters are set to 0.9 for beta1 [c-774be8a63d5c], 0.98 for beta2 [c-a909387fba98], and 10^-9 for epsilon [c-90451fd4eb6b].
+sufficient: true
+citations:
+  [c-774be8a63d5c] 1706-03762-attention — The Adam optimizer beta1 parameter is set to 0.9.
+  [c-a909387fba98] 1706-03762-attention — The Adam optimizer beta2 parameter is set to 0.98.
+  [c-90451fd4eb6b] 1706-03762-attention — The Adam optimizer epsilon parameter is set to 10^-9.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002735250000 (3 ledger events)
+wall:     49.447s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  16%|█▌        | 32/199 [00:00<00:00, 287.58it/s]
+Loading weights:  57%|█████▋    | 113/199 [00:00<00:00, 527.68it/s]
+Loading weights:  83%|████████▎ | 166/199 [00:00<00:00, 333.99it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 423.79it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

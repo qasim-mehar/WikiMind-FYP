@@ -1,0 +1,13 @@
+question: Why does the Transformer scale dot products by 1/sqrt(d_k), and what happens for large d_k without scaling?
+answer:   The Transformer scales dot products by 1/sqrt(dk) to counteract the effect of dot products growing large in magnitude for large values of dk [c-2ecf6bf8d2e0]. Without this scaling, the large dot products push the softmax function into regions where it has extremely small gradients [c-2ecf6bf8d2e0].
+sufficient: true
+citations:
+  [c-2ecf6bf8d2e0] 1706-03762-attention — Scaling dot products by 1/sqrt(dk) counteracts the effect of dot products growing large in magnitude for large values of dk, which otherwise pushes the softmax function into regions with extremely small gradients.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002590250000 (3 ledger events)
+wall:     42.493s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2657.16it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

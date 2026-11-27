@@ -1,0 +1,15 @@
+question: How can RAG's world knowledge be updated without retraining?
+answer:   RAG's world knowledge can be updated without retraining by replacing its non-parametric memory [c-bf1df9657014]. Specifically, the retrieval index can be hot-swapped to update the model [c-5e96e7e8ce95].
+sufficient: true
+citations:
+  [c-bf1df9657014] 2005-11401-retro — RAG's world knowledge can be updated by replacing its non-parametric memory.
+  [c-5e96e7e8ce95] 2005-11401-retro — The retrieval index can be hot-swapped to update the model without requiring retraining.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002779500000 (3 ledger events)
+wall:     33.391s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  57%|█████▋    | 114/199 [00:00<00:00, 1128.89it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1549.13it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

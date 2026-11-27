@@ -1,0 +1,14 @@
+question: How do the contradiction note and the Attention paper disagree about the EN-DE BLEU, and which is marked false?
+answer:   The provided claims do not contain information regarding a "contradiction note" or any disagreement about the EN-DE BLEU score, nor do they identify any information as being marked false.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002499000000 (3 ledger events)
+wall:     34.493s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  36%|███▌      | 71/199 [00:00<00:00, 708.82it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1672.86it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

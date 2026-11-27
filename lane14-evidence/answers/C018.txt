@@ -1,0 +1,14 @@
+question: What does the note instruct readers about citing it?
+answer:   The provided claims do not contain information regarding instructions for citing the note.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002561750000 (3 ledger events)
+wall:     32.489s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  37%|███▋      | 73/199 [00:00<00:00, 717.83it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1766.01it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

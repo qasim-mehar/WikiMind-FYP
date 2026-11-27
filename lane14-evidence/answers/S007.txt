@@ -1,0 +1,19 @@
+question: What positional encoding scheme does the Transformer use?
+answer:   The Transformer uses positional encodings added to input embeddings to provide information about the relative or absolute position of tokens in a sequence [c-bb24a21a339d]. These encodings have the same dimension as the input embeddings [c-914959a24694]. The model uses sine and cosine functions of different frequencies for this purpose [c-052d935e88a8]. Additionally, the authors noted that learned positional embeddings and sinusoidal positional encodings produced nearly identical results [c-4eaf30cf91a9].
+sufficient: true
+citations:
+  [c-bb24a21a339d] 1706-03762-attention — Positional encodings are added to input embeddings to provide information about the relative or absolute position of tokens in a sequence.
+  [c-914959a24694] 1706-03762-attention — Positional encodings have the same dimension dmodel as the input embeddings.
+  [c-052d935e88a8] 1706-03762-attention — The model uses sine and cosine functions of different frequencies for positional encoding.
+  [c-4eaf30cf91a9] 1706-03762-attention — Learned positional embeddings and sinusoidal positional encodings produced nearly identical results.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002889000000 (3 ledger events)
+wall:     78.953s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  24%|██▎       | 47/199 [00:00<00:00, 408.53it/s]
+Loading weights:  44%|████▍     | 88/199 [00:00<00:00, 355.00it/s]
+Loading weights:  64%|██████▍   | 128/199 [00:00<00:00, 372.85it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 493.09it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

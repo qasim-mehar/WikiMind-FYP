@@ -1,0 +1,18 @@
+question: What role does 'attention' play in the Transformer paper versus in RAG's DPR?
+answer:   The provided claims do not contain information regarding the role of attention in RAG's DPR. Regarding the Transformer, it is the first sequence transduction model based entirely on attention [c-1ec92c835808]. It uses a mechanism called Scaled Dot-Product Attention [c-249f3e7081e6], which allows for the modeling of dependencies between elements in sequences regardless of distance [c-e5a88d18abc1]. The Transformer employs multi-head attention, which performs the attention function in parallel on projected versions of queries, keys, and values [c-aafa24457545], allowing the model to jointly attend to information from different representation subspaces [c-6e874a612bed].
+sufficient: false
+citations:
+  [c-1ec92c835808] 1706-03762-attention — The Transformer is the first sequence transduction model based entirely on attention.
+  [c-249f3e7081e6] 1706-03762-attention — The attention mechanism introduced by the authors is named Scaled Dot-Product Attention.
+  [c-e5a88d18abc1] 1706-03762-attention — Attention mechanisms allow for the modeling of dependencies between elements in input or output sequences regardless of the distance between them.
+  [c-aafa24457545] 1706-03762-attention — Multi-head attention performs the attention function in parallel on projected versions of queries, keys, and values.
+  [c-6e874a612bed] 1706-03762-attention — Multi-head attention allows the model to jointly attend to information from different representation subspaces at different positions.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.003018000000 (3 ledger events)
+wall:     30.368s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  18%|█▊        | 35/199 [00:00<00:00, 344.98it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1707.48it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

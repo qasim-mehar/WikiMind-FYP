@@ -1,0 +1,6 @@
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  36%|███▌      | 72/199 [00:00<00:00, 702.51it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1574.67it/s]
+error: answer generation failed: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}} (cause: Gemini call failed after 3 attempts: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}})

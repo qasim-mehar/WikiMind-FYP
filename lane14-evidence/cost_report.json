@@ -1,0 +1,769 @@
+{
+  "ruling": "Ruling 30",
+  "ledger_events": 690,
+  "anomaly_event_indices_1based": [
+    559
+  ],
+  "anomaly_events": 1,
+  "total_all_inclusive_usd": 0.50964525,
+  "total_anomaly_usd": 0.10074675,
+  "total_graded_usd": 0.4088985,
+  "per_question_graded_sum_usd": 0.406227,
+  "per_question_allin_sum_usd": 0.50697375,
+  "unattributed_usd": 0.0026715,
+  "unattributed_note": "one pre-batch S001 smoke qa.answer event remains in the shared ledger; the retained S001 final answer is the later batch event. Headline totals are whole-ledger real spend; per-question figures come from answer attempt files.",
+  "anomaly_cap_usd": 0.5,
+  "anomaly_cap_status": "PASS",
+  "per_question": {
+    "S001": {
+      "all_inclusive_usd": 0.0026715,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0026715
+    },
+    "S002": {
+      "all_inclusive_usd": 0.002694,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002694
+    },
+    "S003": {
+      "all_inclusive_usd": 0.00262425,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00262425
+    },
+    "S004": {
+      "all_inclusive_usd": 0.002672,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002672
+    },
+    "S005": {
+      "all_inclusive_usd": 0.0027835,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027835
+    },
+    "S006": {
+      "all_inclusive_usd": 0.00251975,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00251975
+    },
+    "S007": {
+      "all_inclusive_usd": 0.002889,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002889
+    },
+    "S008": {
+      "all_inclusive_usd": 0.0027945,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027945
+    },
+    "S009": {
+      "all_inclusive_usd": 0.00273525,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00273525
+    },
+    "S010": {
+      "all_inclusive_usd": 0.00253275,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00253275
+    },
+    "S011": {
+      "all_inclusive_usd": 0.00258975,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00258975
+    },
+    "S012": {
+      "all_inclusive_usd": 0.00286175,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00286175
+    },
+    "S013": {
+      "all_inclusive_usd": 0.00292825,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00292825
+    },
+    "S014": {
+      "all_inclusive_usd": 0.001817,
+      "anomaly_usd": 0,
+      "graded_usd": 0.001817
+    },
+    "S015": {
+      "all_inclusive_usd": 0.00256025,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00256025
+    },
+    "S016": {
+      "all_inclusive_usd": 0.002496,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002496
+    },
+    "S017": {
+      "all_inclusive_usd": 0.002496,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002496
+    },
+    "S018": {
+      "all_inclusive_usd": 0.00193625,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00193625
+    },
+    "S019": {
+      "all_inclusive_usd": 0.00261575,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00261575
+    },
+    "S020": {
+      "all_inclusive_usd": 0.002491,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002491
+    },
+    "S021": {
+      "all_inclusive_usd": 0.0026125,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0026125
+    },
+    "S022": {
+      "all_inclusive_usd": 0.00247725,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00247725
+    },
+    "S023": {
+      "all_inclusive_usd": 0.0024935,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0024935
+    },
+    "S024": {
+      "all_inclusive_usd": 0.0030955,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0030955
+    },
+    "S025": {
+      "all_inclusive_usd": 0.002749,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002749
+    },
+    "S026": {
+      "all_inclusive_usd": 0.0029155,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0029155
+    },
+    "S027": {
+      "all_inclusive_usd": 0.00277475,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00277475
+    },
+    "S028": {
+      "all_inclusive_usd": 0.002889,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002889
+    },
+    "S029": {
+      "all_inclusive_usd": 0.00266175,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00266175
+    },
+    "S030": {
+      "all_inclusive_usd": 0.00271325,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00271325
+    },
+    "S031": {
+      "all_inclusive_usd": 0.00255475,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00255475
+    },
+    "S032": {
+      "all_inclusive_usd": 0.0025565,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0025565
+    },
+    "S033": {
+      "all_inclusive_usd": 0.0027795,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027795
+    },
+    "S034": {
+      "all_inclusive_usd": 0.00288225,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00288225
+    },
+    "S035": {
+      "all_inclusive_usd": 0.0027645,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027645
+    },
+    "S036": {
+      "all_inclusive_usd": 0.00250825,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00250825
+    },
+    "S037": {
+      "all_inclusive_usd": 0.00270125,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00270125
+    },
+    "S038": {
+      "all_inclusive_usd": 0.00249225,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00249225
+    },
+    "S039": {
+      "all_inclusive_usd": 0.002687,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002687
+    },
+    "S040": {
+      "all_inclusive_usd": 0.002746,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002746
+    },
+    "M001": {
+      "all_inclusive_usd": 0.00313225,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00313225
+    },
+    "M002": {
+      "all_inclusive_usd": 0.00259025,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00259025
+    },
+    "M003": {
+      "all_inclusive_usd": 0.0029235,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0029235
+    },
+    "M004": {
+      "all_inclusive_usd": 0.00257925,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00257925
+    },
+    "M005": {
+      "all_inclusive_usd": 0.00259325,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00259325
+    },
+    "M006": {
+      "all_inclusive_usd": 0.00276275,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00276275
+    },
+    "M007": {
+      "all_inclusive_usd": 0.002495,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002495
+    },
+    "M008": {
+      "all_inclusive_usd": 0.00257125,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00257125
+    },
+    "M009": {
+      "all_inclusive_usd": 0.0024305,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0024305
+    },
+    "M010": {
+      "all_inclusive_usd": 0.00248825,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00248825
+    },
+    "M011": {
+      "all_inclusive_usd": 0.002374,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002374
+    },
+    "M012": {
+      "all_inclusive_usd": 0.0025875,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0025875
+    },
+    "M013": {
+      "all_inclusive_usd": 0.002998,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002998
+    },
+    "M014": {
+      "all_inclusive_usd": 0.002646,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002646
+    },
+    "M015": {
+      "all_inclusive_usd": 0.00253625,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00253625
+    },
+    "M016": {
+      "all_inclusive_usd": 0.00248225,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00248225
+    },
+    "M017": {
+      "all_inclusive_usd": 0.00261125,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00261125
+    },
+    "M018": {
+      "all_inclusive_usd": 0.002792,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002792
+    },
+    "M019": {
+      "all_inclusive_usd": 0.00281725,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00281725
+    },
+    "M020": {
+      "all_inclusive_usd": 0.0027495,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027495
+    },
+    "M021": {
+      "all_inclusive_usd": 0.0026535,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0026535
+    },
+    "M022": {
+      "all_inclusive_usd": 0.002769,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002769
+    },
+    "M023": {
+      "all_inclusive_usd": 0.10386925,
+      "anomaly_usd": 0.10074675,
+      "graded_usd": 0.0031225
+    },
+    "M024": {
+      "all_inclusive_usd": 0.002606,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002606
+    },
+    "M025": {
+      "all_inclusive_usd": 0.00283625,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00283625
+    },
+    "M026": {
+      "all_inclusive_usd": 0.002643,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002643
+    },
+    "M027": {
+      "all_inclusive_usd": 0.0027675,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027675
+    },
+    "M028": {
+      "all_inclusive_usd": 0.00299775,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00299775
+    },
+    "M029": {
+      "all_inclusive_usd": 0.003131,
+      "anomaly_usd": 0,
+      "graded_usd": 0.003131
+    },
+    "M030": {
+      "all_inclusive_usd": 0.002954,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002954
+    },
+    "M031": {
+      "all_inclusive_usd": 0.00279275,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00279275
+    },
+    "M032": {
+      "all_inclusive_usd": 0.00289925,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00289925
+    },
+    "M033": {
+      "all_inclusive_usd": 0.00280575,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00280575
+    },
+    "M034": {
+      "all_inclusive_usd": 0.0027895,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027895
+    },
+    "M035": {
+      "all_inclusive_usd": 0.00257625,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00257625
+    },
+    "M036": {
+      "all_inclusive_usd": 0.0028725,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0028725
+    },
+    "M037": {
+      "all_inclusive_usd": 0.00305075,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00305075
+    },
+    "M038": {
+      "all_inclusive_usd": 0.00285125,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00285125
+    },
+    "M039": {
+      "all_inclusive_usd": 0.00282925,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00282925
+    },
+    "M040": {
+      "all_inclusive_usd": 0.0026745,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0026745
+    },
+    "M041": {
+      "all_inclusive_usd": 0.002694,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002694
+    },
+    "M042": {
+      "all_inclusive_usd": 0.003224,
+      "anomaly_usd": 0,
+      "graded_usd": 0.003224
+    },
+    "M043": {
+      "all_inclusive_usd": 0.00258475,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00258475
+    },
+    "M044": {
+      "all_inclusive_usd": 0.002854,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002854
+    },
+    "M045": {
+      "all_inclusive_usd": 0.003018,
+      "anomaly_usd": 0,
+      "graded_usd": 0.003018
+    },
+    "M046": {
+      "all_inclusive_usd": 0.00278125,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00278125
+    },
+    "M047": {
+      "all_inclusive_usd": 0.00304775,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00304775
+    },
+    "M048": {
+      "all_inclusive_usd": 0.00379425,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00379425
+    },
+    "M049": {
+      "all_inclusive_usd": 0.0025675,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0025675
+    },
+    "M050": {
+      "all_inclusive_usd": 0.0028865,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0028865
+    },
+    "M051": {
+      "all_inclusive_usd": 0.0027535,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027535
+    },
+    "M052": {
+      "all_inclusive_usd": 0.0026175,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0026175
+    },
+    "M053": {
+      "all_inclusive_usd": 0.00404525,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00404525
+    },
+    "M054": {
+      "all_inclusive_usd": 0.002499,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002499
+    },
+    "M055": {
+      "all_inclusive_usd": 0.002871,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002871
+    },
+    "M056": {
+      "all_inclusive_usd": 0.003179,
+      "anomaly_usd": 0,
+      "graded_usd": 0.003179
+    },
+    "M057": {
+      "all_inclusive_usd": 0.002738,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002738
+    },
+    "M058": {
+      "all_inclusive_usd": 0.00283425,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00283425
+    },
+    "M059": {
+      "all_inclusive_usd": 0.0027875,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027875
+    },
+    "M060": {
+      "all_inclusive_usd": 0.00269525,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00269525
+    },
+    "C001": {
+      "all_inclusive_usd": 0.00280375,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00280375
+    },
+    "C002": {
+      "all_inclusive_usd": 0.00295525,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00295525
+    },
+    "C003": {
+      "all_inclusive_usd": 0.00254925,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00254925
+    },
+    "C004": {
+      "all_inclusive_usd": 0.00286975,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00286975
+    },
+    "C005": {
+      "all_inclusive_usd": 0.002448,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002448
+    },
+    "C006": {
+      "all_inclusive_usd": 0.00263725,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00263725
+    },
+    "C007": {
+      "all_inclusive_usd": 0.002608,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002608
+    },
+    "C008": {
+      "all_inclusive_usd": 0.00255375,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00255375
+    },
+    "C009": {
+      "all_inclusive_usd": 0.0026385,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0026385
+    },
+    "C010": {
+      "all_inclusive_usd": 0.0027335,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027335
+    },
+    "C011": {
+      "all_inclusive_usd": 0.00270775,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00270775
+    },
+    "C012": {
+      "all_inclusive_usd": 0.00238125,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00238125
+    },
+    "C013": {
+      "all_inclusive_usd": 0.00271175,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00271175
+    },
+    "C014": {
+      "all_inclusive_usd": 0.00251325,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00251325
+    },
+    "C015": {
+      "all_inclusive_usd": 0.002555,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002555
+    },
+    "C016": {
+      "all_inclusive_usd": 0.00268775,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00268775
+    },
+    "C017": {
+      "all_inclusive_usd": 0.002708,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002708
+    },
+    "C018": {
+      "all_inclusive_usd": 0.00256175,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00256175
+    },
+    "C019": {
+      "all_inclusive_usd": 0.002632,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002632
+    },
+    "C020": {
+      "all_inclusive_usd": 0.002791,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002791
+    },
+    "C021": {
+      "all_inclusive_usd": 0.00262025,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00262025
+    },
+    "C022": {
+      "all_inclusive_usd": 0.00309125,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00309125
+    },
+    "C023": {
+      "all_inclusive_usd": 0.00304675,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00304675
+    },
+    "C024": {
+      "all_inclusive_usd": 0.002983,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002983
+    },
+    "C025": {
+      "all_inclusive_usd": 0.0027975,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0027975
+    },
+    "C026": {
+      "all_inclusive_usd": 0.002561,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002561
+    },
+    "C027": {
+      "all_inclusive_usd": 0.00277575,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00277575
+    },
+    "C028": {
+      "all_inclusive_usd": 0.00291675,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00291675
+    },
+    "C029": {
+      "all_inclusive_usd": 0.002776,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002776
+    },
+    "C030": {
+      "all_inclusive_usd": 0.002701,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002701
+    },
+    "U001": {
+      "all_inclusive_usd": 0.00246675,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00246675
+    },
+    "U002": {
+      "all_inclusive_usd": 0.0025505,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0025505
+    },
+    "U003": {
+      "all_inclusive_usd": 0.00236825,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00236825
+    },
+    "U004": {
+      "all_inclusive_usd": 0.00264475,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00264475
+    },
+    "U005": {
+      "all_inclusive_usd": 0.0023735,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0023735
+    },
+    "U006": {
+      "all_inclusive_usd": 0.00237575,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00237575
+    },
+    "U007": {
+      "all_inclusive_usd": 0.0025315,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0025315
+    },
+    "U008": {
+      "all_inclusive_usd": 0.002528,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002528
+    },
+    "U009": {
+      "all_inclusive_usd": 0.00277025,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00277025
+    },
+    "U010": {
+      "all_inclusive_usd": 0.002542,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002542
+    },
+    "U011": {
+      "all_inclusive_usd": 0.002945,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002945
+    },
+    "U012": {
+      "all_inclusive_usd": 0.00265675,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00265675
+    },
+    "U013": {
+      "all_inclusive_usd": 0.00234875,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00234875
+    },
+    "U014": {
+      "all_inclusive_usd": 0.002509,
+      "anomaly_usd": 0,
+      "graded_usd": 0.002509
+    },
+    "U015": {
+      "all_inclusive_usd": 0.00279275,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00279275
+    },
+    "U016": {
+      "all_inclusive_usd": 0.00258775,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00258775
+    },
+    "U017": {
+      "all_inclusive_usd": 0.0024825,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0024825
+    },
+    "U018": {
+      "all_inclusive_usd": 0.00249925,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00249925
+    },
+    "U019": {
+      "all_inclusive_usd": 0.00236925,
+      "anomaly_usd": 0,
+      "graded_usd": 0.00236925
+    },
+    "U020": {
+      "all_inclusive_usd": 0.0025515,
+      "anomaly_usd": 0,
+      "graded_usd": 0.0025515
+    }
+  }
+}

@@ -1,0 +1,14 @@
+question: Which RAG variant wins each QA dataset in Table 1?
+answer:   The provided claims do not contain information regarding which specific RAG variant wins each QA dataset in Table 1.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002561000000 (3 ledger events)
+wall:     33.077s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  83%|████████▎ | 166/199 [00:00<00:00, 1644.48it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1952.08it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

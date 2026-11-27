@@ -1,0 +1,15 @@
+question: Which evaluation metrics are shared across the papers?
+answer:   The provided claims do not contain enough information to identify evaluation metrics that are shared across the papers. While one paper mentions using Exact Match (EM) scores [c-ebfce1167c41] and another mentions BLEU score [c-4a5f1287b1ee], there is no information indicating that these or any other metrics are shared across the papers.
+sufficient: false
+citations:
+  [c-ebfce1167c41] 2005-11401-retro — The authors of the study report Exact Match (EM) scores as an evaluation metric.
+  [c-4a5f1287b1ee] 1706-03762-attention — Label smoothing hurts perplexity but improves accuracy and BLEU score.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002834250000 (3 ledger events)
+wall:     28.811s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  62%|██████▏   | 123/199 [00:00<00:00, 1203.26it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1633.98it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

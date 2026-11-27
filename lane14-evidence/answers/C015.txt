@@ -1,0 +1,14 @@
+question: How large is the gap between the two reported EN-DE BLEU values?
+answer:   The provided claims do not contain enough information to calculate the gap between two reported English-to-German (EN-DE) BLEU values, as only one BLEU score of 28.4 is provided for the Transformer (big) model on the WMT 2014 English-to-German translation task [c-e2c686bf6eac].
+sufficient: false
+citations:
+  [c-e2c686bf6eac] 1706-03762-attention — The Transformer (big) model achieved a BLEU score of 28.4 on the WMT 2014 English-to-German translation task.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002555000000 (3 ledger events)
+wall:     45.357s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  18%|█▊        | 35/199 [00:00<00:00, 326.25it/s]
+Loading weights:  34%|███▍      | 68/199 [00:00<00:00, 231.42it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 585.14it/s]

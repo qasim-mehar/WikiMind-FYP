@@ -1,0 +1,14 @@
+question: What is the 'Helvetica scenario' in adversarial nets?
+answer:   In adversarial nets, the 'Helvetica scenario' is a situation that must be avoided by synchronizing the discriminator D with the generator G during training [c-33d009d1247a].
+sufficient: true
+citations:
+  [c-33d009d1247a] 1406-2661-gan — The discriminator D must be synchronized with the generator G during training to avoid the Helvetica scenario.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002477250000 (3 ledger events)
+wall:     70.755s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  53%|█████▎    | 105/199 [00:00<00:00, 1049.85it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1656.92it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

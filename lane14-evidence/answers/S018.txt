@@ -1,0 +1,14 @@
+question: What value of k (discriminator steps per generator step) was used in the experiments?
+answer:   In the experiments, the authors used a value of k = 1, where k represents the number of steps to apply to the discriminator for each step of optimizing the generator [c-a90e02e40213, c-4dac525b5af6].
+sufficient: true
+citations:
+  [c-a90e02e40213] 1406-2661-gan — The authors used a value of k = 1 in their experiments.
+  [c-4dac525b5af6] 1406-2661-gan — The training procedure for the discriminative model D and the generative model G alternates between k steps of optimizing D and one step of optimizing G.
+retrieval: 20 seeds, 106/150 claims
+shadow:   $0.001936250000 (3 ledger events)
+wall:     24.356s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2151.99it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

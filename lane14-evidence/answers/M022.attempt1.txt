@@ -1,0 +1,16 @@
+question: What did the null-document experiments find?
+answer:   The null document experiments explored modeling the null document logit by learning a document embedding, a static learnt bias term, or a neural network [c-ab97f360e847]. These null document mechanisms did not improve performance [c-9f51064ac1e9].
+sufficient: true
+citations:
+  [c-ab97f360e847] 2005-11401-retro — The authors explored modeling the null document logit by learning a document embedding, a static learnt bias term, or a neural network.
+  [c-9f51064ac1e9] 2005-11401-retro — The null document mechanisms did not improve performance.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002769000000 (3 ledger events)
+wall:     31.186s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  20%|█▉        | 39/199 [00:00<00:00, 368.32it/s]
+Loading weights:  45%|████▍     | 89/199 [00:00<00:00, 427.23it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 881.04it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,15 @@
+question: What is the longest explicit training time reported in the corpus?
+answer:   The longest explicit training time reported in the corpus is 3.5 days, which was required to train the Transformer (big) model for the English-to-German task [c-c24e9f63c086, c-fffa90dd3b5d].
+sufficient: true
+citations:
+  [c-c24e9f63c086] 1706-03762-attention — Training the Transformer (big) model for the English-to-German task took 3.5 days on 8 P100 GPUs.
+  [c-fffa90dd3b5d] 1706-03762-attention — The big models were trained for 300,000 steps or 3.5 days.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002617500000 (3 ledger events)
+wall:     33.085s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  43%|████▎     | 85/199 [00:00<00:00, 845.63it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1799.99it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

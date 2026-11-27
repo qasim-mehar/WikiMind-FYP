@@ -1,0 +1,17 @@
+question: Compare the experimental corpora: Transformer's WMT14 data versus RAG's Wikipedia index.
+answer:   The Transformer model was evaluated on the WMT 2014 English-to-German and English-to-French translation tasks [c-2e60401ef433]. In contrast, RAG models utilize a non-parametric memory consisting of a dense vector index of Wikipedia [c-753cce0a0365]. This Wikipedia index is composed of disjoint 100-word chunks from a single Wikipedia dump [c-c5d774d8a587, c-e6b94b5be535].
+sufficient: true
+citations:
+  [c-2e60401ef433] 1706-03762-attention — The Transformer achieved a new state of the art on the WMT 2014 English-to-German and WMT 2014 English-to-French translation tasks.
+  [c-753cce0a0365] 2005-11401-retro — In RAG models, the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia.
+  [c-c5d774d8a587] 2005-11401-retro — The experiments use a single Wikipedia dump as the non-parametric knowledge source.
+  [c-e6b94b5be535] 2005-11401-retro — Each Wikipedia article is split into disjoint 100-word chunks.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.003050750000 (3 ledger events)
+wall:     62.538s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  52%|█████▏    | 103/199 [00:00<00:00, 1025.60it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1346.13it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

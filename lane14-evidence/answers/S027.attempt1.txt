@@ -1,0 +1,15 @@
+question: Which Wikipedia dump is used as the non-parametric knowledge source?
+answer:   The experiments use the December 2018 Wikipedia dump as the non-parametric knowledge source [c-c5d774d8a587, c-d2677485567b].
+sufficient: true
+citations:
+  [c-c5d774d8a587] 2005-11401-retro — The experiments use a single Wikipedia dump as the non-parametric knowledge source.
+  [c-d2677485567b] 2005-11401-retro — The experiments use the December 2018 Wikipedia dump.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002774750000 (3 ledger events)
+wall:     33.189s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  50%|████▉     | 99/199 [00:00<00:00, 714.40it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1302.82it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

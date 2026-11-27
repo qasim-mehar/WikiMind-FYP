@@ -1,0 +1,12 @@
+question: What is the parametric memory component of RAG models?
+answer:   In RAG models, the parametric memory component is a pre-trained sequence-to-sequence (seq2seq) model [c-753cce0a0365].
+sufficient: true
+citations:
+  [c-753cce0a0365] 2005-11401-retro — In RAG models, the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002493500000 (3 ledger events)
+wall:     56.383s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2175.68it/s]

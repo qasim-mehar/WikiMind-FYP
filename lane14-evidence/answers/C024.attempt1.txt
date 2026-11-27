@@ -1,0 +1,16 @@
+question: Which names differ between the two R3 author lists?
+answer:   The two author lists for the paper 'R3: Reinforced ranker-reader for open-domain question answering' differ in the following names: Gerry Tesauro is listed in one version [c-e38bbcd6852b], while Gerald Tesauro is listed in the other [c-f0b5b2356517]. Additionally, the first list includes Bowen Zhou and Jing Jiang [c-e38bbcd6852b], whereas the second list includes Jing Jiang and Murray Campbell [c-f0b5b2356517].
+sufficient: true
+citations:
+  [c-e38bbcd6852b] 2005-11401-retro — Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, and Jing Jiang are the authors of the paper titled R3: Reinforced ranker-reader for open-domain question answering.
+  [c-f0b5b2356517] 2005-11401-retro — The authors of the paper are Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, and Murray Campbell.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002983000000 (3 ledger events)
+wall:     82.928s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  38%|███▊      | 76/199 [00:00<00:00, 757.99it/s]
+Loading weights:  76%|███████▋  | 152/199 [00:00<00:00, 537.37it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 663.85it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

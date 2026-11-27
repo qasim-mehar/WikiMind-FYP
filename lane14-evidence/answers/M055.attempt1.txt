@@ -1,0 +1,14 @@
+question: Is RAG's BART generator in the same model family as the architecture introduced by the Transformer paper?
+answer:   Yes, the BART generator used in RAG is a pre-trained encoder-decoder model [c-95e8682dcd5c] that belongs to the Transformer architecture family [c-1706-03762-attention, c-c85299c2005e].
+sufficient: true
+citations:
+  [c-95e8682dcd5c] 2005-11401-retro — BART and T5 are pre-trained encoder-decoder models that utilize bi-directional attention.
+  [c-c85299c2005e] 1706-03762-attention — Table 3 lists variations on the Transformer architecture.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002871000000 (3 ledger events)
+wall:     40.886s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2488.42it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

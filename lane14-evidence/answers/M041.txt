@@ -1,0 +1,15 @@
+question: Which BLEU-related scores appear across the corpus?
+answer:   The corpus mentions the Q-BLEU-1 metric, which is used for Jeopardy question generation [c-9c758c0f3b8b].
+sufficient: true
+citations:
+  [c-9c758c0f3b8b] 2005-11401-retro — RAG-Token and RAG-Sequence outperform BART on the Q-BLEU-1 metric for Jeopardy question generation.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002694000000 (3 ledger events)
+wall:     78.741s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  36%|███▌      | 72/199 [00:00<00:00, 706.89it/s]
+Loading weights:  72%|███████▏  | 143/199 [00:00<00:00, 686.41it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 883.66it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

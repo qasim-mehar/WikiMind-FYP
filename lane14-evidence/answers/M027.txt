@@ -1,0 +1,15 @@
+question: What retrieval counts were used at test time for each task and model?
+answer:   For Open-domain question answering test results, RAG-Token models use 15 retrieved documents [c-c33c45ca0b8f], while RAG-Sequence models use 50 retrieved documents [c-ca1ed28b5193].
+sufficient: true
+citations:
+  [c-c33c45ca0b8f] 2005-11401-retro — RAG-Token models use 15 retrieved documents for Open-domain QA test numbers.
+  [c-ca1ed28b5193] 2005-11401-retro — RAG-Sequence models use 50 retrieved documents for Open-domain QA test results.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002767500000 (3 ledger events)
+wall:     45.055s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  37%|███▋      | 74/199 [00:00<00:00, 714.42it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1018.05it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,14 @@
+question: Which optimization techniques appear in the Transformer paper and which in the RAG paper?
+answer:   The provided claims do not contain information regarding specific optimization techniques used in the Transformer paper or the RAG paper.
+sufficient: false
+citations:
+  (none)
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002576250000 (3 ledger events)
+wall:     51.068s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  49%|████▉     | 98/199 [00:00<00:00, 927.51it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1394.81it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,13 @@
+question: RAG cites Vaswani et al. [58]. What architecture does that cited paper introduce and what are its headline translation results?
+answer:   The paper 'Attention is all you need' was authored by Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin [c-1e346261a078]. The provided claims do not contain information regarding the architecture introduced in this paper or its headline translation results.
+sufficient: false
+citations:
+  [c-1e346261a078] 2005-11401-retro — The authors of the paper 'Attention is all you need' are Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002792750000 (3 ledger events)
+wall:     29.863s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1997.01it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

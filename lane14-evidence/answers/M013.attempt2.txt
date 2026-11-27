@@ -1,0 +1,20 @@
+question: How do the generator/discriminator activation choices support backprop-only training?
+answer:   When the generator and discriminator are defined by multilayer perceptrons, the system can be trained using backpropagation [c-7eef8a8f1196, c-0862eaca87f4]. The framework uses backpropagation to obtain gradients [c-3bf1681cf36c]. The generator network is updated using gradients flowing through the discriminator [c-978bba7e1a14]. The discriminator net uses maxout activations [c-cd29ea961201], and the generator nets used a mixture of rectifier linear activations and sigmoid activations [c-717e09e2c464].
+sufficient: true
+citations:
+  [c-3bf1681cf36c] 1406-2661-gan — The new framework uses backpropagation to obtain gradients.
+  [c-978bba7e1a14] 1406-2661-gan — The generator network is updated using gradients flowing through the discriminator instead of being updated directly with data examples.
+  [c-cd29ea961201] 1406-2661-gan — The discriminator net uses maxout activations.
+  [c-717e09e2c464] 1406-2661-gan — The generator nets used a mixture of rectifier linear activations and sigmoid activations.
+  [c-7eef8a8f1196] 1406-2661-gan — When the generator and discriminator are defined by multilayer perceptrons, the system can be trained using backpropagation.
+  [c-0862eaca87f4] 1406-2661-gan — Adversarial nets can be implemented using multilayer perceptrons for both the generative and discriminative models.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002998000000 (3 ledger events)
+wall:     123.568s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  16%|█▌        | 32/199 [00:00<00:00, 317.88it/s]
+Loading weights:  67%|██████▋   | 134/199 [00:00<00:00, 729.26it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 948.39it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

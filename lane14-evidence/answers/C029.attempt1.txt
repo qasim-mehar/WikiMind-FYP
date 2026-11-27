@@ -1,0 +1,15 @@
+question: Which GPU count appears in more than one document?
+answer:   The GPU count of 8 appears in more than one document: it is mentioned in the context of training models on 8 NVIDIA P100 GPUs [c-f049f0012af9] and training RAG models and BART baselines using 8 NVIDIA V100 GPUs [c-0d81cf53d064].
+sufficient: true
+citations:
+  [c-f049f0012af9] 1706-03762-attention — The models were trained on one machine equipped with 8 NVIDIA P100 GPUs.
+  [c-0d81cf53d064] 2005-11401-retro — RAG models and BART baselines are trained using 8, 32GB NVIDIA V100 GPUs.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002776000000 (3 ledger events)
+wall:     34.420s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  24%|██▍       | 48/199 [00:00<00:00, 462.10it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1415.00it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

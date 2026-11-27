@@ -1,0 +1,35 @@
+{
+  "window_1": {
+    "start": "2026-11-25 (first smoke, C220 UTC-relative; see run.log)",
+    "halt_question": "C020",
+    "halt_utc": "2026-11-26T07:54:19Z",
+    "halt_pacific": "2026-11-25T23:54:19-08:00",
+    "halt_cause": "real HTTP 429 RESOURCE_EXHAUSTED; Gemini free-tier daily quota (500 requests/day) on gemini-3.1-flash-lite",
+    "manifest_rows": 120,
+    "answers_obtained": 107,
+    "attempt_exhausted": 12,
+    "questions_attempted": 120
+  },
+  "window_2": {
+    "resume_utc": "2026-11-26T08:32:15Z",
+    "resume_pacific": "2026-11-26T00:32:15-08:00",
+    "reason": "midnight Pacific free-tier daily quota reset has occurred (38 minutes before resume)",
+    "scope": "31 unanswered (C020 + C021-C030 + U001-U020) plus 12 reopened (M023, M056, M058-M060, C001-C007) = 43 questions",
+    "fresh_attempt_budget": 6,
+    "ledger": "append to same lane14-evidence/costs.jsonl",
+    "cost_db_mirror": "unset",
+    "halt": {
+      "question": "M023",
+      "kind": "per-question shadow budget breach (W5)",
+      "shadow_usd": 0.10386925,
+      "cap_usd": 0.02,
+      "cause": "one qa.answer call emitted 65520 output tokens (shadow $0.10074675) followed by a 434-token retry; 4 ledger events total",
+      "halted_utc": "2026-11-26T08:37:56Z",
+      "halted_pacific": "2026-11-26T00:37:56-08:00",
+      "halt_429": false,
+      "questions_completed_in_w2": 1,
+      "remaining_unattempted": 30,
+      "note": "No second 429 occurred. Governance direction W5 makes a budget breach a halt condition; await direction (third window or explicit waiver)."
+    }
+  }
+}

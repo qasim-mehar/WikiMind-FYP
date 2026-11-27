@@ -1,0 +1,14 @@
+question: What is RAG-Token's FEVER 3-way label accuracy?
+answer:   The provided claims do not contain information regarding the specific 3-way label accuracy of the RAG-Token model on the FEVER dataset. The claims only state that RAG scores for 3-way classification on the FEVER dataset are within 4.3% of state-of-the-art models [c-fb626d19a578].
+sufficient: false
+citations:
+  [c-fb626d19a578] 2005-11401-retro — RAG scores for 3-way classification on the FEVER dataset are within 4.3% of state-of-the-art models.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002554750000 (3 ledger events)
+wall:     49.348s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  87%|████████▋ | 174/199 [00:00<00:00, 1699.11it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1842.39it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

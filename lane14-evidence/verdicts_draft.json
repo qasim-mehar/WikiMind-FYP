@@ -1,0 +1,1635 @@
+[
+  {
+    "id": "S001",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0026715,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S002",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002694,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S003",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00262425,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S004",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002672,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S005",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0027835,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S006",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00251975,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S007",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002889,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S008",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0027945,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S009",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00273525,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S010",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00253275,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S011",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00258975,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S012",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00286175,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S013",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00292825,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S014",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.001817,
+    "retrieval": "20 seeds, 104/150 claims"
+  },
+  {
+    "id": "S015",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00256025,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S016",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['jensen-shannon', 'divergence'] -> hits ['divergence'] (need 2)"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.002496,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S017",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002496,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S018",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00193625,
+    "retrieval": "20 seeds, 106/150 claims"
+  },
+  {
+    "id": "S019",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['225', '2'] -> hits [] (need 1)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00261575,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S020",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002491,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S021",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens [] -> hits [] (need 1)"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.0026125,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S022",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00247725,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S023",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0024935,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S024",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0030955,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S025",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002749,
+    "retrieval": "23 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S026",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0029155,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S027",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00277475,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S028",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002889,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S029",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00266175,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S030",
+    "bucket": "single-hop",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00271325,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S031",
+    "bucket": "single-hop",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00255475,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S032",
+    "bucket": "single-hop",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.0025565,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S033",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0027795,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S034",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00288225,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S035",
+    "bucket": "single-hop",
+    "expected": "honest-insufficient",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=True, expected false",
+      "asserted answer with citations despite absent target"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.0027645,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S036",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['deliberately', 'synthetic', 'citation', 'fixture', 'false'] -> hits ['fixture'] (need 2)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00250825,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S037",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['1706.03762', 'attention', 'vaswani', 'arxiv', 'need'] -> hits [] (need 1)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00270125,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S038",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00249225,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S039",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002687,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "S040",
+    "bucket": "single-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['says', 'note'] -> hits [] (need 2)"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.002746,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M001",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00313225,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M002",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00259025,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M003",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0029235,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M004",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00257925,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M005",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00259325,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M006",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['representation', 'dimension', 'sequence', 'smaller', 'length'] -> hits [] (need 2)"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.00276275,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M007",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['extrapolation', 'sequences', 'longer', 'allow', 'they'] -> hits [] (need 2)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002495,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M008",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['5', '10', '20', '4', '0.6', 'checkpoints', 'intervals', 'penalty', 'length', 'last'] -> hits [] (need 1)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00257125,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M009",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['4', '1024', '21', '0.3', '300', 'output', 'layers', 'length', 'alpha', 'beam'] -> hits [] (need 1)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.0024305,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M010",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00248825,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M011",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002374,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M012",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0025875,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M013",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002998,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M014",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002646,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M015",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['approximation', 'represented', 'explicitly', 'sampling', 'parzen'] -> hits ['sampling'] (need 2)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00253625,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M016",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['distributions', 'degenerate', 'components', 'parameters', 'generator'] -> hits [] (need 2)"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.00248225,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M017",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['semi-supervised', 'improvements', 'conditional', 'approximate', 'efficiency'] -> hits [] (need 2)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00261125,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M018",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002792,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M019",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00281725,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M020",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['entity-centric', 'differentiable', 'retrieval', 'crucial', 'overlap'] -> hits ['retrieval'] (need 2)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.0027495,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M021",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0026535,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M022",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['questions', 'mechanism', 'retrieval', 'ms-marco', 'improved'] -> hits ['mechanism'] (need 2)"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.002769,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M023",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.10386925,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M024",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002606,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M025",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00283625,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M026",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002643,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M027",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0027675,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M028",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00299775,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M029",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.003131,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M030",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['human-readable', 'aggregates', 'documents', 'external', 'writable'] -> hits [] (need 2)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002954,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M031",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['28.4', '41.8', '41.0', 'transformer', 'en-de', 'en-fr', 'bleu'] -> hits [] (need 1)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00279275,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M032",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00289925,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M033",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00280575,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M034",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0027895,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M035",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['transformer', 'precision', 'schedule', 'fairseq', 'warmup'] -> hits ['transformer'] (need 2)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00257625,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M036",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.0028725,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M037",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00305075,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M038",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00285125,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M039",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00282925,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M040",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.0026745,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M041",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002694,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M042",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.003224,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M043",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['2017', 'attention', 'vaswani', 'neurips', 'need'] -> hits [] (need 1)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00258475,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M044",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002854,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M045",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.003018,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M046",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00278125,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M047",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00304775,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M048",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00379425,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M049",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.0025675,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M050",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.0028865,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M051",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.0027535,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M052",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0026175,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M053",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00404525,
+    "retrieval": "24 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M054",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002499,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M055",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002871,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M056",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.003179,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M057",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002738,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M058",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['transformer', 'specificity', 'evaluation', 'factuality', 'pairwise'] -> hits ['evaluation'] (need 2)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00283425,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M059",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0027875,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "M060",
+    "bucket": "multi-hop",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00269525,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C001",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00280375,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C002",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00295525,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C003",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "REVIEW",
+    "reasons": [
+      "conflict sides not both present: [False, True]"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.00254925,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C004",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00286975,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C005",
+    "bucket": "contradiction",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['41.8'] -> hits [] (need 1)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002448,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C006",
+    "bucket": "contradiction",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00263725,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C007",
+    "bucket": "contradiction",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002608,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C008",
+    "bucket": "contradiction",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00255375,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C009",
+    "bucket": "aggregation",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.0026385,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C010",
+    "bucket": "aggregation",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.0027335,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C011",
+    "bucket": "contradiction",
+    "expected": "cite-present-side-honest-note",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00270775,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C012",
+    "bucket": "contradiction",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00238125,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C013",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "REVIEW",
+    "reasons": [
+      "conflict sides not both present: [True, False]"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.00271175,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C014",
+    "bucket": "contradiction",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00251325,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C015",
+    "bucket": "contradiction",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002555,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C016",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "REVIEW",
+    "reasons": [
+      "conflict sides not both present: [True, False]"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.00268775,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C017",
+    "bucket": "contradiction",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['1706.03762', 'attention', 'arxiv', 'need'] -> hits [] (need 1)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002708,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C018",
+    "bucket": "contradiction",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['cite', 'file'] -> hits [] (need 2)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.00256175,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C019",
+    "bucket": "contradiction",
+    "expected": "cite-present-side-honest-note",
+    "draft": "REVIEW",
+    "reasons": [
+      "stored side not present in answer"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002632,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C020",
+    "bucket": "aggregation",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002791,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C021",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "REVIEW",
+    "reasons": [
+      "conflict sides not both present: [False, False]"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.00262025,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C022",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00309125,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C023",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00304675,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C024",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002983,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C025",
+    "bucket": "aggregation",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.0027975,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C026",
+    "bucket": "aggregation",
+    "expected": "answer-present",
+    "draft": "REVIEW",
+    "reasons": [
+      "target tokens ['rag-sequence', 'rag-token'] -> hits [] (need 2)",
+      "sufficient=False, expected true"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002561,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C027",
+    "bucket": "aggregation",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00277575,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C028",
+    "bucket": "aggregation",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.00291675,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C029",
+    "bucket": "aggregation",
+    "expected": "answer-present",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": true,
+    "shadow_usd": 0.002776,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "C030",
+    "bucket": "contradiction",
+    "expected": "cite-both-sides",
+    "draft": "REVIEW",
+    "reasons": [
+      "conflict sides not both present: [False, False]"
+    ],
+    "sufficient": false,
+    "shadow_usd": 0.002701,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U001",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00246675,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U002",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.0025505,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U003",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00236825,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U004",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=True, expected false",
+      "asserted answer with citations despite absent target"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.00264475,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U005",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.0023735,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U006",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00237575,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U007",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.0025315,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U008",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.002528,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U009",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "REVIEW",
+    "reasons": [
+      "sufficient=True, expected false",
+      "asserted answer with citations despite absent target"
+    ],
+    "sufficient": true,
+    "shadow_usd": 0.00277025,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U010",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.002542,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U011",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.002945,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U012",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00265675,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U013",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00234875,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U014",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.002509,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U015",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00279275,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U016",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00258775,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U017",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.0024825,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U018",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00249925,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U019",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.00236925,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  },
+  {
+    "id": "U020",
+    "bucket": "unanswerable",
+    "expected": "honest-insufficient",
+    "draft": "PASS",
+    "reasons": [],
+    "sufficient": false,
+    "shadow_usd": 0.0025515,
+    "retrieval": "20 seeds, 150/150 claims (capped)"
+  }
+]

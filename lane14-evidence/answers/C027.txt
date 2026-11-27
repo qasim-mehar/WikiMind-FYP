@@ -1,0 +1,15 @@
+question: Aggregate all dropout rates explicitly mentioned across the three papers.
+answer:   The provided documents explicitly mention a dropout rate of 0.1 for the base model [c-76c3f6522298] and for the Transformer (big) model used for English-to-French translation [c-3562f789e932].
+sufficient: true
+citations:
+  [c-76c3f6522298] 1706-03762-attention — The base model uses a dropout rate of 0.1.
+  [c-3562f789e932] 1706-03762-attention — The Transformer (big) model for English-to-French translation used a dropout rate of 0.1.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002775750000 (3 ledger events)
+wall:     32.946s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  77%|███████▋  | 153/199 [00:00<00:00, 1521.91it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1920.41it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

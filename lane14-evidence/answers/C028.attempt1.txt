@@ -1,0 +1,16 @@
+question: Aggregate all explicit parameter counts mentioned in the corpus.
+answer:   The corpus mentions the following explicit parameter counts: RAG models contain 110 million trainable parameters for the BERT-base query encoder [c-648b5e4924d7], RAG models contain 406 million trainable parameters derived from the BART-large model [c-69ab81c8acb4], and the T5-large model has 770 million parameters [c-88698c8e43ec].
+sufficient: true
+citations:
+  [c-648b5e4924d7] 2005-11401-retro — The RAG models contain 110M trainable parameters for the BERT-base query encoder.
+  [c-69ab81c8acb4] 2005-11401-retro — The RAG models contain 406 million trainable parameters derived from the BART-large model.
+  [c-88698c8e43ec] 2005-11401-retro — The T5-large model has 770 million parameters.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002916750000 (3 ledger events)
+wall:     36.570s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  52%|█████▏    | 104/199 [00:00<00:00, 1025.09it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1120.21it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

@@ -1,0 +1,15 @@
+question: Who are the authors of R3 in its first occurrence in the RAG paper?
+answer:   The authors of the paper titled R3: Reinforced ranker-reader for open-domain question answering are Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, and Jing Jiang [c-e38bbcd6852b]. Another claim lists the authors as Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, and Murray Campbell [c-f0b5b2356517].
+sufficient: true
+citations:
+  [c-e38bbcd6852b] 2005-11401-retro — Shuohang Wang, Mo Yu, Xiaoxiao Guo, Zhiguo Wang, Tim Klinger, Wei Zhang, Shiyu Chang, Gerry Tesauro, Bowen Zhou, and Jing Jiang are the authors of the paper titled R3: Reinforced ranker-reader for open-domain question answering.
+  [c-f0b5b2356517] 2005-11401-retro — The authors of the paper are Shuohang Wang, Mo Yu, Jing Jiang, Wei Zhang, Xiaoxiao Guo, Shiyu Chang, Zhiguo Wang, Tim Klinger, Gerald Tesauro, and Murray Campbell.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.003091250000 (3 ledger events)
+wall:     111.271s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  34%|███▎      | 67/199 [00:00<00:00, 663.52it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1772.86it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

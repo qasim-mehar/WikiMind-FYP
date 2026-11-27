@@ -1,0 +1,15 @@
+question: What is retrieval collapse in RAG training?
+answer:   Retrieval collapse occurs in RAG training when the retrieval component fails and retrieves the same documents regardless of the input [c-d18c69d38d53]. When this happens, the generator learns to ignore the retrieved documents [c-3d76e4703be2], and the RAG model performs equivalently to a BART model [c-eb911606dcd5].
+sufficient: true
+citations:
+  [c-d18c69d38d53] 2005-11401-retro — In some tasks, the retrieval component can collapse and retrieve the same documents regardless of the input.
+  [c-3d76e4703be2] 2005-11401-retro — After retrieval collapse, the generator learns to ignore the retrieved documents.
+  [c-eb911606dcd5] 2005-11401-retro — When retrieval collapses, the RAG model performs equivalently to BART.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002882250000 (3 ledger events)
+wall:     33.658s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2078.67it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

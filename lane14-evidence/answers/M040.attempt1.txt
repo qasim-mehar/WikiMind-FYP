@@ -1,0 +1,15 @@
+question: What regularization is reported in the Transformer, GAN and RAG papers?
+answer:   The Transformer (big) model for English-to-French translation utilized a dropout rate of 0.1 [c-3562f789e932]. For Generative Adversarial Nets, dropout was applied during the training of the discriminator net [c-724095a36201]. The provided claims do not contain information regarding regularization for RAG.
+sufficient: false
+citations:
+  [c-3562f789e932] 1706-03762-attention — The Transformer (big) model for English-to-French translation used a dropout rate of 0.1.
+  [c-724095a36201] 1406-2661-gan — Dropout was applied in training the discriminator net.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002674500000 (3 ledger events)
+wall:     38.164s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  50%|█████     | 100/199 [00:00<00:00, 910.50it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1124.01it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

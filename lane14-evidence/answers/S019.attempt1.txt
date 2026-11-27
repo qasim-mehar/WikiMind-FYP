@@ -1,0 +1,15 @@
+question: What Parzen-window log-likelihood did adversarial nets achieve on MNIST?
+answer:   The provided claims state that log-likelihood estimates calculated using the Parzen window method for adversarial nets on the MNIST dataset are presented in Table 1 [c-bdbe1e17ae4e, c-d8eb4dd04fb5]. However, the specific numerical values for these estimates are not provided in the claims.
+sufficient: false
+citations:
+  [c-bdbe1e17ae4e] 1406-2661-gan — The reported numbers for the Parzen window-based log-likelihood estimates are on the MNIST dataset.
+  [c-d8eb4dd04fb5] 1406-2661-gan — Table 1 presents log-likelihood estimates calculated using the Parzen window method.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002615750000 (3 ledger events)
+wall:     33.897s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  65%|██████▌   | 130/199 [00:00<00:00, 1252.59it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1733.28it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

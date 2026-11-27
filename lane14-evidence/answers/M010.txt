@@ -1,0 +1,13 @@
+question: What do Table 3 rows (A)-(D) conclude about heads, d_k, model size and dropout?
+answer:   The provided claims state that Table 3 lists variations on the Transformer architecture [c-c85299c2005e], but they do not contain the specific content of rows (A)-(D) regarding heads, d_k, model size, or dropout.
+sufficient: false
+citations:
+  [c-c85299c2005e] 1706-03762-attention — Table 3 lists variations on the Transformer architecture.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002488250000 (3 ledger events)
+wall:     64.215s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  35%|███▍      | 69/199 [00:00<00:00, 683.79it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1246.44it/s]

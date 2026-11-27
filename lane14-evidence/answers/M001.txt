@@ -1,0 +1,17 @@
+question: Using the reported step time and step count, how long did base and big Transformer training take and on how many GPUs?
+answer:   The base Transformer models were trained for 100,000 steps, taking approximately 12 hours [c-68091987e381]. Each training step for the base models took approximately 0.4 seconds [c-c229e642ff24]. The big Transformer models were trained for 300,000 steps, taking 3.5 days [c-fffa90dd3b5d]. Each training step for the big models took 1.0 seconds [c-c5b0a55e9785]. Both base and big models were trained on one machine equipped with 8 NVIDIA P100 GPUs [c-f049f0012af9].
+sufficient: true
+citations:
+  [c-68091987e381] 1706-03762-attention — The base models were trained for 100,000 steps or 12 hours.
+  [c-c229e642ff24] 1706-03762-attention — Each training step for the base models took approximately 0.4 seconds.
+  [c-fffa90dd3b5d] 1706-03762-attention — The big models were trained for 300,000 steps or 3.5 days.
+  [c-c5b0a55e9785] 1706-03762-attention — Each training step for the big models took 1.0 seconds.
+  [c-f049f0012af9] 1706-03762-attention — The models were trained on one machine equipped with 8 NVIDIA P100 GPUs.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.003132250000 (3 ledger events)
+wall:     38.602s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  58%|█████▊    | 116/199 [00:00<00:00, 1159.81it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1627.61it/s]

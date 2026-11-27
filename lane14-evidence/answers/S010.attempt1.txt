@@ -1,0 +1,14 @@
+question: How many warmup steps are used in the Transformer learning-rate schedule?
+answer:   The number of warmup steps used in the Transformer model training process is 4000 [c-f1ef409c8c09].
+sufficient: true
+citations:
+  [c-f1ef409c8c09] 1706-03762-attention — The number of warmup steps used in the model training process is 4000.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002532750000 (3 ledger events)
+wall:     43.305s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  19%|█▊        | 37/199 [00:00<00:00, 351.12it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1637.55it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

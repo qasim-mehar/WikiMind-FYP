@@ -1,0 +1,14 @@
+question: Summarize the index hot-swapping experiment and its conclusion.
+answer:   The retrieval index can be hot-swapped to update the model without the need for retraining [c-5e96e7e8ce95]. Researchers accomplish this by building a MIPS index using FAISS [c-d040145b8b2f].
+sufficient: true
+citations:
+  [c-5e96e7e8ce95] 2005-11401-retro — The retrieval index can be hot-swapped to update the model without requiring retraining.
+  [c-d040145b8b2f] 2005-11401-retro — The researchers build a MIPS index using FAISS.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002653500000 (3 ledger events)
+wall:     33.465s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2182.63it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.

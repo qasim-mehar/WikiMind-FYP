@@ -1,0 +1,15 @@
+question: Does the corpus agree on whether the Transformer improved over the best ensembles?
+answer:   The provided corpus states that the Transformer model improved over existing best results on the WMT 2014 English-to-German translation task by over 2 BLEU [c-cc28fdac16c0].
+sufficient: true
+citations:
+  [c-cc28fdac16c0] contradiction-note — The Transformer model improved over existing best results on the WMT 2014 English-to-German translation task by over 2 BLEU.
+retrieval: 20 seeds, 150/150 claims (capped)
+shadow:   $0.002687750000 (3 ledger events)
+wall:     64.663s
+
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  18%|█▊        | 36/199 [00:00<00:00, 340.19it/s]
+Loading weights:  80%|███████▉  | 159/199 [00:00<00:00, 848.47it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 940.57it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
