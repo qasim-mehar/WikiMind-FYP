@@ -1,0 +1,14 @@
+South Lab memo on station operations.
+
+Station Beta uses the Vega-3 spectrometer.
+Station Beta ran 18 trials in 2022.
+Station Beta recorded an efficiency of 91 percent.
+Dr. Omar Ruiz leads Station Beta.
+Station Beta has an active status.
+Station Epsilon uses the Vega-3 spectrometer.
+Station Epsilon ran 15 trials in 2023.
+Station Epsilon recorded an efficiency of 93 percent.
+Dr. Omar Ruiz leads Station Epsilon.
+Station Epsilon has an active status.
+The Vega-3 spectrometer was calibrated in 2022 at South Lab.
+South Lab is managed by Dr. Omar Ruiz.

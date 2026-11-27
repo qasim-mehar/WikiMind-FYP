@@ -1,0 +1,12 @@
+Personnel and laboratory assignments at the Meridian Institute.
+
+Dr. Iris Chen leads Station Alpha and Station Delta.
+Dr. Omar Ruiz leads Station Beta and Station Epsilon.
+Dr. Priya Nair leads Station Gamma and Station Eta.
+Dr. Lena Fischer leads Station Zeta and Station Theta.
+Four researchers lead the eight stations.
+Each researcher leads exactly two stations.
+Dr. Iris Chen manages North Lab and East Lab.
+Dr. Omar Ruiz manages South Lab.
+Dr. Priya Nair is a lead at North Lab and East Lab.
+Dr. Lena Fischer manages West Lab.

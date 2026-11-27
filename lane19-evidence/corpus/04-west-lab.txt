@@ -1,0 +1,14 @@
+West Lab memo on station operations.
+
+Station Zeta uses the Orion-7 spectrometer.
+Station Zeta ran 7 trials in 2023.
+Station Zeta recorded an efficiency of 72 percent.
+Dr. Lena Fischer leads Station Zeta.
+Station Zeta has a retired status.
+Station Theta uses the Helios-2 spectrometer.
+Station Theta ran 11 trials in 2023.
+Station Theta recorded an efficiency of 95 percent.
+Dr. Lena Fischer leads Station Theta.
+Station Theta has an active status.
+The Helios-2 spectrometer was calibrated in 2023 at West Lab.
+West Lab is managed by Dr. Lena Fischer.

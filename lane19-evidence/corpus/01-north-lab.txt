@@ -1,0 +1,14 @@
+North Lab memo on station operations.
+
+Station Alpha uses the Orion-7 spectrometer.
+Station Alpha ran 12 trials in 2021.
+Station Alpha recorded an efficiency of 84 percent.
+Dr. Iris Chen leads Station Alpha.
+Station Alpha has an active status.
+Station Gamma uses the Orion-7 spectrometer.
+Station Gamma ran 9 trials in 2021.
+Station Gamma recorded an efficiency of 78 percent.
+Dr. Priya Nair leads Station Gamma.
+Station Gamma has a retired status.
+The Orion-7 spectrometer was calibrated in 2021 at North Lab.
+North Lab is managed by Dr. Iris Chen.

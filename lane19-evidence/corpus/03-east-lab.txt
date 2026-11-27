@@ -1,0 +1,14 @@
+East Lab memo on station operations.
+
+Station Delta uses the Lyra-5 spectrometer.
+Station Delta ran 21 trials in 2022.
+Station Delta recorded an efficiency of 88 percent.
+Dr. Iris Chen leads Station Delta.
+Station Delta has an active status.
+Station Eta uses the Lyra-5 spectrometer.
+Station Eta ran 14 trials in 2022.
+Station Eta recorded an efficiency of 86 percent.
+Dr. Priya Nair leads Station Eta.
+Station Eta has an active status.
+The Lyra-5 spectrometer was calibrated in 2022 at East Lab.
+East Lab is managed by Dr. Iris Chen.

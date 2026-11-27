@@ -1,0 +1,13 @@
+Cross-lab summary of all eight stations.
+
+The Meridian Institute operates eight stations in total.
+The eight stations are Alpha, Beta, Gamma, Delta, Epsilon, Zeta, Eta and Theta.
+Orion-7 is used by three stations.
+Vega-3 is used by two stations.
+Lyra-5 is used by two stations.
+Helios-2 is used by one station.
+Two stations have a retired status.
+Six stations have an active status.
+The highest efficiency recorded is 95 percent at Station Theta.
+The lowest efficiency recorded is 72 percent at Station Zeta.
+Efficiency values above 80 percent were recorded at six stations.
