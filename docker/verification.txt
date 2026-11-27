@@ -1,0 +1,24 @@
+WikiMind LANE 21 verification outputs
+Captured on branch lane/21-deploy at base d362783d0c3cd8c825492866bcf87b7311e5cd63.
+No LLM calls were made; $0 spend. Docker is unavailable in this environment.
+
+=== docker --version ===
+docker : The term 'docker' is not recognized as the name of a cmdlet, function, script file, or operable program.
+
+=== compose validation substitute: PyYAML 6.0.3 yaml.safe_load + structural asserts ===
+compose.yaml: YAML valid; 2 services; db unpublished; webapp published 127.0.0.1:8000:8000 only; healthchecks + volumes present
+
+=== python -m ruff check . ===
+All checks passed!
+
+=== python -m ruff format --check . ===
+202 files already formatted
+
+=== python -m pytest  (no WIKIMIND_DB in process environment) ===
+371 passed, 165 skipped in 191.36s (0:03:11)
+
+=== python -m pytest  (WIKIMIND_DB loaded from the local .env, not printed) ===
+536 passed in 330.72s (0:05:30)
+
+=== .env.example placeholder scan (AIza / sk- / ghp_ patterns) ===
+0 matches

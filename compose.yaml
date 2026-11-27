@@ -1,0 +1,62 @@
+# WikiMind local/demo stack. Local machine only -- no auth, no public exposure.
+# Copy .env.example to .env before running `docker compose up --build`.
+name: wikimind-demo
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    # Credentials and the sandbox DSN come from .env (never committed).
+    env_file:
+      - .env
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+    # Deliberately NO ports: the database is reachable only on the compose
+    # network. Use `docker compose exec db pg_dump ...` for backups.
+
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      # Docker port publishing targets the container's network interface, not
+      # its loopback, so the in-container bind must be 0.0.0.0. This is the
+      # app's guard waiver; it does NOT make the app public. The ONLY published
+      # mapping is 127.0.0.1 on the host (see ports below), so no other machine
+      # can reach either service.
+      WIKIMIND_WEB_HOST: "0.0.0.0"
+      WIKIMIND_WEB_PUBLIC: "1"
+      WIKIMIND_WEB_PORT: "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Host loopback only. Never change the left-hand 127.0.0.1 to 0.0.0.0.
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - webapp_data:/app/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=3).read()"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  webapp_data:
