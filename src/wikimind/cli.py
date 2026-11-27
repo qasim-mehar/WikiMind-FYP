@@ -6,8 +6,15 @@ while lanes are being built in parallel, so only ``ImportError`` is ignored.
 
 from __future__ import annotations
 
+from typing import Annotated
+
 import typer
 
+from wikimind.config import (
+    cost_mirror_requested,
+    get_settings,
+    protected_cost_mirror_database,
+)
 from wikimind.db import cli as db_cli
 
 app = typer.Typer(
@@ -15,6 +22,45 @@ app = typer.Typer(
     help="Compile source documents into a source-tracked, versioned knowledge graph.",
     no_args_is_help=True,
 )
+
+
+def cost_mirror_guard_message(*, force: bool = False) -> str | None:
+    """Refusal text when a mirror would write to the live corpus, else None.
+
+    The guard lives in the entry layer so the frozen cost meter stays untouched:
+    it inspects the *target* DSN before any command opens a connection and
+    before a MirroringCostSink can append rows to ``cost_events``.
+    """
+
+    if force or not cost_mirror_requested():
+        return None
+    dsn = get_settings().db_dsn
+    if not dsn:
+        return None
+    protected = protected_cost_mirror_database(dsn)
+    if protected is None:
+        return None
+    return (
+        f"WIKIMIND_COST_DB_MIRROR=1 would mirror cost events into the protected "
+        f"corpus database {protected!r}; re-run with --force if intentional"
+    )
+
+
+@app.callback()
+def root_callback(
+    force: Annotated[
+        bool,
+        typer.Option("--force", help="Override the live-corpus cost-mirror guard."),
+    ] = False,
+) -> None:
+    """Guard the live corpus against accidental cost_events mirroring."""
+
+    message = cost_mirror_guard_message(force=force)
+    if message is not None:
+        typer.echo(f"error: {message}", err=True)
+        raise typer.Exit(2)
+
+
 app.add_typer(db_cli.app, name="db")
 
 try:
