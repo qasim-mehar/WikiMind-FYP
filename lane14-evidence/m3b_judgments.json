@@ -7,6 +7,7 @@
   "random_order": true,
   "seed": 42,
   "sample_questions": 30,
+  "note": "30 rows were sampled, 25 yielded judgments (5 sampled rows were zero-citation).",
   "judgments": 40,
   "entailed": 33,
   "entailment_rate": 0.825,

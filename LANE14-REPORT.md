@@ -17,6 +17,7 @@
 ## 3. Question set and answer key
 
 - Frozen question SHA256: `bc0fd07c0148bc2452b1bca01aa946e093283967c47b116112b20d97a9648dc4`; 150 questions (40 S / 60 M / 30 C / 20 U).
+  - Note: "30 C" = 22 contradiction + 8 aggregation questions (the frozen `questions.json` buckets `contradiction` and `aggregation`; matches the per-bucket denominators 9/22 and 0/8 in §7).
 - Full set and key: `lane14-evidence/questions.json`, `answer_key.json`, `PHASE-A-REPORT.md`. Unchanged.
 - Authoring spend $0.00.
 
@@ -84,7 +85,7 @@
 | --- | --- | --- | --- |
 | M1 — Paired accuracy difference (multi-hop + contradiction) | N/A | single-arm run; no strong-RAG baseline arm exists to pair against | **N/A** |
 | M2 — Paired accuracy difference (single-hop) | N/A | single-arm run; no paired difference / lower bound L computable | **N/A** |
-| M3a — Anchor validity (machine citation verification) | 1.0000 of cited claims anchored; 1.0000 of 117 citing answers verified (33 zero-citation answers graded FAIL, not vacuous passes) | Ruling 25 machine verification is the M3a check (resolution + slug + anchor containment) | **PASS** |
+| M3a — Anchor validity (machine citation verification) | 1.0000 of cited claims anchored; 1.0000 of 117 citing answers verified (33 zero-citation answers: 17 graded FAIL, 16 honest-insufficient PASS (no vacuous passes)) | Ruling 25 machine verification is the M3a check (resolution + slug + anchor containment) | **PASS** |
 | M3b — Entailment faithfulness (non-Gemini blind judge) | 0.8250 (40 judgments) | judge sample via pinned non-Gemini OpenRouter model | **FAIL(80-90%)** |
 | M4 — Amortized cost per paper (40-50 papers, drills, curve) | N/A | corpus is 4 fixture documents; no 40-50 paper corpus, removal drill or repair pass | **N/A** |
 | M5 — Cost per query | graded $0.00272599 mean (total $0.40889850); all-inclusive $0.00339764 mean (total $0.50964525) | gate <= $0.02; target <= $0.01. Graded excludes Ruling 30 anomalies; all-inclusive is real spend | **PASS** |
@@ -101,12 +102,13 @@ Gate note: M5 target ($0.01) met; gate ($0.02) met.
 
 ## 8. Deviations
 
-See `lane14-evidence/DEVIATIONS.md` (Phase A A-1..A-4; Phase B B-1..B-9).
+See `lane14-evidence/DEVIATIONS.md` (Phase A A-1..A-4; Phase B B-1..B-18).
 
 ## 9. Evidence manifest
 
 - `lane14-evidence/SHA256SUMS.txt` (CRLF, Lane 13 procedure).
-- Manifest SHA256: `2ef298c1afaff1d644f07d4752419586429cab64de1be7101342a336eb7f6d9f`.
+- Manifest SHA256: `dbaeae79a16b82caee3ffa781d681d5a7929cc48855f310379cbfd6256cea1cc`.
+- Standing rule (Gate C, Ruling 31): the manifest generator MUST assert that every listed path is git-tracked (`git ls-files`) before writing `SHA256SUMS.txt`, so a pre-existing `.gitignore` rule can never silently drop an evidence file again. Recorded here as a deferred rule; no generator code is changed on this doc-only patch.
 
 ## 10. STOP
 

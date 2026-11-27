@@ -26,7 +26,7 @@
 | --- | --- | --- | --- |
 | M1 — Paired accuracy difference (multi-hop + contradiction) | N/A | single-arm run; no strong-RAG baseline arm exists to pair against | **N/A** |
 | M2 — Paired accuracy difference (single-hop) | N/A | single-arm run; no paired difference / lower bound L computable | **N/A** |
-| M3a — Anchor validity (machine citation verification) | 1.0000 of cited claims anchored; 1.0000 of 117 citing answers verified (33 zero-citation answers graded FAIL, not vacuous passes) | Ruling 25 machine verification is the M3a check (resolution + slug + anchor containment) | **PASS** |
+| M3a — Anchor validity (machine citation verification) | 1.0000 of cited claims anchored; 1.0000 of 117 citing answers verified (33 zero-citation answers: 17 graded FAIL, 16 honest-insufficient PASS (no vacuous passes)) | Ruling 25 machine verification is the M3a check (resolution + slug + anchor containment) | **PASS** |
 | M3b — Entailment faithfulness (non-Gemini blind judge) | 0.8250 (40 judgments) | judge sample via pinned non-Gemini OpenRouter model | **FAIL(80-90%)** |
 | M4 — Amortized cost per paper (40-50 papers, drills, curve) | N/A | corpus is 4 fixture documents; no 40-50 paper corpus, removal drill or repair pass | **N/A** |
 | M5 — Cost per query | graded $0.00272599 mean (total $0.40889850); all-inclusive $0.00339764 mean (total $0.50964525) | gate <= $0.02; target <= $0.01. Graded excludes Ruling 30 anomalies; all-inclusive is real spend | **PASS** |
