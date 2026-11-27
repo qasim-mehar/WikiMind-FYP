@@ -102,6 +102,64 @@ Run lint and tests before handing a lane back:
 .\.venv\Scripts\python.exe -m pytest
 ```
 
+## Local web interface prototype (Lane 17)
+
+A small, **local-only** browser surface for exploring a compiled wiki. It is a
+prototype, not the Stage 1 product interface: **no auth, no multi-user support**,
+and it binds to `127.0.0.1` by default. Do not expose it to a network. It reuses
+the existing compile and QA pipelines unchanged; it adds no build toolchain
+(server-rendered HTML plus a little plain JavaScript).
+
+Setup against a fresh sandbox database (never the live corpus):
+
+```powershell
+# Create an empty database from wikimind_template, then:
+$env:WIKIMIND_DB = "postgresql://USER:PASSWORD@localhost:5432/wikimind_l17_sandbox"
+.\.venv\Scripts\wikimind.exe db migrate
+.\.venv\Scripts\wikimind.exe db check
+.\.venv\Scripts\wikimind.exe project create webapp-sandbox
+
+$env:WIKIMIND_WEB_DB = $env:WIKIMIND_DB
+$env:WIKIMIND_WEB_PROJECT = "webapp-sandbox"
+$env:WIKIMIND_LIVE = "1"          # required for real, metered model calls
+.\.venv\Scripts\python.exe -m wikimind.webapp
+```
+
+Open <http://127.0.0.1:8000>. The alternative uvicorn target is
+`wikimind.webapp.app:app`. FastAPI and uvicorn are declared in the `dev` extra.
+
+Environment (all optional except the DSN): `WIKIMIND_WEB_DB` (sandbox DSN, falls
+back to `WIKIMIND_DB`), `WIKIMIND_WEB_PROJECT` (default `webapp-sandbox`),
+`WIKIMIND_WEB_COSTS_PATH` (default `data/webapp/costs.jsonl`, an isolated
+shadow-cost ledger), `WIKIMIND_WEB_UPLOAD_DIR` (default
+`data/webapp/uploads`), `WIKIMIND_WEB_HOST`/`WIKIMIND_WEB_PORT` (loopback and
+`8000` by default), `WIKIMIND_WEB_EMBEDDER` (`local` or `fake`), and
+`WIKIMIND_LIVE`. The app refuses to start if the configured database name is
+`wikimind_live_l3`, and a non-loopback bind requires `WIKIMIND_WEB_PUBLIC=1`.
+
+The pages:
+
+- **Documents** (`/documents`) — lists the sandbox corpus with each document's
+  title, canonical slug, claim count, SHA-256 prefix, parser, and source path.
+  It reads only claim counts; raw source text is never shown.
+- **Add** (`/add`) — upload a source (base64 JSON from plain JS) or select a
+  file already in the upload directory. The file is saved as a new immutable
+  copy, registered under the project writer lock, and compiled through the
+  existing five-stage pipeline. A job page polls `/add/<id>/progress` and shows
+  the analyze → write → judge stage log, then the shadow cost and claim count.
+- **Ask** (`/ask`) — asks one question through the existing QA pipeline. Every
+  citation is a link to `/claims/<uuid>`, which shows the underlying claim, its
+  anchor quote, trust status, and source document. When the composer sets
+  `sufficient: false`, the page says **Evidence insufficient** and shows the
+  relevant claims; it is not rendered as an error and nothing is fabricated.
+
+Tests use FastAPI `TestClient` with an injected fake repository, asker, and
+ingestor, so they need no database, keys, or network:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests/test_webapp.py
+```
+
 ## Worktree protocol
 
 | Lane | Worktree | Branch | Owns |

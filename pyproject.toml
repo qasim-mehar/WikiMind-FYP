@@ -22,7 +22,7 @@ dependencies = [
 [project.optional-dependencies]
 llm = ["google-genai>=1.0"]
 embed = ["sentence-transformers>=3.0"]
-dev = ["pytest>=8", "ruff>=0.4", "google-genai>=1.0"]
+dev = ["pytest>=8", "ruff>=0.4", "google-genai>=1.0", "fastapi>=0.100", "uvicorn>=0.27"]
 
 [project.scripts]
 wikimind = "wikimind.cli:main"
